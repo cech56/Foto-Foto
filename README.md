@@ -15,3 +15,8 @@ Open this repository in Android Studio, sync Gradle, and build the app module. T
 
 ## Not yet complete
 The current commit is an initial Android foundation. Authentication, credit wallet, payments, production hardening (authentication, credit controls, rate limiting and persistent task history), in-app task polling, generated video playback/download/history, app icon, release signing, Play Console setup, and end-to-end testing remain to be completed. No APK/AAB has been built or published yet.
+
+## Supabase setup
+- Project URL and the public publishable key are configured in the Android Gradle BuildConfig. The publishable key is intended for mobile clients; never add a Supabase secret/service-role key to the app.
+- Run `supabase/migrations/0001_profiles.sql` in the new FOTO FOTO project's SQL Editor.
+- Email confirmation settings are controlled in Supabase Authentication. If confirmation is enabled, users must verify their email before signing in.
