@@ -102,7 +102,6 @@ private fun FotoFotoApp() {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
                             ChoiceButton("16:9", ratio == "1280:720") { ratio = "1280:720" }
                             ChoiceButton("9:16", ratio == "720:1280") { ratio = "720:1280" }
-                            ChoiceButton("1:1", ratio == "960:960") { ratio = "960:960" }
                         }
                         Spacer(Modifier.height(22.dp))
                         Button(onClick = {
