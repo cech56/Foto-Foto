@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -76,13 +77,13 @@ private fun FotoFotoApp() {
                         Text("Ne hayal ediyorsun?", fontSize = 21.sp, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.height(14.dp))
                         OutlinedTextField(
-                            value = prompt, onValueChange = { if (it.length <= 2500) prompt = it },
+                            value = prompt, onValueChange = { if (it.length <= 1000) prompt = it },
                             modifier = Modifier.fillMaxWidth().heightIn(min = 150.dp),
                             placeholder = { Text("Örnek: Gün batımında deniz kenarında ilerleyen kırmızı klasik bir araba, sinematik kamera hareketi…", color = Muted) },
                             minLines = 5, maxLines = 8,
                             colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Accent, unfocusedBorderColor = Color(0xFF343B4D), focusedTextColor = White, unfocusedTextColor = White)
                         )
-                        Text("${prompt.length} / 2500", color = Muted, fontSize = 10.sp, modifier = Modifier.align(Alignment.End).padding(top = 5.dp))
+                        Text("${prompt.length} / 1000", color = Muted, fontSize = 10.sp, modifier = Modifier.align(Alignment.End).padding(top = 5.dp))
                         Spacer(Modifier.height(17.dp))
                         Text("VİDEO MOTORU", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                         Spacer(Modifier.height(9.dp))
@@ -108,7 +109,18 @@ private fun FotoFotoApp() {
                             scope.launch {
                                 loading = true; status = "İstek gönderiliyor…"; taskId = ""
                                 val result = submitGeneration(prompt, duration, ratio)
-                                status = result.first; taskId = result.second; loading = false
+                                status = result.first
+                                taskId = result.second
+                                if (taskId.isNotBlank()) {
+                                    status = "Video kuyruğa alındı. Üretim durumu kontrol ediliyor…"
+                                    for (attempt in 0 until 120) {
+                                        delay(5000)
+                                        val task = checkGeneration(taskId)
+                                        status = task.message
+                                        if (task.finished) break
+                                    }
+                                }
+                                loading = false
                             }
                         }, enabled = !loading && prompt.trim().length >= 10, modifier = Modifier.fillMaxWidth().height(54.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Accent, contentColor = Color(0xFF211721)), shape = RoundedCornerShape(13.dp)) {
@@ -156,6 +168,31 @@ private fun RowScope.ChoiceButton(label: String, selected: Boolean, onClick: () 
         contentPadding = PaddingValues(horizontal = 7.dp, vertical = 5.dp), shape = RoundedCornerShape(10.dp)) {
         Text(label, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
     }
+}
+
+private data class TaskCheck(val message: String, val finished: Boolean)
+
+private suspend fun checkGeneration(taskId: String): TaskCheck = withContext(Dispatchers.IO) {
+    try {
+        val request = Request.Builder()
+            .url(BuildConfig.API_BASE_URL.trimEnd('/') + "/api/tasks/" + taskId)
+            .get().build()
+        OkHttpClient().newCall(request).execute().use { response ->
+            val data = JSONObject(response.body?.string().orEmpty())
+            if (!response.isSuccessful) return@withContext TaskCheck(data.optString("message", "Görev durumu alınamadı."), true)
+            when (data.optString("status").uppercase()) {
+                "SUCCEEDED" -> {
+                    val output = data.optJSONArray("output")
+                    val videoUrl = output?.optString(0).orEmpty()
+                    if (videoUrl.isNotBlank()) TaskCheck("Video hazır! Bağlantı: $videoUrl", true)
+                    else TaskCheck("Video tamamlandı; ancak video bağlantısı yanıtta bulunamadı.", true)
+                }
+                "FAILED" -> TaskCheck("Video üretimi başarısız oldu. Başka bir açıklamayla tekrar deneyebilirsin.", true)
+                "CANCELED", "CANCELLED" -> TaskCheck("Video üretimi iptal edildi.", true)
+                else -> TaskCheck("Video hazırlanıyor… Durum: " + data.optString("status", "BEKLEMEDE"), false)
+            }
+        }
+    } catch (_: Exception) { TaskCheck("Görev durumu kontrol edilemedi. Bağlantı yeniden denenecek.", false) }
 }
 
 private suspend fun submitGeneration(prompt: String, duration: Int, ratio: String): Pair<String, String> = withContext(Dispatchers.IO) {
