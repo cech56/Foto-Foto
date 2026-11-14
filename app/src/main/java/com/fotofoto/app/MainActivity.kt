@@ -37,7 +37,7 @@ private val White = Color(0xFFF8F6F2)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { FotoFotoApp() }
+        setContent { AuthGate { FotoFotoApp() } }
     }
 }
 
