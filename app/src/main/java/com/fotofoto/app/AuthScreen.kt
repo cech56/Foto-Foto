@@ -90,22 +90,22 @@ private fun AuthScreen(onSignedIn: () -> Unit) {
                 Spacer(Modifier.height(25.dp))
                 Card(colors = CardDefaults.cardColors(containerColor = AuthPanel), shape = RoundedCornerShape(22.dp)) {
                     Column(Modifier.padding(20.dp)) {
-                        Text(when { pendingVerification -> "E-posta doğrulama"; mode == "register" -> "Hesap oluştur"; mode == "reset" -> "Şifremi yenile"; else -> "Giriş yap" },
+                        Text(when { pendingVerification -> tr("E-posta doğrulama", "Email verification", "تأكيد البريد الإلكتروني"); mode == "register" -> tr("Hesap oluştur", "Create account", "إنشاء حساب"); mode == "reset" -> tr("Şifremi yenile", "Reset password", "إعادة تعيين كلمة المرور"); else -> tr("Tekrar hoş geldin!", "Welcome back!", "مرحباً بعودتك!") },
                             color = Color.White, fontSize = 23.sp, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.height(16.dp))
                         if (pendingVerification) {
                             Text("E-posta adresine gelen kodu gir. Bağlantıya tıklamana gerek yok.", color = Color.LightGray, fontSize = 12.sp)
                             Spacer(Modifier.height(10.dp))
-                            OutlinedTextField(value = otp, onValueChange = { otp = it.filter(Char::isDigit).take(8) }, label = { Text("E-posta kodu") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                            OutlinedTextField(value = otp, onValueChange = { otp = it.filter(Char::isDigit).take(8) }, label = { Text(tr("E-posta kodu", "Email code", "رمز البريد الإلكتروني")) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                         }
                         if (mode == "register" && !pendingVerification) {
-                            OutlinedTextField(value = displayName, onValueChange = { displayName = it }, label = { Text("Adın") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                            OutlinedTextField(value = displayName, onValueChange = { displayName = it }, label = { Text(tr("Adın", "Your name", "اسمك")) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                             Spacer(Modifier.height(10.dp))
                         }
-                        if (!pendingVerification) OutlinedTextField(value = email, onValueChange = { email = it.trim() }, label = { Text("E-posta") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                        if (!pendingVerification) OutlinedTextField(value = email, onValueChange = { email = it.trim() }, label = { Text(tr("E-posta", "Email", "البريد الإلكتروني")) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                         if (mode != "reset" && !pendingVerification) {
                             Spacer(Modifier.height(10.dp))
-                            OutlinedTextField(value = password, onValueChange = { password = it }, label = { Text("Şifre (en az 8 karakter)") },
+                            OutlinedTextField(value = password, onValueChange = { password = it }, label = { Text(tr("Şifre (en az 8 karakter)", "Password (at least 8 characters)", "كلمة المرور (8 أحرف على الأقل)")) },
                                 visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth(), singleLine = true)
                         }
                         Spacer(Modifier.height(16.dp))
@@ -131,30 +131,30 @@ private fun AuthScreen(onSignedIn: () -> Unit) {
                             modifier = Modifier.fillMaxWidth().height(52.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = AuthAccent, contentColor = Color(0xFF211721))
                         ) {
-                            Text(if (busy) "İŞLENİYOR…" else if (pendingVerification) "KODU DOĞRULA" else when(mode) {
-                                "register" -> "ÜCRETSİZ HESAP OLUŞTUR"
-                                "reset" -> "YENİLEME E-POSTASI GÖNDER"
-                                else -> "GİRİŞ YAP"
+                            Text(if (busy) tr("İŞLENİYOR…", "WORKING…", "جارٍ التنفيذ…") else if (pendingVerification) tr("KODU DOĞRULA", "VERIFY CODE", "تحقق من الرمز") else when(mode) {
+                                "register" -> tr("ÜCRETSİZ HESAP OLUŞTUR", "CREATE FREE ACCOUNT", "إنشاء حساب مجاني")
+                                "reset" -> tr("YENİLEME E-POSTASI GÖNDER", "SEND RESET EMAIL", "إرسال بريد إعادة التعيين")
+                                else -> tr("GİRİŞ YAP", "SIGN IN", "تسجيل الدخول")
                             }, fontWeight = FontWeight.Black)
                         }
                         if (mode == "login") {
                             TextButton(onClick = { mode = "reset"; message = "Şifre yenileme bağlantısı e-posta adresine gönderilecek." }, modifier = Modifier.fillMaxWidth()) {
-                                Text("Şifremi unuttum", color = AuthAccent)
+                                Text(tr("Şifremi unuttum", "Forgot password?", "نسيت كلمة المرور؟"), color = AuthAccent)
                             }
                         }
-                        if (pendingVerification) TextButton(onClick = { scope.launch { busy = true; message = resendSignupOtp(email); busy = false } }, modifier = Modifier.fillMaxWidth()) { Text("KODU TEKRAR GÖNDER", color = AuthAccent) }
+                        if (pendingVerification) TextButton(onClick = { scope.launch { busy = true; message = resendSignupOtp(email); busy = false } }, modifier = Modifier.fillMaxWidth()) { Text(tr("KODU TEKRAR GÖNDER", "RESEND CODE", "إعادة إرسال الرمز"), color = AuthAccent) }
                         TextButton(onClick = {
                             pendingVerification = false
                             mode = if (mode == "login") "register" else "login"
-                            message = if (mode == "register") "Hesap oluşturabilirsin." else "FOTO FOTO hesabına giriş yap."
+                            message = if (mode == "register") tr("Hesap oluşturabilirsin.", "You can create an account.", "يمكنك إنشاء حساب.") else tr("FOTO FOTO hesabına giriş yap.", "Sign in to your FOTO FOTO account.", "سجّل الدخول إلى حسابك في FOTO FOTO.")
                         }, modifier = Modifier.fillMaxWidth()) {
-                            Text(if (mode == "register") "Zaten hesabın var mı? Giriş yap" else "Giriş ekranına / kayıt ekranına dön", color = AuthAccent)
+                            Text(if (mode == "register") tr("Zaten hesabın var mı? Giriş yap", "Already have an account? Sign in", "لديك حساب؟ سجّل الدخول") else tr("Hesabın yok mu? Ücretsiz kayıt ol", "New here? Create a free account", "ليس لديك حساب؟ أنشئ حساباً مجانياً"), color = AuthAccent)
                         }
                         Text(message, color = Color.LightGray, fontSize = 12.sp)
                     }
                 }
                 Spacer(Modifier.height(16.dp))
-                Text("Güvenli hesap · FOTO FOTO", color = Color.Gray, fontSize = 11.sp)
+                Text(tr("Güvenli hesap · FOTO FOTO", "Secure account · FOTO FOTO", "حساب آمن · FOTO FOTO"), color = Color.Gray, fontSize = 11.sp)
             }
         }
     }
