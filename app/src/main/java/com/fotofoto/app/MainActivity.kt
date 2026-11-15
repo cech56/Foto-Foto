@@ -58,7 +58,8 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
     var prompt by remember { mutableStateOf("") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var selectedVideoUri by remember { mutableStateOf<Uri?>(null) }
-    var editMode by remember { mutableStateOf(false) }
+    var studioMode by remember { mutableStateOf("generate") }
+    var upscaleResolution by remember { mutableStateOf("2k") }
     val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri -> selectedImageUri = uri }
     val videoPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri -> selectedVideoUri = uri }
     var duration by remember { mutableIntStateOf(5) }
@@ -95,22 +96,23 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         Text("YAPAY ZEKÂ STÜDYOSU", color = Accent, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.5.sp)
                         Spacer(Modifier.height(12.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                            ChoiceButton("VİDEO OLUŞTUR", !editMode) { editMode = false }
-                            ChoiceButton("VİDEO DÜZENLE", editMode) { editMode = true }
+                            ChoiceButton("OLUŞTUR", studioMode == "generate") { studioMode = "generate" }
+                            ChoiceButton("DÜZENLE", studioMode == "edit") { studioMode = "edit" }
+                            ChoiceButton("KALİTE", studioMode == "upscale") { studioMode = "upscale" }
                         }
                         Spacer(Modifier.height(12.dp))
-                        Text(if (editMode) "Videonda ne değişsin?" else "Ne hayal ediyorsun?", fontSize = 21.sp, fontWeight = FontWeight.Bold)
+                        Text(when (studioMode) { "edit" -> "Videonda ne değişsin?"; "upscale" -> "Videonu hangi kaliteye yükseltelim?"; else -> "Ne hayal ediyorsun?" }, fontSize = 21.sp, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.height(14.dp))
                         OutlinedTextField(
                             value = prompt, onValueChange = { if (it.length <= 1000) prompt = it },
                             modifier = Modifier.fillMaxWidth().heightIn(min = 150.dp),
-                            placeholder = { Text(if (editMode) "Örnek: Arka planı gün batımı sahiline dönüştür, kişiyi ve kamera hareketini koru…" else "Örnek: Gün batımında deniz kenarında ilerleyen kırmızı klasik bir araba, sinematik kamera hareketi…", color = Muted) },
+                            placeholder = { Text(when (studioMode) { "edit" -> "Örnek: Arka planı gün batımı sahiline dönüştür, kişiyi ve kamera hareketini koru…"; "upscale" -> "İsteğe bağlı: Doğal detayları koru, görüntüyü netleştir…"; else -> "Örnek: Gün batımında deniz kenarında ilerleyen kırmızı klasik bir araba, sinematik kamera hareketi…" }, color = Muted) },
                             minLines = 5, maxLines = 8,
                             colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Accent, unfocusedBorderColor = Color(0xFF343B4D), focusedTextColor = White, unfocusedTextColor = White)
                         )
                         Text("${prompt.length} / 1000", color = Muted, fontSize = 10.sp, modifier = Modifier.align(Alignment.End).padding(top = 5.dp))
                         Spacer(Modifier.height(14.dp))
-                        if (!editMode) {
+                        if (studioMode == "generate") {
                             Text("REFERANS FOTOĞRAFI", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                             Spacer(Modifier.height(8.dp))
                             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -126,7 +128,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                                 Text("Fotoğraf videonun ilk karesi olarak kullanılacak.", color = Muted, fontSize = 10.sp)
                             } else Text("Kendi fotoğrafını veya canlandırmak istediğin görseli ekle.", color = Muted, fontSize = 10.sp)
                         } else {
-                            Text("DÜZENLENECEK VİDEO", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            Text(if (studioMode == "edit") "DÜZENLENECEK VİDEO" else "KALİTESİ YÜKSELTİLECEK VİDEO", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                             Spacer(Modifier.height(8.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Button(onClick = { videoPicker.launch("video/*") }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF242D40))) {
@@ -134,7 +136,16 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                                 }
                                 if (selectedVideoUri != null) TextButton(onClick = { selectedVideoUri = null }) { Text("KALDIR", color = Accent) }
                             }
-                            Text("Aleph 2 · 2–30 saniyelik video · İlk sürümde dosya boyutu 3,5 MB ile sınırlı.", color = Muted, fontSize = 10.sp)
+                            Text(if (studioMode == "edit") "Runway Aleph 2 · En fazla 30 saniye · İlk sürümde dosya boyutu 3,5 MB." else "Magnific Video Upscaler · 720p, 1K, 2K veya 4K · En fazla 30 saniye.", color = Muted, fontSize = 10.sp)
+                            if (studioMode == "upscale") {
+                                Spacer(Modifier.height(10.dp))
+                                Text("HEDEF ÇÖZÜNÜRLÜK", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(top = 6.dp)) {
+                                    listOf("720p", "1k", "2k", "4k").forEach { value ->
+                                        ChoiceButton(value.uppercase(), upscaleResolution == value) { upscaleResolution = value }
+                                    }
+                                }
+                            }
                         }
                         Spacer(Modifier.height(17.dp))
                         Text("VİDEO MOTORU", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
@@ -170,11 +181,11 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         Button(onClick = {
                             scope.launch {
                                 loading = true; status = "İstek gönderiliyor…"; taskId = ""; videoUrl = ""
-                                val result = if (editMode) {
-                                    val uri = selectedVideoUri
-                                    if (uri == null) "Önce düzenlenecek videoyu seç." to ""
-                                    else submitVideoEdit(context, prompt, uri)
-                                } else submitGeneration(context, prompt, duration, ratio, selectedImageUri)
+                                val result = when (studioMode) {
+                                    "edit" -> selectedVideoUri?.let { submitVideoEdit(context, prompt, it) } ?: ("Önce düzenlenecek videoyu seç." to "")
+                                    "upscale" -> selectedVideoUri?.let { submitVideoUpscale(context, it, upscaleResolution) } ?: ("Önce kalite yükseltilecek videoyu seç." to "")
+                                    else -> submitGeneration(context, prompt, duration, ratio, selectedImageUri)
+                                }
                                 status = result.first
                                 taskId = result.second
                                 if (taskId.isNotBlank()) {
@@ -200,9 +211,9 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                                 if (loading && taskId.isNotBlank() && videoUrl.isBlank() && status.contains("kontrol")) status = "Üretim takibi zaman aşımına uğradı. Daha sonra tekrar kontrol edebilirsin."
                                 loading = false
                             }
-                        }, enabled = !loading && prompt.trim().length >= (if (editMode) 3 else 10) && (!editMode || selectedVideoUri != null), modifier = Modifier.fillMaxWidth().height(54.dp),
+                        }, enabled = !loading && when (studioMode) { "edit" -> prompt.trim().length >= 1 && selectedVideoUri != null; "upscale" -> selectedVideoUri != null; else -> prompt.trim().length >= 10 }, modifier = Modifier.fillMaxWidth().height(54.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Accent, contentColor = Color(0xFF211721)), shape = RoundedCornerShape(13.dp)) {
-                            Text(if (loading) "GÖNDERİLİYOR…" else if (editMode) "✦  VİDEOMU DÜZENLE" else "✦  VİDEOMU OLUŞTUR", fontWeight = FontWeight.Black)
+                            Text(if (loading) "İŞLENİYOR…" else when (studioMode) { "edit" -> "✦  VİDEOMU DÜZENLE"; "upscale" -> "✦  KALİTEYİ YÜKSELT"; else -> "✦  VİDEOMU OLUŞTUR" }, fontWeight = FontWeight.Black)
                         }
                         Spacer(Modifier.height(12.dp))
                         Text(status, color = Accent, fontSize = 12.sp, lineHeight = 18.sp)
@@ -322,6 +333,29 @@ private suspend fun submitVideoEdit(context: android.content.Context, prompt: St
             val data = JSONObject(response.body?.string().orEmpty())
             if (!response.isSuccessful) return@withContext data.optString("message", "Video düzenleme başlatılamadı.") to ""
             "Video düzenleme isteği kabul edildi. Hazırlanıyor…" to data.optString("taskId")
+        }
+    } catch (_: Exception) { "Video sunucusuna bağlanılamadı. Dosyayı ve internet bağlantını kontrol et." to "" }
+}
+
+
+private suspend fun submitVideoUpscale(context: android.content.Context, uri: Uri, resolution: String): Pair<String, String> = withContext(Dispatchers.IO) {
+    if (BuildConfig.API_BASE_URL.contains("YOUR-BACKEND-DOMAIN")) return@withContext "Video sunucusu henüz bağlanmadı." to ""
+    try {
+        val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+            ?: return@withContext "Video dosyası okunamadı." to ""
+        if (bytes.size > 3_500_000) return@withContext "Video 3,5 MB sınırını aşıyor. Daha küçük bir video seç." to ""
+        val mime = context.contentResolver.getType(uri) ?: "video/mp4"
+        if (!mime.startsWith("video/")) return@withContext "Geçerli bir video dosyası seç." to ""
+        val videoData = "data:$mime;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP)
+        val json = JSONObject().put("videoUri", videoData).put("resolution", resolution)
+        val token = SessionStore.read(context)?.optString("access_token").orEmpty()
+        val request = Request.Builder().url(BuildConfig.API_BASE_URL.trimEnd('/') + "/api/upscale-video")
+            .header("Authorization", "Bearer $token")
+            .post(json.toString().toRequestBody("application/json".toMediaType())).build()
+        OkHttpClient().newCall(request).execute().use { response ->
+            val data = JSONObject(response.body?.string().orEmpty())
+            if (!response.isSuccessful) return@withContext data.optString("message", "Video kalite işlemi başlatılamadı.") to ""
+            "Kalite yükseltme isteği kabul edildi. Hazırlanıyor…" to data.optString("taskId")
         }
     } catch (_: Exception) { "Video sunucusuna bağlanılamadı. Dosyayı ve internet bağlantını kontrol et." to "" }
 }
