@@ -29,7 +29,7 @@ private val AuthPanel = Color(0xFF151B2B)
 private val authClient = OkHttpClient()
 
 @Composable
-fun AuthGate(content: @Composable () -> Unit) {
+fun AuthGate(content: @Composable (onSignOut: () -> Unit) -> Unit) {
     val context = LocalContext.current
     var signedIn by remember { mutableStateOf(false) }
     var checking by remember { mutableStateOf(true) }
@@ -41,7 +41,7 @@ fun AuthGate(content: @Composable () -> Unit) {
         checking -> Box(Modifier.fillMaxSize().background(AuthBg), contentAlignment = Alignment.Center) {
             CircularProgressIndicator(color = AuthAccent)
         }
-        signedIn -> content()
+        signedIn -> content { SessionStore.clear(context); signedIn = false }
         else -> AuthScreen(onSignedIn = { signedIn = true })
     }
 }
