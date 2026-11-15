@@ -5,6 +5,13 @@ import android.content.Intent
 import android.net.Uri
 import android.app.DownloadManager
 import android.os.Environment
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -49,6 +56,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun FotoFotoApp(onSignOut: () -> Unit) {
     var prompt by remember { mutableStateOf("") }
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri -> selectedImageUri = uri }
     var duration by remember { mutableIntStateOf(5) }
     var ratio by remember { mutableStateOf("1280:720") }
     var status by remember { mutableStateOf("Fikrini yaz, ilk videonu oluşturmaya hazırlan.") }
@@ -92,6 +101,18 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                             colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Accent, unfocusedBorderColor = Color(0xFF343B4D), focusedTextColor = White, unfocusedTextColor = White)
                         )
                         Text("${prompt.length} / 1000", color = Muted, fontSize = 10.sp, modifier = Modifier.align(Alignment.End).padding(top = 5.dp))
+                        Spacer(Modifier.height(14.dp))
+                        Text("REFERANS FOTOĞRAFI", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.height(8.dp))
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Button(onClick = { imagePicker.launch("image/*") }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF242D40))) { Text(if (selectedImageUri == null) "＋ FOTOĞRAF EKLE" else "FOTOĞRAFI DEĞİŞTİR", color = White) }
+                            if (selectedImageUri != null) TextButton(onClick = { selectedImageUri = null }) { Text("KALDIR", color = Accent) }
+                        }
+                        if (selectedImageUri != null) {
+                            val previewBitmap = remember(selectedImageUri) { try { context.contentResolver.openInputStream(selectedImageUri!!)?.use { BitmapFactory.decodeStream(it) } } catch (_: Exception) { null } }
+                            previewBitmap?.let { Image(bitmap = it.asImageBitmap(), contentDescription = "Referans fotoğrafı", modifier = Modifier.fillMaxWidth().heightIn(max = 190.dp)) }
+                            Text("Fotoğraf videonun ilk karesi olarak kullanılacak.", color = Muted, fontSize = 10.sp)
+                        } else Text("Kendi fotoğrafını veya canlandırmak istediğin görseli ekle.", color = Muted, fontSize = 10.sp)
                         Spacer(Modifier.height(17.dp))
                         Text("VİDEO MOTORU", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                         Spacer(Modifier.height(9.dp))
@@ -116,7 +137,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         Button(onClick = {
                             scope.launch {
                                 loading = true; status = "İstek gönderiliyor…"; taskId = ""; videoUrl = ""
-                                val result = submitGeneration(context, prompt, duration, ratio)
+                                val result = submitGeneration(context, prompt, duration, ratio, selectedImageUri)
                                 status = result.first
                                 taskId = result.second
                                 if (taskId.isNotBlank()) {
@@ -228,10 +249,11 @@ private suspend fun checkGeneration(context: android.content.Context, taskId: St
     } catch (_: Exception) { TaskCheck("Görev durumu kontrol edilemedi. Bağlantı yeniden denenecek.", false) }
 }
 
-private suspend fun submitGeneration(context: android.content.Context, prompt: String, duration: Int, ratio: String): Pair<String, String> = withContext(Dispatchers.IO) {
+private suspend fun submitGeneration(context: android.content.Context, prompt: String, duration: Int, ratio: String, imageUri: Uri?): Pair<String, String> = withContext(Dispatchers.IO) {
     if (BuildConfig.API_BASE_URL.contains("YOUR-BACKEND-DOMAIN")) return@withContext "Video sunucusu henüz bağlanmadı." to ""
     try {
         val json = JSONObject().put("prompt", prompt).put("model", "gen4.5").put("duration", duration).put("ratio", ratio)
+        if (imageUri != null) { val imageData = compressImageForRunway(context, imageUri) ?: return@withContext "Fotoğraf okunamadı." to ""; json.put("imageUri", imageData) }
         val body = json.toString().toRequestBody("application/json".toMediaType())
         val token = SessionStore.read(context)?.optString("access_token").orEmpty()
         val request = Request.Builder().url(BuildConfig.API_BASE_URL.trimEnd('/') + "/api/generate")
@@ -255,4 +277,22 @@ private fun downloadFotoVideo(context: android.content.Context, videoUrl: String
         .setMimeType("video/mp4")
     val manager = context.getSystemService(android.content.Context.DOWNLOAD_SERVICE) as DownloadManager
     manager.enqueue(request)
+}
+
+private fun compressImageForRunway(context: android.content.Context, uri: Uri): String? {
+    return try {
+        val source = context.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it) } ?: return null
+        var bitmap = source
+        val maxSide = 1800
+        if (source.width > maxSide || source.height > maxSide) {
+            val scale = minOf(maxSide.toFloat() / source.width, maxSide.toFloat() / source.height)
+            bitmap = Bitmap.createScaledBitmap(source, (source.width * scale).toInt(), (source.height * scale).toInt(), true)
+            if (bitmap !== source) source.recycle()
+        }
+        var quality = 88
+        var bytes: ByteArray
+        do { val output = java.io.ByteArrayOutputStream(); bitmap.compress(Bitmap.CompressFormat.JPEG, quality, output); bytes = output.toByteArray(); quality -= 8 } while (bytes.size > 3500000 && quality >= 48)
+        bitmap.recycle()
+        if (bytes.size > 3500000) null else "data:image/jpeg;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP)
+    } catch (_: Exception) { null }
 }
