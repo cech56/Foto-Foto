@@ -436,23 +436,25 @@ private fun FotoFotoGalaxyHome(
             )
             Box(Modifier.align(Alignment.TopStart).padding(start = 10.dp, top = 10.dp).width(174.dp).height(92.dp)) {
                 Canvas(Modifier.fillMaxSize()) {
-                    val radius = 18.dp.toPx()
-                    drawRoundRect(Color(0xF20C1749), cornerRadius = CornerRadius(radius))
-                    val tail = Path().apply {
-                        moveTo(size.width * .18f, size.height * .78f)
-                        lineTo(size.width * .27f, size.height * .98f)
-                        lineTo(size.width * .36f, size.height * .78f)
+                    val r = 18.dp.toPx()
+                    val bubble = Path().apply {
+                        moveTo(r, 0f)
+                        lineTo(size.width-r, 0f)
+                        quadraticTo(size.width, 0f, size.width, r)
+                        lineTo(size.width, size.height-r)
+                        quadraticTo(size.width, size.height, size.width-r, size.height)
+                        lineTo(size.width*.55f, size.height)
+                        lineTo(size.width*.40f, size.height*.98f)
+                        lineTo(size.width*.34f, size.height)
+                        lineTo(r, size.height)
+                        quadraticTo(0f, size.height, 0f, size.height-r)
+                        lineTo(0f, r)
+                        quadraticTo(0f, 0f, r, 0f)
                         close()
                     }
-                    drawPath(tail, Color(0xF20C1749))
-                    drawRoundRect(Color(0xFF9B7BFF), cornerRadius = CornerRadius(radius),
+                    drawPath(bubble, Color(0xF20C1749))
+                    drawPath(bubble, Color(0xFF9B7BFF),
                         style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.5.dp.toPx()))
-                    val tailLine = Path().apply {
-                        moveTo(size.width * .18f, size.height * .78f)
-                        lineTo(size.width * .27f, size.height * .98f)
-                        lineTo(size.width * .36f, size.height * .78f)
-                    }
-                    drawPath(tailLine, Color(0xFF9B7BFF), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.5.dp.toPx()))
                 }
                 Column(Modifier.padding(start = 11.dp, end = 9.dp, top = 10.dp)) {
                     Text(if (tr) "Merhaba Serdar! 👋" else if (language == "English") "Hello! 👋" else "مرحباً! 👋",
@@ -486,7 +488,7 @@ private fun FotoFotoGalaxyHome(
                 Text(if (tr) "Yapay Zekâ ile" else if (language == "English") "With AI" else "بالذكاء الاصطناعي",
                     color = White, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-                Text(if (tr) "Sıradan Görselleri\\nEtkileyici Videolara Dönüştür! 🚀" else if (language == "English") "Turn ordinary images into\\namazing videos! 🚀" else "حوّل الصور العادية إلى\\nفيديوهات مذهلة! 🚀",
+                Text(if (tr) "Sıradan Görselleri\nEtkileyici Videolara Dönüştür! 🚀" else if (language == "English") "Turn ordinary images into\namazing videos! 🚀" else "حوّل الصور العادية إلى\nفيديوهات مذهلة! 🚀",
                     color = White, fontSize = 10.sp, fontWeight = FontWeight.Bold, lineHeight = 13.sp,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center)
             }
