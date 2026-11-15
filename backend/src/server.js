@@ -6,6 +6,8 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
 const RUNWAY_BASE = "https://api.dev.runwayml.com";
 const RUNWAY_VERSION = "2024-11-06";
+const generationWindows = new Map();
+const MAX_GENERATIONS_PER_HOUR = 5;
 
 function send(res, status, data) {
   res.writeHead(status, {
@@ -73,6 +75,12 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "POST" && req.url === "/api/generate") {
       const user = await requireUser(req);
       if (!user?.id) return send(res, 401, { message: "FOTO FOTO hesabına giriş yapmalısın." });
+      const now = Date.now();
+      const windowStart = now - 60 * 60 * 1000;
+      const recent = (generationWindows.get(user.id) || []).filter((time) => time > windowStart);
+      if (recent.length >= MAX_GENERATIONS_PER_HOUR) {
+        return send(res, 429, { message: "Saatlik video oluşturma sınırına ulaştın. Bir süre sonra tekrar dene." });
+      }
       const input = await readJson(req);
       const prompt = typeof input.prompt === "string" ? input.prompt.trim() : "";
       const duration = Number(input.duration);
@@ -88,6 +96,8 @@ const server = http.createServer(async (req, res) => {
         method: "POST",
         body: JSON.stringify({ model: "gen4.5", promptText: prompt, duration, ratio })
       });
+      recent.push(now);
+      generationWindows.set(user.id, recent);
       return send(res, 202, { taskId: task.id || task.taskId, status: task.status || "PENDING" });
     }
 
