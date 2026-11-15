@@ -3,6 +3,7 @@ package com.fotofoto.app
 import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -136,7 +137,7 @@ fun AccountWalletCard(onRefresh: Int = 0, language: String = "Türkçe", onAccou
         loading = false
     }
     val summary = result?.summary
-    Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF151B2B)), shape = RoundedCornerShape(18.dp)) {
+    Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF151B2B)), shape = RoundedCornerShape(26.dp), modifier = Modifier.fillMaxWidth().border(1.dp, Color(0xFF2D3550), RoundedCornerShape(26.dp))) {
         Column(Modifier.fillMaxWidth().padding(18.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
@@ -145,7 +146,7 @@ fun AccountWalletCard(onRefresh: Int = 0, language: String = "Türkçe", onAccou
                     Text("Merhaba, ${summary?.displayName?.takeIf { it.isNotBlank() } ?: if (en) "creative friend" else if (ar) "صديقي المبدع" else "yaratıcı dostumuz"}! ✨", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
                     Text(summary?.email ?: if (loading) tr("Hesap bilgisi yükleniyor…", "Loading account…", "جارٍ تحميل الحساب…") else (result?.error ?: tr("Hesap bilgisi alınamadı.", "Could not load account details.", "تعذر تحميل بيانات الحساب.")), color = Color(0xFF9AA3B6), fontSize = 10.sp)
                 }
-                Box(Modifier.size(42.dp).background(Color(0xFF38265A), RoundedCornerShape(15.dp)), contentAlignment = androidx.compose.ui.Alignment.Center) { Text("✦", color = Color(0xFFFFB36B), fontSize = 24.sp) }
+                Box(Modifier.size(54.dp).background(Brush.linearGradient(listOf(Color(0xFF7045B5), Color(0xFFE66D8D))), RoundedCornerShape(18.dp)), contentAlignment = androidx.compose.ui.Alignment.Center) { Text("✦", color = Color.White, fontSize = 28.sp) }
             }
             Spacer(Modifier.height(14.dp))
             Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color(0xFF302052)), shape = RoundedCornerShape(18.dp)) {
@@ -153,7 +154,7 @@ fun AccountWalletCard(onRefresh: Int = 0, language: String = "Türkçe", onAccou
                     Column(Modifier.weight(1f)) {
                         Text(tr("KREDİ CÜZDANIN", "YOUR CREDIT WALLET", "محفظة الرصيد"), color = Color.White.copy(alpha = 0.78f), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
                         Spacer(Modifier.height(5.dp))
-                        Text(if (loading) "…" else summary?.let { "${it.credits} kredi" } ?: "—", color = Color.White, fontSize = 27.sp, fontWeight = FontWeight.Black)
+                        Text(if (loading) "…" else summary?.let { "${it.credits} ${tr("kredi", "credits", "رصيد")}" } ?: "—", color = Color.White, fontSize = 29.sp, fontWeight = FontWeight.Black)
                         Text(tr("1 kredi = 1 TL", "1 credit = 1 TRY", "1 رصيد = 1 ليرة"), color = Color.White.copy(alpha = 0.78f), fontSize = 10.sp)
                     }
                     Text("✧", color = Color.White, fontSize = 34.sp)
@@ -163,13 +164,14 @@ fun AccountWalletCard(onRefresh: Int = 0, language: String = "Türkçe", onAccou
                 Text(tr("Bakiye bilgisi hesabına özeldir.", "Your balance is private to your account.", "رصيدك خاص بحسابك."), color = Color(0xFF9AA3B6), fontSize = 9.sp)
                 TextButton(onClick = { refreshKey++ }, enabled = !loading, contentPadding = PaddingValues(4.dp)) { Text(if (loading) tr("YÜKLENİYOR", "LOADING", "جارٍ التحميل") else "↻ YENİLE", color = Color(0xFFFF795E), fontSize = 10.sp) }
             }
-            Text(tr("ÜRETİM ÜCRETLERİ", "GENERATION PRICES", "أسعار الإنشاء"), color = Color(0xFF9AA3B6), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+            Text(tr("ÜRETİM ÜCRETLERİ", "GENERATION PRICES", "أسعار الإنشاء"), color = Color(0xFFB99AFF), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
+            Text(tr("Her video için gereken kredi miktarı", "Credits required for each video", "الرصيد المطلوب لكل فيديو"), color = Color(0xFF9AA3B6), fontSize = 9.sp)
             Row(Modifier.fillMaxWidth().padding(top = 7.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Column(Modifier.weight(1f).background(Color(0xFF101726), RoundedCornerShape(12.dp)).padding(11.dp)) { Text(tr("5 SANİYE", "5 SECONDS", "٥ ثوانٍ"), color = Color(0xFF9AA3B6), fontSize = 9.sp); Text("59 kredi", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold) }
                 Column(Modifier.weight(1f).background(Color(0xFF101726), RoundedCornerShape(12.dp)).padding(11.dp)) { Text(tr("10 SANİYE", "10 SECONDS", "١٠ ثوانٍ"), color = Color(0xFF9AA3B6), fontSize = 9.sp); Text("119 kredi", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold) }
             }
                         Spacer(Modifier.height(12.dp))
-            Text(tr("SON KREDİ HAREKETLERİ", "RECENT CREDIT ACTIVITY", "آخر حركات الرصيد"), color = Color(0xFFFF795E), fontSize = 10.sp)
+            Text(tr("SON KREDİ HAREKETLERİ", "RECENT CREDIT ACTIVITY", "آخر حركات الرصيد"), color = Color(0xFFB99AFF), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.1.sp)
             Spacer(Modifier.height(6.dp))
             when {
                 loading -> Text(tr("Hareketler yükleniyor…", "Loading activity…", "جارٍ تحميل الحركات…"), color = Color(0xFF9AA3B6), fontSize = 11.sp)
@@ -186,7 +188,7 @@ fun AccountWalletCard(onRefresh: Int = 0, language: String = "Türkçe", onAccou
                     }
                 }
             }
-            Text(tr("Kredi yükleme ve ödeme henüz etkin değil.", "Credit top-ups and payments are not active yet.", "شحن الرصيد والدفع غير متاحين بعد."), color = Color(0xFF9AA3B6), fontSize = 10.sp)
+            Row(Modifier.fillMaxWidth().background(Color(0xFF20283B), RoundedCornerShape(13.dp)).padding(12.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) { Text("ⓘ", color = Color(0xFF65C9D8), fontSize = 18.sp); Spacer(Modifier.width(9.dp)); Text(tr("Kredi yükleme ve ödeme henüz etkin değil. Bu alan etkinleştiğinde buradan bilgi alacaksın.", "Credit top-ups and payments are not active yet. You will find updates here when they launch.", "شحن الرصيد والدفع غير متاحين بعد. ستجد التحديثات هنا عند توفرهما."), color = Color(0xFFB6C0D1), fontSize = 9.sp, lineHeight = 14.sp) }
             Spacer(Modifier.height(16.dp))
             HorizontalDivider(color = Color(0xFF30384A))
             Spacer(Modifier.height(10.dp))
