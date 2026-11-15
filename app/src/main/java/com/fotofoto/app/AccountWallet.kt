@@ -143,7 +143,7 @@ fun AccountWalletCard(onRefresh: Int = 0, language: String = "Türkçe", onAccou
                 Column(Modifier.weight(1f)) {
                     Text(tr("SENİN YARATICI ALANIN", "YOUR CREATIVE SPACE", "مساحتك الإبداعية"), color = Color(0xFFB99AFF), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.5.sp)
                     Spacer(Modifier.height(5.dp))
-                    Text("Merhaba, ${summary?.displayName?.takeIf { it.isNotBlank() } ?: if (en) "creative friend" else if (ar) "صديقي المبدع" else "yaratıcı dostumuz"}! ✨", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+                    Text(tr("Merhaba, ${summary?.displayName?.takeIf { it.isNotBlank() } ?: "yaratıcı dostumuz"}! ✨", "Hello, ${summary?.displayName?.takeIf { it.isNotBlank() } ?: "creative friend"}! ✨", "مرحباً، ${summary?.displayName?.takeIf { it.isNotBlank() } ?: "صديقي المبدع"}! ✨"), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
                     Text(summary?.email ?: if (loading) tr("Hesap bilgisi yükleniyor…", "Loading account…", "جارٍ تحميل الحساب…") else (result?.error ?: tr("Hesap bilgisi alınamadı.", "Could not load account details.", "تعذر تحميل بيانات الحساب.")), color = Color(0xFF9AA3B6), fontSize = 10.sp)
                 }
                 Box(Modifier.size(54.dp).background(Brush.linearGradient(listOf(Color(0xFF7045B5), Color(0xFFE66D8D))), RoundedCornerShape(18.dp)), contentAlignment = androidx.compose.ui.Alignment.Center) { Text("✦", color = Color.White, fontSize = 28.sp) }
