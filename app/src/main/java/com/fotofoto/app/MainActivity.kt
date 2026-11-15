@@ -173,6 +173,13 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                             ChoiceButton("5 saniye", duration == 5) { duration = 5 }
                             ChoiceButton("10 saniye", duration == 10) { duration = 10 }
                         }
+                        Text(
+                            if (duration == 5) "Bu üretimin ücreti: 59 FOTO FOTO kredisi (59 TL)"
+                            else "Bu üretimin ücreti: 119 FOTO FOTO kredisi (119 TL)",
+                            color = Accent, fontSize = 12.sp, fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(top = 9.dp)
+                        )
+                        Text("Üretim başarısız olursa ayrılan krediler iade edilir.", color = Muted, fontSize = 10.sp)
                         Spacer(Modifier.height(15.dp))
                         Text("VİDEO FORMATI", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
