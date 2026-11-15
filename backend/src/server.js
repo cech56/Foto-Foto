@@ -119,7 +119,20 @@ async function runway(path, options = {}) {
 
 const server = http.createServer(async (req, res) => {
   if (req.method === "OPTIONS") return send(res, 204, {});
-  if (req.method === "GET" && req.url === "/health") return send(res, 200, { ok: true, service: "foto-foto-api" });
+  if (req.method === "GET" && req.url === "/health") {
+    const checks = {
+      supabaseUrl: Boolean(SUPABASE_URL),
+      supabasePublishableKey: Boolean(SUPABASE_PUBLISHABLE_KEY),
+      walletServiceKey: Boolean(SUPABASE_SERVICE_ROLE_KEY),
+      runwayApiKey: Boolean(RUNWAY_API_KEY)
+    };
+    return send(res, 200, {
+      ok: true,
+      service: "foto-foto-api",
+      status: checks.supabaseUrl && checks.supabasePublishableKey && checks.walletServiceKey ? "ready_for_account_tests" : "configuration_incomplete",
+      checks
+    });
+  }
 
   if (!RUNWAY_API_KEY) return send(res, 503, { message: "Sunucu API anahtarı yapılandırılmamış." });
 
