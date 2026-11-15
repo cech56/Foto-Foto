@@ -465,7 +465,7 @@ private fun FotoFotoGalaxyHome(
                     Text(if (tr) "Merhaba Serdar! 👋" else if (language == "English") "Hello! 👋" else "مرحباً! 👋",
                         color = White, fontWeight = FontWeight.ExtraBold, fontSize = 11.sp, maxLines = 1)
                     Spacer(Modifier.height(3.dp))
-                    Text(if (tr) "Bugün ne tür bir video\\noluşturuyoruz?" else if (language == "English") "What video shall we\\ncreate today?" else "ما الفيديو الذي\\nسننشئه اليوم؟",
+                    Text(if (tr) "Bugün ne tür bir video\noluşturuyoruz?" else if (language == "English") "What video shall we\ncreate today?" else "ما الفيديو الذي\nسننشئه اليوم؟",
                         color = White, fontSize = 9.sp, lineHeight = 12.sp)
                 }
             }
