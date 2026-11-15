@@ -111,64 +111,35 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 )
             }
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 92.dp)) {
-                Spacer(Modifier.height(30.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(46.dp).clip(RoundedCornerShape(16.dp)).background(
-                        Brush.linearGradient(listOf(Color(0xFF12D8FA), Color(0xFF8B35FF), Color(0xFFFF5AA8)))
-                    ), contentAlignment = Alignment.Center) {
-                        Text("▶", color = White, fontSize = 23.sp, fontWeight = FontWeight.Black)
-                    }
-                    Spacer(Modifier.width(12.dp))
-                    Column {
-                        Text("FOTO FOTO", color = White, fontSize = 19.sp, fontWeight = FontWeight.Black, letterSpacing = 1.6.sp)
-                        Text(if (appLanguage == "English") "AI VIDEO STUDIO" else if (appLanguage == "العربية") "استوديو فيديو ذكي" else "AI VIDEO STÜDYOSU", color = Muted, fontSize = 9.sp, letterSpacing = 2.sp)
+                Spacer(Modifier.height(10.dp))
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.clip(RoundedCornerShape(24.dp)).border(1.dp, Color(0xFF9B72FF), RoundedCornerShape(24.dp))
+                        .background(Color(0xFF171638).copy(alpha = 0.92f)).clickable { settingsOpen = true }.padding(horizontal = 12.dp, vertical = 9.dp)) {
+                        Text("◎  ${if (appLanguage == "English") "EN" else if (appLanguage == "العربية") "AR" else "TR"}  ▾", color = White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                     Spacer(Modifier.weight(1f))
-                    IconButton(onClick = { settingsOpen = true }) {
-                        Text("⚙", color = White, fontSize = 23.sp)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(42.dp).clip(RoundedCornerShape(14.dp)).background(Brush.linearGradient(listOf(Color(0xFF19D8FF), Color(0xFF833BFF), Color(0xFFFF4FBA)))), contentAlignment = Alignment.Center) {
+                            Text("▶", color = White, fontSize = 23.sp, fontWeight = FontWeight.Black)
+                        }
+                        Spacer(Modifier.width(8.dp))
+                        Column {
+                            Text("FOTO FOTO", color = White, fontSize = 19.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                            Text("AI VIDEO STÜDYOSU", color = Color(0xFF67D9FF), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.5.sp)
+                        }
                     }
-                    TextButton(onClick = onSignOut) { Text(if (appLanguage == "English") "SIGN OUT" else if (appLanguage == "العربية") "خروج" else "ÇIKIŞ", color = Muted, fontSize = 10.sp) }
+                    Spacer(Modifier.weight(1f))
+                    IconButton(onClick = { settingsOpen = true }) { Text("♧", color = White, fontSize = 23.sp) }
+                    IconButton(onClick = { settingsOpen = true }) { Text("⚙", color = White, fontSize = 22.sp) }
                 }
                 if (selectedTab == "home") {
-                Spacer(Modifier.height(20.dp))
-                HomeAiShowcase(appLanguage) { selectedTab = "create" }
-                Spacer(Modifier.height(18.dp))
-                Card(Modifier.fillMaxWidth().border(1.dp, Color(0xFF51406F), RoundedCornerShape(22.dp)),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF171D30)), shape = RoundedCornerShape(22.dp)) {
-                    Row(Modifier.fillMaxWidth().padding(17.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f)) {
-                            Text(tr("HAYALİNİ VİDEOYA DÖNÜŞTÜR", "TURN YOUR IDEA INTO VIDEO", "حوّل فكرتك إلى فيديو"), color = Color(0xFFFFA17D), fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                            Spacer(Modifier.height(6.dp))
-                            Text(tr("Bir fotoğraf seç veya sahneni tarif et.", "Choose a photo or describe your scene.", "اختر صورة أو صف مشهدك."), color = White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-                        }
-                        Button(onClick = { selectedTab = "create" }, colors = ButtonDefaults.buttonColors(containerColor = Accent), shape = RoundedCornerShape(14.dp)) {
-                            Text(tr("BAŞLA", "START", "ابدأ"), color = Color(0xFF211721), fontWeight = FontWeight.Black, fontSize = 11.sp)
-                        }
-                    }
-                }
-                Spacer(Modifier.height(20.dp))
-                Text(tr("FOTO FOTO İLE NELER YAPABİLİRSİN?", "WHAT CAN YOU CREATE WITH FOTO FOTO?", "ماذا يمكنك أن تصنع مع FOTO FOTO؟"), color = Color(0xFFB99AFF), fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.1.sp)
-                Spacer(Modifier.height(10.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(9.dp), modifier = Modifier.fillMaxWidth()) {
-                    HomeFeatureTile("✦", tr("Fotoğrafı canlandır", "Animate a photo", "حرّك صورة"), tr("Tek kareden video", "Turn a still into video", "حوّل صورة إلى فيديو"), Color(0xFF5834A0), Modifier.weight(1f)) { selectedTab = "create" }
-                    HomeFeatureTile("◈", tr("Sinematik sahne", "Cinematic scene", "مشهد سينمائي"), tr("Fikrini tarif et", "Describe your idea", "صف فكرتك"), Color(0xFFB64282), Modifier.weight(1f)) { selectedTab = "create" }
-                }
-                Spacer(Modifier.height(18.dp))
-                Card(Modifier.fillMaxWidth().border(1.dp, Color(0xFF343B5C), RoundedCornerShape(22.dp)),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF151B2B)), shape = RoundedCornerShape(22.dp)) {
-                    Column(Modifier.padding(17.dp)) {
-                        Text(tr("NASIL ÇALIŞIR?", "HOW IT WORKS", "كيف يعمل؟"), color = Color(0xFFFFA17D), fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.2.sp)
-                        Spacer(Modifier.height(13.dp))
-                        HomeStepRow("01", tr("Fotoğrafını ekle", "Add your photo", "أضف صورتك"), tr("Galerinden bir görsel seç.", "Choose an image from your gallery.", "اختر صورة من معرضك."))
-                        HomeStepRow("02", tr("Hayalini anlat", "Describe your vision", "صف رؤيتك"), tr("Sahneyi ve kamera hareketini yaz.", "Describe the scene and camera movement.", "صف المشهد وحركة الكاميرا."))
-                        HomeStepRow("03", tr("Videonu oluştur", "Create your video", "أنشئ الفيديو"), tr("Ayarlarını seç ve üretimi başlat.", "Choose your settings and start generation.", "اختر الإعدادات وابدأ الإنشاء."))
-                        Spacer(Modifier.height(12.dp))
-                        Button(onClick = { selectedTab = "create" }, modifier = Modifier.fillMaxWidth().height(48.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6E42B5)), shape = RoundedCornerShape(14.dp)) {
-                            Text(tr("YARATIM STÜDYOSUNA GİT  →", "OPEN CREATION STUDIO  →", "انتقل إلى استوديو الإنشاء  ←"), color = White, fontWeight = FontWeight.ExtraBold, fontSize = 11.sp)
-                        }
-                    }
-                }
-                Spacer(Modifier.height(20.dp))
+                    FotoFotoGalaxyHome(
+                        language = appLanguage,
+                        onPhotoVideo = { selectedTab = "create"; studioMode = "generate" },
+                        onEdit = { selectedTab = "create"; studioMode = "edit" },
+                        onUpscale = { selectedTab = "create"; studioMode = "upscale" },
+                        onCharacter = { selectedTab = "create"; studioMode = "character" }
+                    )
                 }
                 if (selectedTab == "create") {
                 Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF17172D)), shape = RoundedCornerShape(26.dp), elevation = CardDefaults.cardElevation(defaultElevation = 10.dp), modifier = Modifier.border(1.dp, Color(0xFF34304D), RoundedCornerShape(26.dp))) {
@@ -410,6 +381,93 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 }
             }
         }
+    }
+}
+
+
+@Composable
+private fun FotoFotoGalaxyHome(
+    language: String,
+    onPhotoVideo: () -> Unit,
+    onEdit: () -> Unit,
+    onUpscale: () -> Unit,
+    onCharacter: () -> Unit
+) {
+    val tr = language != "English" && language != "العربية"
+    val transition = rememberInfiniteTransition(label = "foto-galaxy")
+    val floatY by transition.animateFloat(-7f, 7f, infiniteRepeatable(tween(2300, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "float")
+    val glow by transition.animateFloat(0.72f, 1f, infiniteRepeatable(tween(1700), RepeatMode.Reverse), label = "glow")
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(13.dp)) {
+        Box(Modifier.fillMaxWidth().height(390.dp).clip(RoundedCornerShape(28.dp))
+            .border(1.dp, Color(0xFF8D63FF), RoundedCornerShape(28.dp))
+            .background(Brush.verticalGradient(listOf(Color(0xFF11133C), Color(0xFF28145A), Color(0xFF8C3D9D), Color(0xFF18234D))))) {
+            // Nebulae and stars
+            Box(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(Color(0x66FF72D2), Color.Transparent), radius = 650f)))
+            listOf(0.08f to 0.16f, 0.19f to 0.34f, 0.82f to 0.17f, 0.91f to 0.39f, 0.13f to 0.67f, 0.78f to 0.72f, 0.48f to 0.10f, 0.60f to 0.27f).forEachIndexed { i, p ->
+                Box(Modifier.fillMaxWidth(p.first).fillMaxHeight(0.02f).align(Alignment.TopStart).padding(start = 0.dp)
+                    .offset(x = (i * 17).dp, y = (i * 29 + 20).dp).size(if (i % 3 == 0) 4.dp else 2.dp)
+                    .background(Color.White.copy(alpha = 0.45f), RoundedCornerShape(50)))
+            }
+            Box(Modifier.align(Alignment.TopCenter).padding(top = 66.dp).size(184.dp)
+                .graphicsLayer { translationY = floatY * 0.35f; alpha = glow }
+                .background(Brush.radialGradient(listOf(Color(0xFFB9F5FF), Color(0xFF287BFF), Color(0xFF261B80))), RoundedCornerShape(100))
+                .border(3.dp, Color(0xFF8BE9FF), RoundedCornerShape(100)))
+            Box(Modifier.align(Alignment.TopCenter).padding(top = 78.dp).size(198.dp)
+                .border(2.dp, Color(0xFFCA8BFF).copy(alpha = 0.8f), RoundedCornerShape(50)))
+            // Floating islands
+            Text("🏰", Modifier.align(Alignment.TopEnd).padding(top = 95.dp, end = 12.dp).graphicsLayer { translationY = -floatY }, fontSize = 48.sp)
+            Text("🌸", Modifier.align(Alignment.CenterStart).padding(start = 4.dp, top = 12.dp), fontSize = 38.sp)
+            Text("🪐", Modifier.align(Alignment.TopStart).padding(start = 18.dp, top = 55.dp), fontSize = 32.sp)
+            Text("🐋", Modifier.align(Alignment.TopEnd).padding(end = 72.dp, top = 35.dp), fontSize = 34.sp)
+            Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(112.dp)
+                .background(Brush.verticalGradient(listOf(Color.Transparent, Color(0xFF21164D), Color(0xFF101632)))))
+            Text("🪨  ✨  🪨", Modifier.align(Alignment.BottomCenter).padding(bottom = 6.dp), fontSize = 34.sp)
+            // Character and companion
+            Text("🤖", Modifier.align(Alignment.Center).offset(y = 38.dp).graphicsLayer { translationY = floatY }, fontSize = 112.sp)
+            Text("🐱", Modifier.align(Alignment.BottomCenter).padding(bottom = 36.dp, end = 116.dp), fontSize = 49.sp)
+            Text("🎬", Modifier.align(Alignment.CenterEnd).padding(top = 90.dp, end = 18.dp).graphicsLayer { rotationZ = floatY }, fontSize = 39.sp)
+            Text("🎞️", Modifier.align(Alignment.BottomEnd).padding(end = 23.dp, bottom = 58.dp), fontSize = 30.sp)
+            Column(Modifier.align(Alignment.TopStart).padding(start = 12.dp, top = 14.dp)
+                .clip(RoundedCornerShape(18.dp)).background(Color(0xE91A1745)).border(1.dp, Color(0xFF9B7BFF), RoundedCornerShape(18.dp)).padding(horizontal = 13.dp, vertical = 10.dp)) {
+                Text(if (tr) "Merhaba! 👋" else if (language == "English") "Hello! 👋" else "مرحباً! 👋", color = White, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
+                Text(if (tr) "Bugün ne tür bir video\noluşturuyoruz?" else if (language == "English") "What video shall we\ncreate today?" else "ما الفيديو الذي\nسننشئه اليوم؟", color = White, fontSize = 12.sp, lineHeight = 17.sp)
+            }
+            Text("✦", Modifier.align(Alignment.CenterStart).padding(start = 25.dp, top = 72.dp).graphicsLayer { alpha = glow }, color = Color(0xFFFFD6FF), fontSize = 27.sp)
+            Text("✧", Modifier.align(Alignment.CenterEnd).padding(end = 72.dp, bottom = 30.dp), color = Color(0xFF70E8FF), fontSize = 28.sp)
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+            GalaxyActionCard("▧", if (tr) "Fotoğraftan\nVideo" else if (language == "English") "Photo to\nVideo" else "صورة إلى\nفيديو", Color(0xFFD54BFF), Modifier.weight(1f), onPhotoVideo)
+            GalaxyActionCard("▣", if (tr) "Video\nDüzenleme" else if (language == "English") "Video\nEditing" else "تحرير\nالفيديو", Color(0xFF26CFFF), Modifier.weight(1f), onEdit)
+            GalaxyActionCard("HD", if (tr) "Kalite\nArtırma" else if (language == "English") "Enhance\nQuality" else "تحسين\nالجودة", Color(0xFF21C9FF), Modifier.weight(1f), onUpscale)
+            GalaxyActionCard("♙", if (tr) "Karakter\nAnimasyonu" else if (language == "English") "Character\nAnimation" else "تحريك\nالشخصية", Color(0xFFFF9B47), Modifier.weight(1f), onCharacter)
+        }
+        Box(Modifier.fillMaxWidth().height(104.dp).clip(RoundedCornerShape(23.dp))
+            .border(1.dp, Color(0xFF8D62FF), RoundedCornerShape(23.dp))
+            .background(Brush.horizontalGradient(listOf(Color(0xFF21145B), Color(0xFF642B9C), Color(0xFF26134E))))) {
+            Text("🤖", Modifier.align(Alignment.CenterStart).padding(start = 12.dp), fontSize = 55.sp)
+            Column(Modifier.align(Alignment.Center).padding(start = 76.dp, end = 55.dp)) {
+                Text(if (tr) "Yapay Zekâ ile" else if (language == "English") "With Artificial Intelligence" else "بالذكاء الاصطناعي", color = White, fontSize = 13.sp, fontWeight = FontWeight.Black)
+                Text(if (tr) "Sıradan Görselleri Etkileyici Videolara Dönüştür! 🚀" else if (language == "English") "Turn ordinary images into amazing videos! 🚀" else "حوّل الصور العادية إلى فيديوهات مذهلة! 🚀", color = White, fontSize = 13.sp, fontWeight = FontWeight.Bold, lineHeight = 17.sp)
+            }
+            Text("🎞️", Modifier.align(Alignment.CenterEnd).padding(end = 8.dp), fontSize = 38.sp)
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+            repeat(4) { i -> Box(Modifier.padding(horizontal = 4.dp).size(if (i == 0) 8.dp else 7.dp)
+                .background(if (i == 0) Color.White else Color(0xFF6A4A9D), RoundedCornerShape(50))) }
+        }
+    }
+}
+
+@Composable
+private fun GalaxyActionCard(icon: String, label: String, tint: Color, modifier: Modifier, onClick: () -> Unit) {
+    Column(modifier.height(112.dp).clip(RoundedCornerShape(21.dp))
+        .background(Brush.verticalGradient(listOf(tint.copy(alpha = 0.28f), Color(0xFF17143D))))
+        .border(1.5.dp, tint.copy(alpha = 0.9f), RoundedCornerShape(21.dp))
+        .clickable(onClick = onClick).padding(horizontal = 3.dp, vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Text(icon, color = tint, fontSize = 29.sp, fontWeight = FontWeight.Black)
+        Spacer(Modifier.height(7.dp))
+        Text(label, color = White, fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, lineHeight = 12.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
     }
 }
 
