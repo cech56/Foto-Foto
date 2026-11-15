@@ -132,14 +132,8 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                     }
                 }
                 Spacer(Modifier.height(16.dp))
-                Card(colors = CardDefaults.cardColors(containerColor = Panel), shape = RoundedCornerShape(18.dp)) {
-                    Column(Modifier.padding(18.dp)) {
-                        Text("FOTO FOTO CÜZDAN", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-                        Spacer(Modifier.height(6.dp))
-                        Text("Yakında", color = Accent, fontSize = 23.sp, fontWeight = FontWeight.Bold)
-                        Text("Kredi sistemi: 1 kredi = 1 TL", color = Muted, fontSize = 11.sp)
-                    }
-                }
+                AccountWalletCard()
+                Spacer(Modifier.height(16.dp))
                 Spacer(Modifier.height(26.dp))
                 Text("FOTO FOTO  ·  HAYAL ET, OLUŞTUR.", color = Muted, fontSize = 10.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
                 Spacer(Modifier.height(28.dp))
