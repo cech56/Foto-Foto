@@ -23,7 +23,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.runtime.*
+import androidx.compose.animation.core.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -109,7 +111,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 )
             }
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 92.dp)) {
-                Spacer(Modifier.height(18.dp))
+                Spacer(Modifier.height(30.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(Modifier.size(46.dp).clip(RoundedCornerShape(16.dp)).background(
                         Brush.linearGradient(listOf(Color(0xFF12D8FA), Color(0xFF8B35FF), Color(0xFFFF5AA8)))
@@ -129,46 +131,22 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 }
                 if (selectedTab == "home") {
                 Spacer(Modifier.height(20.dp))
-                Box(
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(26.dp))
-                        .background(Brush.linearGradient(listOf(Color(0xFF302080), Color(0xFF6D2FC4), Color(0xFFE84E9B), Color(0xFFFF8A55))))
-                        .padding(20.dp)
-                ) {
-                    Column {
-                        Text(if (appLanguage == "English") "BRING YOUR IMAGINATION TO LIFE" else if (appLanguage == "العربية") "حوّل خيالك إلى واقع" else "HAYALİNİ HAREKETE GEÇİR", color = Color.White.copy(alpha = 0.78f), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.6.sp)
-                        Spacer(Modifier.height(9.dp))
-                        Text(if (appLanguage == "English") "Turn Your Photo\nInto a Cinematic Video" else if (appLanguage == "العربية") "حوّل صورتك إلى\nفيديو سينمائي" else "Fotoğrafından\nSinematik Video Üret", color = White, fontSize = 27.sp, lineHeight = 31.sp, fontWeight = FontWeight.Black)
-                        Spacer(Modifier.height(8.dp))
-                        Text(if (appLanguage == "English") "Write an idea. Let AI do the rest." else if (appLanguage == "العربية") "اكتب فكرتك ودع الذكاء الاصطناعي يتولى الباقي." else "Bir fikir yaz. Gerisini yapay zekâya bırak.", color = White.copy(alpha = 0.86f), fontSize = 12.sp)
-                        Spacer(Modifier.height(15.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(Modifier.background(Color.White.copy(alpha = 0.20f), RoundedCornerShape(50)).padding(horizontal = 13.dp, vertical = 8.dp)) {
-                                Text(tr("✦  GEN-4.5 STÜDYOSU", "✦  GEN-4.5 STUDIO", "✦  استوديو GEN-4.5"), color = White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                            }
-                            Spacer(Modifier.weight(1f))
-                            Text(tr("● CANLI MOTOR", "● LIVE ENGINE", "● المحرك مباشر"), color = White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
+                HomeAiShowcase(appLanguage) { selectedTab = "create" }
                 Spacer(Modifier.height(18.dp))
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                    QuickStatCard("01", tr("Yarat", "Create", "إنشاء"), tr("Fikrini yaz", "Write your idea", "اكتب فكرتك"), Modifier.weight(1f), listOf(Color(0xFF4732A8), Color(0xFF8B43D8)))
-                    QuickStatCard("02", tr("Canlandır", "Animate", "تحريك"), tr("Fotoğraf ekle", "Add a photo", "أضف صورة"), Modifier.weight(1f), listOf(Color(0xFFB64A73), Color(0xFFEE8758)))
-                    QuickStatCard("03", tr("İndir", "Download", "تنزيل"), tr("Videonu al", "Get your video", "احصل على الفيديو"), Modifier.weight(1f), listOf(Color(0xFF176E9B), Color(0xFF3A9FBE)))
-                }
-                Spacer(Modifier.height(16.dp))
-                Card(Modifier.fillMaxWidth().border(1.dp, Color(0xFF3D365C), RoundedCornerShape(20.dp)), colors = CardDefaults.cardColors(containerColor = Color(0xFF171D30)), shape = RoundedCornerShape(20.dp)) {
-                    Row(Modifier.fillMaxWidth().padding(15.dp), verticalAlignment = Alignment.CenterVertically) {
+                Card(Modifier.fillMaxWidth().border(1.dp, Color(0xFF51406F), RoundedCornerShape(22.dp)),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF171D30)), shape = RoundedCornerShape(22.dp)) {
+                    Row(Modifier.fillMaxWidth().padding(17.dp), verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
-                            Text(tr("İLK VİDEONU OLUŞTUR", "CREATE YOUR FIRST VIDEO", "أنشئ فيديوك الأول"), color = Color(0xFFFFA17D), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
-                            Spacer(Modifier.height(5.dp))
-                            Text(tr("Hayalindeki sahneyi birkaç kelimeyle anlat.", "Describe your dream scene in a few words.", "صف المشهد الذي تحلم به ببضع كلمات."), color = White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                            Text(tr("HAYALİNİ VİDEOYA DÖNÜŞTÜR", "TURN YOUR IDEA INTO VIDEO", "حوّل فكرتك إلى فيديو"), color = Color(0xFFFFA17D), fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                            Spacer(Modifier.height(6.dp))
+                            Text(tr("Bir fotoğraf seç veya sahneni tarif et.", "Choose a photo or describe your scene.", "اختر صورة أو صف مشهدك."), color = White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                         }
-                        Button(onClick = { selectedTab = "create" }, colors = ButtonDefaults.buttonColors(containerColor = Accent), contentPadding = PaddingValues(horizontal = 13.dp, vertical = 9.dp)) {
-                            Text(tr("BAŞLA  →", "START  →", "ابدأ  →"), color = Color(0xFF211721), fontSize = 10.sp, fontWeight = FontWeight.Black)
+                        Button(onClick = { selectedTab = "create" }, colors = ButtonDefaults.buttonColors(containerColor = Accent), shape = RoundedCornerShape(14.dp)) {
+                            Text(tr("BAŞLA", "START", "ابدأ"), color = Color(0xFF211721), fontWeight = FontWeight.Black, fontSize = 11.sp)
                         }
                     }
                 }
+                Spacer(Modifier.height(20.dp))
                 Spacer(Modifier.height(20.dp))
                 }
                 if (selectedTab == "create") {
@@ -415,16 +393,36 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
 }
 
 @Composable
-private fun QuickStatCard(number: String, title: String, subtitle: String, modifier: Modifier, colors: List<Color>) {
-    Column(
-        modifier.clip(RoundedCornerShape(17.dp))
-            .background(Brush.linearGradient(colors))
-            .padding(12.dp)
-    ) {
-        Text(number, color = Color.White.copy(alpha = 0.72f), fontSize = 9.sp, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(8.dp))
-        Text(title, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold)
-        Text(subtitle, color = Color.White.copy(alpha = 0.78f), fontSize = 9.sp)
+private fun HomeAiShowcase(language: String, onCreate: () -> Unit) {
+    val en = language == "English"
+    val ar = language == "العربية"
+    fun tr(t: String, e: String, a: String) = if (en) e else if (ar) a else t
+    val transition = rememberInfiniteTransition(label = "ai-showcase")
+    val pulse by transition.animateFloat(0.92f, 1.08f, infiniteRepeatable(tween(1800, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "pulse")
+    val rotation by transition.animateFloat(-12f, 12f, infiniteRepeatable(tween(4200, easing = LinearEasing), RepeatMode.Reverse), label = "rotation")
+    Card(Modifier.fillMaxWidth().height(292.dp).border(1.dp, Color(0xFF7552B5), RoundedCornerShape(28.dp)),
+        shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = Color.Transparent)) {
+        Box(Modifier.fillMaxSize().background(Brush.linearGradient(listOf(Color(0xFF251B59), Color(0xFF7133A8), Color(0xFFD84D91), Color(0xFFFF865C)))).padding(20.dp)) {
+            Box(Modifier.align(Alignment.TopEnd).size(178.dp).graphicsLayer { rotationZ = rotation; scaleX = pulse; scaleY = pulse }.border(1.dp, Color.White.copy(alpha = 0.30f), RoundedCornerShape(48.dp)))
+            Box(Modifier.align(Alignment.TopEnd).padding(top = 25.dp, end = 25.dp).size(128.dp).graphicsLayer { rotationZ = -rotation }.border(1.dp, Color.White.copy(alpha = 0.42f), RoundedCornerShape(38.dp)))
+            Column(Modifier.align(Alignment.CenterStart)) {
+                Text(tr("YAPAY ZEKÂ YARATICI STÜDYOSU", "AI CREATIVE STUDIO", "استوديو الإبداع بالذكاء الاصطناعي"), color = Color.White.copy(alpha = 0.82f), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.4.sp)
+                Spacer(Modifier.height(13.dp))
+                Text(tr("Hayal et.\nBiz canlandıralım.", "Imagine it.\nWe'll bring it to life.", "تخيّل.\nونحن نُحييه."), color = White, fontSize = 29.sp, lineHeight = 34.sp, fontWeight = FontWeight.Black)
+                Spacer(Modifier.height(8.dp))
+                Text(tr("Fotoğraflarına hareket, fikirlerine hayat ver.", "Add motion to photos. Bring ideas to life.", "أضف الحركة إلى صورك وأحيِ أفكارك."), color = White.copy(alpha = 0.88f), fontSize = 11.sp)
+                Spacer(Modifier.height(17.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Button(onClick = onCreate, colors = ButtonDefaults.buttonColors(containerColor = Color.White), shape = RoundedCornerShape(15.dp), contentPadding = PaddingValues(horizontal = 17.dp, vertical = 10.dp)) {
+                        Text(tr("✦  HEMEN OLUŞTUR", "✦  CREATE NOW", "✦  أنشئ الآن"), color = Color(0xFF48266F), fontWeight = FontWeight.Black, fontSize = 10.sp)
+                    }
+                    Spacer(Modifier.width(10.dp))
+                    Text("GEN-4.5  •  AI", color = White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            Text("✦", Modifier.align(Alignment.TopEnd).padding(top = 46.dp, end = 48.dp).graphicsLayer { scaleX = pulse; scaleY = pulse; rotationZ = rotation }, color = White, fontSize = 55.sp)
+            Text(tr("FOTOĞRAFINI CANLANDIR", "ANIMATE YOUR PHOTO", "حرّك صورتك"), Modifier.align(Alignment.BottomEnd), color = White.copy(alpha = 0.75f), fontSize = 8.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+        }
     }
 }
 
@@ -450,7 +448,6 @@ private fun RowScope.ChoiceButton(label: String, selected: Boolean, onClick: () 
         border = androidx.compose.foundation.BorderStroke(if (selected) 1.5.dp else 1.dp, if (selected) Color(0xFFCB9CFF) else Color(0xFF394154)),
         contentPadding = PaddingValues(horizontal = 5.dp, vertical = 7.dp), shape = RoundedCornerShape(13.dp)) {
         Text(label, fontSize = 10.sp, fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold, maxLines = 1)
-    }
     }
 }
 
