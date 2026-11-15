@@ -214,19 +214,19 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                                 Spacer(Modifier.height(7.dp))
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Button(onClick = { imagePicker.launch("image/*") }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF242D40))) {
-                                        Text(if (selectedImageUri == null) "＋ KARAKTER FOTOĞRAFI" else "FOTOĞRAFI DEĞİŞTİR", color = White)
+                                        Text(if (selectedImageUri == null) tr("＋ KARAKTER FOTOĞRAFI", "＋ CHARACTER PHOTO", "＋ صورة الشخصية") else tr("FOTOĞRAFI DEĞİŞTİR", "CHANGE PHOTO", "تغيير الصورة"), color = White)
                                     }
                                     if (selectedImageUri != null) TextButton(onClick = { selectedImageUri = null }) { Text("KALDIR", color = Accent) }
                                 }
                                 Text(tr("Hareket videosunda yüzü net görünen tek kişi olmalı.", "The motion video should show one person with a clearly visible face.", "يجب أن يظهر في فيديو الحركة شخص واحد بوجه واضح."), color = Muted, fontSize = 10.sp)
                             }
-                            Text(if (studioMode == "edit") "DÜZENLENECEK VİDEO" else if (studioMode == "character") "HAREKET / PERFORMANS VİDEOSU" else "KALİTESİ YÜKSELTİLECEK VİDEO", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            Text(if (studioMode == "edit") tr("DÜZENLENECEK VİDEO", "VIDEO TO EDIT", "الفيديو المراد تعديله") else if (studioMode == "character") tr("HAREKET / PERFORMANS VİDEOSU", "MOTION / PERFORMANCE VIDEO", "فيديو الحركة / الأداء") else tr("KALİTESİ YÜKSELTİLECEK VİDEO", "VIDEO TO UPSCALE", "الفيديو المراد تحسينه"), color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                             Spacer(Modifier.height(8.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Button(onClick = { videoPicker.launch("video/*") }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF242D40))) {
                                     Text(if (selectedVideoUri == null) tr("＋ VİDEO SEÇ", "＋ SELECT VIDEO", "＋ اختر فيديو") else tr("VİDEOYU DEĞİŞTİR", "CHANGE VIDEO", "تغيير الفيديو"), color = White)
                                 }
-                                if (selectedVideoUri != null) TextButton(onClick = { selectedVideoUri = null }) { Text("KALDIR", color = Accent) }
+                                if (selectedVideoUri != null) TextButton(onClick = { selectedVideoUri = null }) { Text(tr("KALDIR", "REMOVE", "إزالة"), color = Accent) }
                             }
                             Text(when (studioMode) { "edit" -> "Runway Aleph 2 · En fazla 30 saniye · İlk sürümde dosya boyutu 3,5 MB."; "character" -> "Act-Two · 3–30 saniyelik performans videosu · Tek kişi, yüz görünür olmalı."; else -> "Magnific Video Upscaler · 720p, 1K, 2K veya 4K · En fazla 30 saniye." }, color = Muted, fontSize = 10.sp)
                             if (studioMode == "upscale") {
@@ -242,11 +242,11 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         Spacer(Modifier.height(17.dp))
                         Text(tr("VİDEO MOTORU", "VIDEO ENGINE", "محرك الفيديو"), color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                         Spacer(Modifier.height(9.dp))
-                        EngineCard("RUNWAY", "Gen-4.5 · İlk aktif motor", true, true)
+                        EngineCard("RUNWAY", tr("Gen-4.5 · İlk aktif motor", "Gen-4.5 · Primary active engine", "Gen-4.5 · المحرك النشط الأساسي"), true, true, appLanguage)
                         Spacer(Modifier.height(8.dp))
-                        EngineCard("KLING", "API bağlantısı sonraki aşamada", false, false)
+                        EngineCard("KLING", tr("API bağlantısı sonraki aşamada", "API integration planned", "تكامل API مخطط له"), false, false, appLanguage)
                         Spacer(Modifier.height(8.dp))
-                        EngineCard("VEO", "API bağlantısı sonraki aşamada", false, false)
+                        EngineCard("VEO", tr("API bağlantısı sonraki aşamada", "API integration planned", "تكامل API مخطط له"), false, false, appLanguage)
                         Spacer(Modifier.height(18.dp))
                         Text(tr("VİDEO SÜRESİ", "VIDEO DURATION", "مدة الفيديو"), color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                         Row(horizontalArrangement = Arrangement.spacedBy(9.dp), modifier = Modifier.padding(top = 8.dp)) {
@@ -255,8 +255,8 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         }
                         if (studioMode == "generate") {
                             Text(
-                                if (duration == 5) "Bu üretimin ücreti: 59 FOTO FOTO kredisi (59 TL)"
-                                else "Bu üretimin ücreti: 119 FOTO FOTO kredisi (119 TL)",
+                                if (duration == 5) tr("Bu üretimin ücreti: 59 FOTO FOTO kredisi (59 TL)", "This video costs 59 FOTO FOTO credits (59 TRY)", "تكلفة هذا الفيديو 59 رصيداً (59 ليرة تركية)")
+                                else tr("Bu üretimin ücreti: 119 FOTO FOTO kredisi (119 TL)", "This video costs 119 FOTO FOTO credits (119 TRY)", "تكلفة هذا الفيديو 119 رصيداً (119 ليرة تركية)"),
                                 color = Accent, fontSize = 12.sp, fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(top = 9.dp)
                             )
@@ -427,14 +427,14 @@ private fun HomeAiShowcase(language: String, onCreate: () -> Unit) {
 }
 
 @Composable
-private fun EngineCard(name: String, detail: String, active: Boolean, selected: Boolean) {
+private fun EngineCard(name: String, detail: String, active: Boolean, selected: Boolean, language: String) {
     Row(Modifier.fillMaxWidth().background(if (selected) Color(0xFF30202B) else Color(0xFF101625), RoundedCornerShape(12.dp))
         .border(1.dp, if (selected) Accent else Color(0xFF30384A), RoundedCornerShape(12.dp)).padding(13.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             Text(name, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = if (active) White else Muted)
             Text(detail, color = Muted, fontSize = 10.sp)
         }
-        Text(if (active) "AKTİF" else "YAKINDA", color = if (active) Accent else Muted, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+        Text(if (active) if (language == "English") "ACTIVE" else if (language == "العربية") "نشط" else "AKTİF" else if (language == "English") "COMING SOON" else if (language == "العربية") "قريباً" else "YAKINDA", color = if (active) Accent else Muted, fontSize = 9.sp, fontWeight = FontWeight.Bold)
     }
 }
 
