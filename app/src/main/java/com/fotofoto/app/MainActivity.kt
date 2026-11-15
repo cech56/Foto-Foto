@@ -420,7 +420,7 @@ private fun FotoFotoGalaxyHome(
     val tr = language != "English" && language != "العربية"
     val glow = Color(0xFFB66BFF)
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Box(Modifier.fillMaxWidth().height(225.dp).clip(RoundedCornerShape(27.dp))
+        Box(Modifier.fillMaxWidth().height(292.dp).clip(RoundedCornerShape(27.dp))
             .border(1.5.dp, Color(0xFF8D63FF), RoundedCornerShape(27.dp))
             .background(Color(0xFF15133B))) {
             Image(
@@ -450,15 +450,15 @@ private fun FotoFotoGalaxyHome(
             FotoHomeMenuCard("♙", if (tr) "Karakter\nAnimasyonu" else if (language == "English") "Character\nAnimation" else "تحريك\nالشخصية",
                 Color(0xFFFFA13D), Modifier.weight(1f), onCharacter)
         }
-        Box(Modifier.fillMaxWidth().height(70.dp).clip(RoundedCornerShape(21.dp))
+        Box(Modifier.fillMaxWidth().height(92.dp).clip(RoundedCornerShape(21.dp))
             .background(Brush.horizontalGradient(listOf(Color(0xFF241052), Color(0xFF6122A1), Color(0xFF26104E))))
             .border(1.dp, Color(0xFF8659FF), RoundedCornerShape(21.dp))) {
-            Text("🤖", Modifier.align(Alignment.CenterStart).padding(start = 12.dp), fontSize = 39.sp)
+            Text("🤖", Modifier.align(Alignment.CenterStart).padding(start = 12.dp), fontSize = 47.sp)
             Column(Modifier.align(Alignment.Center).padding(start = 76.dp, end = 65.dp)) {
                 Text(if (tr) "Yapay Zekâ ile" else if (language == "English") "With AI" else "بالذكاء الاصطناعي",
-                    color = White, fontSize = 13.sp, fontWeight = FontWeight.ExtraBold)
+                    color = White, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold)
                 Text(if (tr) "Sıradan Görselleri\nEtkileyici Videolara Dönüştür! 🚀" else if (language == "English") "Turn ordinary images into amazing videos! 🚀" else "حوّل الصور العادية إلى فيديوهات مذهلة! 🚀",
-                    color = White, fontSize = 12.sp, fontWeight = FontWeight.Bold, lineHeight = 16.sp)
+                    color = White, fontSize = 13.sp, fontWeight = FontWeight.Bold, lineHeight = 17.sp)
             }
             Text("🎞", Modifier.align(Alignment.CenterEnd).padding(end = 10.dp), color = Color(0xFFFFD66B), fontSize = 35.sp)
         }
@@ -475,14 +475,14 @@ private fun FotoFotoGalaxyHome(
 
 @Composable
 private fun FotoHomeMenuCard(icon: String, label: String, tint: Color, modifier: Modifier, onClick: () -> Unit) {
-    Column(modifier.height(78.dp).clip(RoundedCornerShape(23.dp))
+    Column(modifier.height(112.dp).clip(RoundedCornerShape(23.dp))
         .background(Brush.verticalGradient(listOf(tint.copy(alpha = 0.26f), Color(0xFF17132F))))
         .border(1.5.dp, tint, RoundedCornerShape(23.dp))
         .clickable(onClick = onClick).padding(horizontal = 3.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Text(icon, color = tint, fontSize = 26.sp, fontWeight = FontWeight.Black)
-        Spacer(Modifier.height(5.dp))
-        Text(label, color = White, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold,
+        Text(icon, color = tint, fontSize = 31.sp, fontWeight = FontWeight.Black)
+        Spacer(Modifier.height(8.dp))
+        Text(label, color = White, fontSize = 10.sp, fontWeight = FontWeight.ExtraBold,
             lineHeight = 12.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
     }
 }
