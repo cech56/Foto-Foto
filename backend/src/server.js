@@ -14,7 +14,7 @@ function send(res, status, data) {
     "content-type": "application/json; charset=utf-8",
     "cache-control": "no-store",
     "access-control-allow-origin": process.env.ALLOWED_ORIGIN || "*",
-    "access-control-allow-methods": "GET, POST, OPTIONS",
+    "access-control-allow-methods": "GET, POST, DELETE, OPTIONS",
     "access-control-allow-headers": "Content-Type, Authorization"
   });
   res.end(JSON.stringify(data));
@@ -134,9 +134,27 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
-  if (!RUNWAY_API_KEY) return send(res, 503, { message: "Sunucu API anahtarı yapılandırılmamış." });
-
   try {
+    if (req.method === "DELETE" && new URL(req.url, "http://localhost").pathname === "/api/account") {
+      const user = await requireUser(req);
+      if (!user?.id) return send(res, 401, { message: "Oturum doğrulanamadı. Tekrar giriş yap." });
+      if (!SUPABASE_SERVICE_ROLE_KEY) return send(res, 503, { message: "Hesap silme servisi henüz yapılandırılmamış." });
+      const deletion = await fetch(SUPABASE_URL + "/auth/v1/admin/users/" + encodeURIComponent(user.id), {
+        method: "DELETE",
+        headers: {
+          apikey: SUPABASE_SERVICE_ROLE_KEY,
+          Authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY
+        }
+      });
+      if (!deletion.ok) {
+        const detail = await deletion.json().catch(() => ({}));
+        return send(res, 502, { message: detail?.message || "Hesap silinemedi. Daha sonra tekrar dene." });
+      }
+      return send(res, 200, { ok: true, message: "FOTO FOTO hesabın ve hesaba bağlı veriler silindi." });
+    }
+
+    if (!RUNWAY_API_KEY) return send(res, 503, { message: "Video üretim servisi henüz yapılandırılmamış." });
+
     if (req.method === "POST" && req.url === "/api/generate") {
       const user = await requireUser(req);
       if (!user?.id) return send(res, 401, { message: "FOTO FOTO hesabına giriş yapmalısın." });
