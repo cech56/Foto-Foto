@@ -1,4 +1,5 @@
 import http from "node:http";
+import { randomUUID } from "node:crypto";
 
 const PORT = Number(process.env.PORT || 8080);
 const RUNWAY_API_KEY = process.env.RUNWAY_API_KEY;
@@ -53,7 +54,7 @@ async function adminRpc(functionName, args) {
 }
 
 async function reserveCredits(userId, amount, description) {
-  const reservationId = crypto.randomUUID();
+  const reservationId = randomUUID();
   const result = await adminRpc("reserve_foto_credits", {
     p_user_id: userId,
     p_reservation_id: reservationId,
@@ -160,6 +161,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === "POST" && req.url === "/api/edit-video") {
+      return send(res, 503, { message: "Video düzenleme için güvenli süre ölçümü ve kredi tarifesi tamamlanıyor. Şimdilik bu işlem başlatılamıyor." });
       const user = await requireUser(req);
       if (!user?.id) return send(res, 401, { message: "FOTO FOTO hesabına giriş yapmalısın." });
       const input = await readJson(req);
@@ -179,6 +181,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === "POST" && req.url === "/api/animate-character") {
+      return send(res, 503, { message: "Karakter animasyonu için güvenli süre ölçümü ve kredi tarifesi tamamlanıyor. Şimdilik bu işlem başlatılamıyor." });
       const user = await requireUser(req);
       if (!user?.id) return send(res, 401, { message: "FOTO FOTO hesabına giriş yapmalısın." });
       const input = await readJson(req);
@@ -213,6 +216,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === "POST" && req.url === "/api/upscale-video") {
+      return send(res, 503, { message: "Video kalite yükseltme için kare sayısına dayalı kredi hesabı tamamlanıyor. Şimdilik bu işlem başlatılamıyor." });
       const user = await requireUser(req);
       if (!user?.id) return send(res, 401, { message: "FOTO FOTO hesabına giriş yapmalısın." });
       const input = await readJson(req);
