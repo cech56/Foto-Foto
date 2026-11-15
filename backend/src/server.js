@@ -4,6 +4,7 @@ const PORT = Number(process.env.PORT || 8080);
 const RUNWAY_API_KEY = process.env.RUNWAY_API_KEY;
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const RUNWAY_BASE = "https://api.dev.runwayml.com";
 const RUNWAY_VERSION = "2024-11-06";
 
@@ -33,6 +34,58 @@ async function requireUser(req) {
   const response = await fetch(SUPABASE_URL + "/auth/v1/user", { headers: { apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: auth } });
   if (!response.ok) return null;
   return response.json();
+}
+
+async function adminRpc(functionName, args) {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error("Kredi sistemi sunucu tarafında yapılandırılmamış.");
+  const response = await fetch(SUPABASE_URL + "/rest/v1/rpc/" + functionName, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_SERVICE_ROLE_KEY,
+      Authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(args)
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.message || "Kredi işlemi tamamlanamadı.");
+  return data;
+}
+
+async function reserveCredits(userId, amount, description) {
+  const reservationId = crypto.randomUUID();
+  const result = await adminRpc("reserve_foto_credits", {
+    p_user_id: userId,
+    p_reservation_id: reservationId,
+    p_amount: amount,
+    p_description: description
+  });
+  if (!result?.ok) {
+    const balance = Number(result?.balance || 0);
+    const error = new Error("Yetersiz kredi. Gerekli: " + amount + ", mevcut: " + balance + ".");
+    error.status = 402;
+    throw error;
+  }
+  return reservationId;
+}
+
+async function releaseCredits(reservationId) {
+  return adminRpc("release_foto_reservation", { p_reservation_id: reservationId });
+}
+
+async function attachTask(reservationId, taskId) {
+  const result = await adminRpc("attach_foto_task", {
+    p_reservation_id: reservationId,
+    p_provider_task_id: taskId
+  });
+  if (result !== true) throw new Error("Üretim görevi kredi kaydına bağlanamadı.");
+}
+
+async function settleTask(taskId, success) {
+  return adminRpc("settle_foto_credits", {
+    p_provider_task_id: taskId,
+    p_success: success
+  });
 }
 
 async function ownsTask(req, taskId) {
@@ -92,8 +145,18 @@ const server = http.createServer(async (req, res) => {
       const payload = imageUri
         ? { model: "gen4.5", promptText: prompt, uri: imageUri, position: "first", duration, ratio }
         : { model: "gen4.5", promptText: prompt, duration, ratio };
-      const task = await runway(endpoint, { method: "POST", body: JSON.stringify(payload) });
-      return send(res, 202, { taskId: task.id || task.taskId, status: task.status || "PENDING" });
+      const cost = duration * 12;
+      const reservationId = await reserveCredits(user.id, cost, "Gen-4.5 video üretimi (" + duration + " saniye)");
+      try {
+        const task = await runway(endpoint, { method: "POST", body: JSON.stringify(payload) });
+        const taskId = task.id || task.taskId;
+        if (!taskId) throw new Error("Runway görev numarası döndürmedi.");
+        await attachTask(reservationId, taskId);
+        return send(res, 202, { taskId, status: task.status || "PENDING", reservedCredits: cost });
+      } catch (error) {
+        await releaseCredits(reservationId).catch(() => {});
+        throw error;
+      }
     }
 
     if (req.method === "POST" && req.url === "/api/edit-video") {
@@ -186,12 +249,15 @@ const server = http.createServer(async (req, res) => {
       if (!user?.id) return send(res, 401, { message: "Oturum doğrulanamadı." });
       if (!(await ownsTask(req, match[1]))) return send(res, 404, { message: "Bu video görevi hesabında bulunamadı." });
       const task = await runway("/v1/tasks/" + encodeURIComponent(match[1]), { method: "GET" });
+      const state = String(task.status || "").toUpperCase();
+      if (state === "SUCCEEDED") await settleTask(match[1], true);
+      if (state === "FAILED" || state === "CANCELED" || state === "CANCELLED") await settleTask(match[1], false);
       return send(res, 200, task);
     }
 
     return send(res, 404, { message: "Adres bulunamadı." });
   } catch (error) {
-    const status = Number.isInteger(error.status) ? 502 : 400;
+    const status = error.status === 402 ? 402 : Number.isInteger(error.status) ? 502 : 400;
     return send(res, status, { message: error.message || "Beklenmeyen sunucu hatası." });
   }
 });
