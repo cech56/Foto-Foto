@@ -21,6 +21,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,25 +76,53 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
     MaterialTheme(colorScheme = darkColorScheme(primary = Accent, background = Bg, surface = Panel, onPrimary = Color(0xFF211721), onBackground = White, onSurface = White)) {
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFF21182A), Bg, Bg)))) {
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(18.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(42.dp).background(Accent, RoundedCornerShape(13.dp)), contentAlignment = Alignment.Center) {
-                        Text("F", color = Color(0xFF211721), fontSize = 25.sp, fontWeight = FontWeight.Black)
+                    Box(Modifier.size(46.dp).clip(RoundedCornerShape(16.dp)).background(
+                        Brush.linearGradient(listOf(Color(0xFF12D8FA), Color(0xFF8B35FF), Color(0xFFFF5AA8)))
+                    ), contentAlignment = Alignment.Center) {
+                        Text("▶", color = White, fontSize = 23.sp, fontWeight = FontWeight.Black)
                     }
                     Spacer(Modifier.width(12.dp))
-                    Text("FOTO FOTO", fontSize = 19.sp, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
+                    Column {
+                        Text("FOTO FOTO", fontSize = 19.sp, fontWeight = FontWeight.Black, letterSpacing = 1.6.sp)
+                        Text("AI VIDEO STÜDYOSU", color = Muted, fontSize = 9.sp, letterSpacing = 2.sp)
+                    }
                     Spacer(Modifier.weight(1f))
                     TextButton(onClick = onSignOut) { Text("ÇIKIŞ", color = Muted, fontSize = 10.sp) }
                 }
-                Spacer(Modifier.height(34.dp))
-                Text("HAYAL ET.", color = White, fontSize = 35.sp, fontWeight = FontWeight.Black)
-                Text("FOTO FOTO OLUŞTUR.", color = Accent, fontSize = 29.sp, fontWeight = FontWeight.ExtraBold)
-                Spacer(Modifier.height(8.dp))
-                Text("Aklındaki sahneyi anlat. Yapay zekâ videona dönüştürsün.", color = Muted, fontSize = 14.sp, lineHeight = 21.sp)
-                Spacer(Modifier.height(25.dp))
-                Card(colors = CardDefaults.cardColors(containerColor = Panel), shape = RoundedCornerShape(22.dp)) {
+                Spacer(Modifier.height(20.dp))
+                Box(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(26.dp))
+                        .background(Brush.linearGradient(listOf(Color(0xFF302080), Color(0xFF6D2FC4), Color(0xFFE84E9B), Color(0xFFFF8A55))))
+                        .padding(20.dp)
+                ) {
+                    Column {
+                        Text("HAYALİNİ HAREKETE GEÇİR", color = Color.White.copy(alpha = 0.78f), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.6.sp)
+                        Spacer(Modifier.height(9.dp))
+                        Text("Fotoğrafından\nSinematik Video Üret", color = White, fontSize = 27.sp, lineHeight = 31.sp, fontWeight = FontWeight.Black)
+                        Spacer(Modifier.height(8.dp))
+                        Text("Bir fikir yaz. Gerisini yapay zekâya bırak.", color = White.copy(alpha = 0.86f), fontSize = 12.sp)
+                        Spacer(Modifier.height(15.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(Modifier.background(Color.White.copy(alpha = 0.20f), RoundedCornerShape(50)).padding(horizontal = 13.dp, vertical = 8.dp)) {
+                                Text("✦  GEN-4.5 STÜDYOSU", color = White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            }
+                            Spacer(Modifier.weight(1f))
+                            Text("● CANLI MOTOR", color = White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+                Spacer(Modifier.height(18.dp))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                    QuickStatCard("01", "Yarat", "Fikrini yaz", Modifier.weight(1f), listOf(Color(0xFF4732A8), Color(0xFF8B43D8)))
+                    QuickStatCard("02", "Canlandır", "Fotoğraf ekle", Modifier.weight(1f), listOf(Color(0xFFB64A73), Color(0xFFEE8758)))
+                    QuickStatCard("03", "İndir", "Videonu al", Modifier.weight(1f), listOf(Color(0xFF176E9B), Color(0xFF3A9FBE)))
+                }
+                Spacer(Modifier.height(20.dp))
+                Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF17172D)), shape = RoundedCornerShape(26.dp), elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)) {
                     Column(Modifier.padding(18.dp)) {
-                        Text("YAPAY ZEKÂ STÜDYOSU", color = Accent, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.5.sp)
+                        Text("✦  YARATIM MASASI", color = Color(0xFFB99AFF), fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.7.sp)
                         Spacer(Modifier.height(12.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                             ChoiceButton("OLUŞTUR", studioMode == "generate") { studioMode = "generate" }
@@ -270,10 +299,24 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 VideoHistoryCard(historyRefresh)
                 Spacer(Modifier.height(16.dp))
                 Spacer(Modifier.height(26.dp))
-                Text("FOTO FOTO  ·  HAYAL ET, OLUŞTUR.", color = Muted, fontSize = 10.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
+                Text("FOTO FOTO  ·  FİKRİNİ VİDEOYA DÖNÜŞTÜR", color = Muted, fontSize = 10.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
                 Spacer(Modifier.height(28.dp))
             }
         }
+    }
+}
+
+@Composable
+private fun QuickStatCard(number: String, title: String, subtitle: String, modifier: Modifier, colors: List<Color>) {
+    Column(
+        modifier.clip(RoundedCornerShape(17.dp))
+            .background(Brush.linearGradient(colors))
+            .padding(12.dp)
+    ) {
+        Text(number, color = Color.White.copy(alpha = 0.72f), fontSize = 9.sp, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(8.dp))
+        Text(title, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold)
+        Text(subtitle, color = Color.White.copy(alpha = 0.78f), fontSize = 9.sp)
     }
 }
 
