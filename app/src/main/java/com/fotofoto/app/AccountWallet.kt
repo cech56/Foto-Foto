@@ -11,6 +11,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
@@ -93,12 +95,35 @@ suspend fun loadAccountSummary(context: Context): AccountLoadResult = withContex
     }
 }
 
+private suspend fun deleteFotoAccount(context: android.content.Context): String = withContext(Dispatchers.IO) {
+    try {
+        val token = SessionStore.read(context)?.optString("access_token").orEmpty()
+        if (token.isBlank()) return@withContext "Oturum bulunamadı. Tekrar giriş yap."
+        val request = Request.Builder()
+            .url(BuildConfig.API_BASE_URL.trimEnd('/') + "/api/account")
+            .addHeader("Authorization", "Bearer $token")
+            .delete(ByteArray(0).toRequestBody())
+            .build()
+        walletHttp.newCall(request).execute().use { response ->
+            val data = JSONObject(response.body?.string().orEmpty())
+            if (response.isSuccessful && data.optBoolean("ok")) "Hesap silindi."
+            else data.optString("message").ifBlank { "Hesap silinemedi (HTTP ${response.code})." }
+        }
+    } catch (e: Exception) {
+        "Hesap silme isteği tamamlanamadı: " + (e.message ?: "Bağlantı hatası").take(120)
+    }
+}
+
 @Composable
-fun AccountWalletCard(onRefresh: Int = 0) {
+fun AccountWalletCard(onRefresh: Int = 0, onAccountDeleted: () -> Unit = {}) {
     val context = androidx.compose.ui.platform.LocalContext.current
     var result by remember { mutableStateOf<AccountLoadResult?>(null) }
     var loading by remember { mutableStateOf(true) }
     var refreshKey by remember { mutableIntStateOf(onRefresh) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+    var deleting by remember { mutableStateOf(false) }
+    var deleteMessage by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
     LaunchedEffect(onRefresh, refreshKey) {
         loading = true
         result = loadAccountSummary(context)
@@ -140,6 +165,40 @@ fun AccountWalletCard(onRefresh: Int = 0) {
                 }
             }
             Text("Kredi yükleme ve ödeme henüz etkin değil.", color = Color(0xFF9AA3B6), fontSize = 10.sp)
+            Spacer(Modifier.height(16.dp))
+            HorizontalDivider(color = Color(0xFF30384A))
+            Spacer(Modifier.height(10.dp))
+            TextButton(onClick = { showDeleteConfirm = true }, enabled = !deleting) {
+                Text("HESABIMI KALICI OLARAK SİL", color = Color(0xFFFF8A80), fontSize = 10.sp)
+            }
+            if (deleteMessage.isNotBlank()) Text(deleteMessage, color = Color(0xFFFF8A80), fontSize = 11.sp)
         }
+    }
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { if (!deleting) showDeleteConfirm = false },
+            title = { Text("Hesabın kalıcı olarak silinsin mi?") },
+            text = { Text("FOTO FOTO hesabın ve hesaba bağlı profil, cüzdan ve video geçmişi verileri silinir. Bu işlem geri alınamaz.") },
+            confirmButton = {
+                TextButton(
+                    enabled = !deleting,
+                    onClick = {
+                        scope.launch {
+                            deleting = true
+                            deleteMessage = deleteFotoAccount(context)
+                            deleting = false
+                            if (deleteMessage == "Hesap silindi.") {
+                                SessionStore.clear(context)
+                                showDeleteConfirm = false
+                                onAccountDeleted()
+                            }
+                        }
+                    }
+                ) { Text(if (deleting) "SİLİNİYOR…" else "EVET, HESABIMI SİL", color = Color(0xFFFF8A80)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }, enabled = !deleting) { Text("VAZGEÇ") }
+            }
+        )
     }
 }
