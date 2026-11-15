@@ -118,7 +118,10 @@ private suspend fun deleteFotoAccount(context: android.content.Context): String 
 }
 
 @Composable
-fun AccountWalletCard(onRefresh: Int = 0, onAccountDeleted: () -> Unit = {}) {
+fun AccountWalletCard(onRefresh: Int = 0, language: String = "Türkçe", onAccountDeleted: () -> Unit = {}) {
+    val en = language == "English"
+    val ar = language == "العربية"
+    fun tr(t: String, e: String, a: String) = if (en) e else if (ar) a else t
     val context = androidx.compose.ui.platform.LocalContext.current
     var result by remember { mutableStateOf<AccountLoadResult?>(null) }
     var loading by remember { mutableStateOf(true) }
@@ -137,10 +140,10 @@ fun AccountWalletCard(onRefresh: Int = 0, onAccountDeleted: () -> Unit = {}) {
         Column(Modifier.fillMaxWidth().padding(18.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text("SENİN YARATICI ALANIN", color = Color(0xFFB99AFF), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.5.sp)
+                    Text(tr("SENİN YARATICI ALANIN", "YOUR CREATIVE SPACE", "مساحتك الإبداعية"), color = Color(0xFFB99AFF), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.5.sp)
                     Spacer(Modifier.height(5.dp))
-                    Text("Merhaba, ${summary?.displayName?.takeIf { it.isNotBlank() } ?: "yaratıcı dostumuz"}! ✨", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
-                    Text(summary?.email ?: if (loading) "Hesap bilgisi yükleniyor…" else (result?.error ?: "Hesap bilgisi alınamadı."), color = Color(0xFF9AA3B6), fontSize = 10.sp)
+                    Text("Merhaba, ${summary?.displayName?.takeIf { it.isNotBlank() } ?: if (en) "creative friend" else if (ar) "صديقي المبدع" else "yaratıcı dostumuz"}! ✨", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+                    Text(summary?.email ?: if (loading) tr("Hesap bilgisi yükleniyor…", "Loading account…", "جارٍ تحميل الحساب…") else (result?.error ?: tr("Hesap bilgisi alınamadı.", "Could not load account details.", "تعذر تحميل بيانات الحساب.")), color = Color(0xFF9AA3B6), fontSize = 10.sp)
                 }
                 Box(Modifier.size(42.dp).background(Color(0xFF38265A), RoundedCornerShape(15.dp)), contentAlignment = androidx.compose.ui.Alignment.Center) { Text("✦", color = Color(0xFFFFB36B), fontSize = 24.sp) }
             }
@@ -148,47 +151,47 @@ fun AccountWalletCard(onRefresh: Int = 0, onAccountDeleted: () -> Unit = {}) {
             Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color(0xFF302052)), shape = RoundedCornerShape(18.dp)) {
                 Row(Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(Color(0xFF39266B), Color(0xFF8A3F83), Color(0xFFB45B59)))).padding(16.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
-                        Text("KREDİ CÜZDANIN", color = Color.White.copy(alpha = 0.78f), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
+                        Text(tr("KREDİ CÜZDANIN", "YOUR CREDIT WALLET", "محفظة الرصيد"), color = Color.White.copy(alpha = 0.78f), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
                         Spacer(Modifier.height(5.dp))
                         Text(if (loading) "…" else summary?.let { "${it.credits} kredi" } ?: "—", color = Color.White, fontSize = 27.sp, fontWeight = FontWeight.Black)
-                        Text("1 kredi = 1 TL", color = Color.White.copy(alpha = 0.78f), fontSize = 10.sp)
+                        Text(tr("1 kredi = 1 TL", "1 credit = 1 TRY", "1 رصيد = 1 ليرة"), color = Color.White.copy(alpha = 0.78f), fontSize = 10.sp)
                     }
                     Text("✧", color = Color.White, fontSize = 34.sp)
                 }
             }
             Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                Text("Bakiye bilgisi hesabına özeldir.", color = Color(0xFF9AA3B6), fontSize = 9.sp)
-                TextButton(onClick = { refreshKey++ }, enabled = !loading, contentPadding = PaddingValues(4.dp)) { Text(if (loading) "YÜKLENİYOR" else "↻ YENİLE", color = Color(0xFFFF795E), fontSize = 10.sp) }
+                Text(tr("Bakiye bilgisi hesabına özeldir.", "Your balance is private to your account.", "رصيدك خاص بحسابك."), color = Color(0xFF9AA3B6), fontSize = 9.sp)
+                TextButton(onClick = { refreshKey++ }, enabled = !loading, contentPadding = PaddingValues(4.dp)) { Text(if (loading) tr("YÜKLENİYOR", "LOADING", "جارٍ التحميل") else "↻ YENİLE", color = Color(0xFFFF795E), fontSize = 10.sp) }
             }
-            Text("ÜRETİM ÜCRETLERİ", color = Color(0xFF9AA3B6), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+            Text(tr("ÜRETİM ÜCRETLERİ", "GENERATION PRICES", "أسعار الإنشاء"), color = Color(0xFF9AA3B6), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
             Row(Modifier.fillMaxWidth().padding(top = 7.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Column(Modifier.weight(1f).background(Color(0xFF101726), RoundedCornerShape(12.dp)).padding(11.dp)) { Text("5 SANİYE", color = Color(0xFF9AA3B6), fontSize = 9.sp); Text("59 kredi", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold) }
-                Column(Modifier.weight(1f).background(Color(0xFF101726), RoundedCornerShape(12.dp)).padding(11.dp)) { Text("10 SANİYE", color = Color(0xFF9AA3B6), fontSize = 9.sp); Text("119 kredi", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold) }
+                Column(Modifier.weight(1f).background(Color(0xFF101726), RoundedCornerShape(12.dp)).padding(11.dp)) { Text(tr("5 SANİYE", "5 SECONDS", "٥ ثوانٍ"), color = Color(0xFF9AA3B6), fontSize = 9.sp); Text("59 kredi", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold) }
+                Column(Modifier.weight(1f).background(Color(0xFF101726), RoundedCornerShape(12.dp)).padding(11.dp)) { Text(tr("10 SANİYE", "10 SECONDS", "١٠ ثوانٍ"), color = Color(0xFF9AA3B6), fontSize = 9.sp); Text("119 kredi", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold) }
             }
                         Spacer(Modifier.height(12.dp))
-            Text("SON KREDİ HAREKETLERİ", color = Color(0xFFFF795E), fontSize = 10.sp)
+            Text(tr("SON KREDİ HAREKETLERİ", "RECENT CREDIT ACTIVITY", "آخر حركات الرصيد"), color = Color(0xFFFF795E), fontSize = 10.sp)
             Spacer(Modifier.height(6.dp))
             when {
-                loading -> Text("Hareketler yükleniyor…", color = Color(0xFF9AA3B6), fontSize = 11.sp)
-                summary == null -> Text("Kredi hareketleri alınamadı.", color = Color(0xFF9AA3B6), fontSize = 11.sp)
-                summary.entries.isEmpty() -> Text("Henüz kredi hareketi yok.", color = Color(0xFF9AA3B6), fontSize = 11.sp)
+                loading -> Text(tr("Hareketler yükleniyor…", "Loading activity…", "جارٍ تحميل الحركات…"), color = Color(0xFF9AA3B6), fontSize = 11.sp)
+                summary == null -> Text(tr("Kredi hareketleri alınamadı.", "Could not load credit activity.", "تعذر تحميل حركات الرصيد."), color = Color(0xFF9AA3B6), fontSize = 11.sp)
+                summary.entries.isEmpty() -> Text(tr("Henüz kredi hareketi yok.", "No credit activity yet.", "لا توجد حركات رصيد بعد."), color = Color(0xFF9AA3B6), fontSize = 11.sp)
                 else -> summary.entries.forEach { entry ->
                     Row(Modifier.fillMaxWidth().padding(vertical = 5.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                         Column(Modifier.weight(1f)) {
                             Text(entry.description.ifBlank { entry.type }, color = Color.White, fontSize = 11.sp, maxLines = 2)
                             Text(entry.type.uppercase(), color = Color(0xFF9AA3B6), fontSize = 9.sp)
                         }
-                        Text((if (entry.amount > 0) "+" else "") + entry.amount + " kredi",
+                        Text((if (entry.amount > 0) "+" else "") + entry.amount + if (en) " credits" else if (ar) " رصيد" else " kredi",
                             color = if (entry.amount > 0) Color(0xFF8BC6A0) else Color(0xFFFF795E), fontSize = 11.sp)
                     }
                 }
             }
-            Text("Kredi yükleme ve ödeme henüz etkin değil.", color = Color(0xFF9AA3B6), fontSize = 10.sp)
+            Text(tr("Kredi yükleme ve ödeme henüz etkin değil.", "Credit top-ups and payments are not active yet.", "شحن الرصيد والدفع غير متاحين بعد."), color = Color(0xFF9AA3B6), fontSize = 10.sp)
             Spacer(Modifier.height(16.dp))
             HorizontalDivider(color = Color(0xFF30384A))
             Spacer(Modifier.height(10.dp))
             TextButton(onClick = { showDeleteConfirm = true }, enabled = !deleting) {
-                Text("HESABIMI KALICI OLARAK SİL", color = Color(0xFFFF8A80), fontSize = 10.sp)
+                Text(tr("HESABIMI KALICI OLARAK SİL", "PERMANENTLY DELETE MY ACCOUNT", "حذف حسابي نهائياً"), color = Color(0xFFFF8A80), fontSize = 10.sp)
             }
             if (deleteMessage.isNotBlank()) Text(deleteMessage, color = Color(0xFFFF8A80), fontSize = 11.sp)
         }
@@ -196,7 +199,7 @@ fun AccountWalletCard(onRefresh: Int = 0, onAccountDeleted: () -> Unit = {}) {
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { if (!deleting) showDeleteConfirm = false },
-            title = { Text("Hesabın kalıcı olarak silinsin mi?") },
+            title = { Text(tr("Hesabın kalıcı olarak silinsin mi?", "Permanently delete your account?", "هل تريد حذف حسابك نهائياً؟")) },
             text = { Text("FOTO FOTO hesabın ve hesaba bağlı profil, cüzdan ve video geçmişi verileri silinir. Bu işlem geri alınamaz.") },
             confirmButton = {
                 TextButton(
@@ -216,7 +219,7 @@ fun AccountWalletCard(onRefresh: Int = 0, onAccountDeleted: () -> Unit = {}) {
                 ) { Text(if (deleting) "SİLİNİYOR…" else "EVET, HESABIMI SİL", color = Color(0xFFFF8A80)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }, enabled = !deleting) { Text("VAZGEÇ") }
+                TextButton(onClick = { showDeleteConfirm = false }, enabled = !deleting) { Text(tr("VAZGEÇ", "CANCEL", "إلغاء")) }
             }
         )
     }
