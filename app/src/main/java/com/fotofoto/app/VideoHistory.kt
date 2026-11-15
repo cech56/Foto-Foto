@@ -7,6 +7,7 @@ import android.os.Environment
 import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -149,12 +150,12 @@ fun VideoHistoryCard(refreshKey: Int, language: String = "Türkçe") {
         loading = false
     }
     LaunchedEffect(refreshKey) { reloadHistory() }
-    Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF151B2B)), shape = RoundedCornerShape(18.dp)) {
+    Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF151B2B)), shape = RoundedCornerShape(24.dp), modifier = Modifier.fillMaxWidth().border(1.dp, Color(0xFF2D3550), RoundedCornerShape(24.dp))) {
         Column(Modifier.fillMaxWidth().padding(18.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(tr("VİDEO GEÇMİŞİ", "VIDEO HISTORY", "سجل الفيديو"), color = Color(0xFFFF795E), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text(tr("VİDEO GEÇMİŞİ", "VIDEO HISTORY", "سجل الفيديو"), color = Color(0xFFB99AFF), fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
                 TextButton(onClick = { scope.launch { reloadHistory() } }, enabled = !loading && checkingTask.isBlank(), contentPadding = PaddingValues(0.dp)) {
-                    Text(tr("YENİLE", "REFRESH", "تحديث"), color = Color(0xFFFF795E), fontSize = 10.sp)
+                    Text(tr("YENİLE", "REFRESH", "تحديث"), color = Color(0xFFFFA47D), fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
             }
             if (feedback.isNotBlank()) Text(feedback, color = Color(0xFF9AA3B6), fontSize = 10.sp)
