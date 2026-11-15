@@ -156,6 +156,19 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                     QuickStatCard("02", "Canlandır", tr("Fotoğraf ekle", "Add a photo", "أضف صورة"), Modifier.weight(1f), listOf(Color(0xFFB64A73), Color(0xFFEE8758)))
                     QuickStatCard("03", "İndir", tr("Videonu al", "Get your video", "احصل على الفيديو"), Modifier.weight(1f), listOf(Color(0xFF176E9B), Color(0xFF3A9FBE)))
                 }
+                Spacer(Modifier.height(16.dp))
+                Card(Modifier.fillMaxWidth().border(1.dp, Color(0xFF3D365C), RoundedCornerShape(20.dp)), colors = CardDefaults.cardColors(containerColor = Color(0xFF171D30)), shape = RoundedCornerShape(20.dp)) {
+                    Row(Modifier.fillMaxWidth().padding(15.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text(tr("İLK VİDEONU OLUŞTUR", "CREATE YOUR FIRST VIDEO", "أنشئ فيديوك الأول"), color = Color(0xFFFFA17D), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
+                            Spacer(Modifier.height(5.dp))
+                            Text(tr("Hayalindeki sahneyi birkaç kelimeyle anlat.", "Describe your dream scene in a few words.", "صف المشهد الذي تحلم به ببضع كلمات."), color = White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                        }
+                        Button(onClick = { selectedTab = "create" }, colors = ButtonDefaults.buttonColors(containerColor = Accent), contentPadding = PaddingValues(horizontal = 13.dp, vertical = 9.dp)) {
+                            Text(tr("BAŞLA  →", "START  →", "ابدأ  →"), color = Color(0xFF211721), fontSize = 10.sp, fontWeight = FontWeight.Black)
+                        }
+                    }
+                }
                 Spacer(Modifier.height(20.dp))
                 }
                 if (selectedTab == "create") {
