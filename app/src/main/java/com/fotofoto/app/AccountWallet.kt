@@ -177,7 +177,7 @@ fun AccountWalletCard(onRefresh: Int = 0, language: String = "Türkçe", onAccou
             }
             Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                 Text(tr("Bakiye bilgisi hesabına özeldir.", "Your balance is private to your account.", "رصيدك خاص بحسابك."), color = Color(0xFF9AA3B6), fontSize = 9.sp)
-                TextButton(onClick = { refreshKey++ }, enabled = !loading, contentPadding = PaddingValues(4.dp)) { Text(if (loading) tr("YÜKLENİYOR", "LOADING", "جارٍ التحميل") else "↻ YENİLE", color = Color(0xFFFF795E), fontSize = 10.sp) }
+                TextButton(onClick = { refreshKey++ }, enabled = !loading, contentPadding = PaddingValues(4.dp)) { Text(if (loading) tr("YÜKLENİYOR", "LOADING", "جارٍ التحميل") else tr("↻ YENİLE", "↻ REFRESH", "↻ تحديث"), color = Color(0xFFFF795E), fontSize = 10.sp) }
             }
             Text(tr("ÜRETİM ÜCRETLERİ", "GENERATION PRICES", "أسعار الإنشاء"), color = Color(0xFFB99AFF), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
             Text(tr("Her video için gereken kredi miktarı", "Credits required for each video", "الرصيد المطلوب لكل فيديو"), color = Color(0xFF9AA3B6), fontSize = 9.sp)
@@ -217,7 +217,7 @@ fun AccountWalletCard(onRefresh: Int = 0, language: String = "Türkçe", onAccou
         AlertDialog(
             onDismissRequest = { if (!deleting) showDeleteConfirm = false },
             title = { Text(tr("Hesabın kalıcı olarak silinsin mi?", "Permanently delete your account?", "هل تريد حذف حسابك نهائياً؟")) },
-            text = { Text("FOTO FOTO hesabın ve hesaba bağlı profil, cüzdan ve video geçmişi verileri silinir. Bu işlem geri alınamaz.") },
+            text = { Text(tr("FOTO FOTO hesabın ve hesaba bağlı profil, cüzdan ve video geçmişi verileri silinir. Bu işlem geri alınamaz.", "Your FOTO FOTO account and its linked profile, wallet, and video history data will be permanently deleted. This cannot be undone.", "سيتم حذف حساب FOTO FOTO والملف الشخصي والمحفظة وسجل الفيديو المرتبط به نهائياً. لا يمكن التراجع عن ذلك.")) },
             confirmButton = {
                 TextButton(
                     enabled = !deleting,
@@ -233,7 +233,7 @@ fun AccountWalletCard(onRefresh: Int = 0, language: String = "Türkçe", onAccou
                             }
                         }
                     }
-                ) { Text(if (deleting) "SİLİNİYOR…" else "EVET, HESABIMI SİL", color = Color(0xFFFF8A80)) }
+                ) { Text(if (deleting) tr("SİLİNİYOR…", "DELETING…", "جارٍ الحذف…") else tr("EVET, HESABIMI SİL", "YES, DELETE MY ACCOUNT", "نعم، احذف حسابي"), color = Color(0xFFFF8A80)) }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }, enabled = !deleting) { Text(tr("VAZGEÇ", "CANCEL", "إلغاء")) }
