@@ -118,7 +118,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                     confirmButton = { TextButton(onClick = { settingsOpen = false }) { Text(if (appLanguage == "English") "Done" else if (appLanguage == "العربية") "تم" else "Tamam", color = Accent) } }
                 )
             }
-            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 12.dp).padding(bottom = 84.dp)) {
+            Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 14.dp).padding(bottom = 104.dp)) {
                 Spacer(Modifier.height(10.dp))
                 Row(Modifier.fillMaxWidth().height(66.dp), verticalAlignment = Alignment.CenterVertically) {
                     Box(Modifier.clip(RoundedCornerShape(24.dp)).border(1.dp, Color(0xFF9B72FF), RoundedCornerShape(24.dp))
@@ -373,7 +373,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
             }
             Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().navigationBarsPadding()
                 .background(Color(0xF2171B2C)).border(1.dp, Color(0xFF33245B), RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
-                .padding(horizontal = 7.dp, vertical = 7.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
+                .padding(horizontal = 12.dp, vertical = 5.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
                 val navItems = listOf(
                     Triple("home", "⌂", if (appLanguage == "English") "Home" else if (appLanguage == "العربية") "الرئيسية" else "Ana Sayfa"),
                     Triple("projects", "▤", if (appLanguage == "English") "Projects" else if (appLanguage == "العربية") "مشاريعي" else "Projelerim"),
@@ -384,7 +384,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 navItems.forEach { item ->
                     val selected = selectedTab == item.first
                     if (item.first == "create") {
-                        Column(Modifier.weight(1f).padding(horizontal = 2.dp).offset(y = (-8).dp)
+                        Column(Modifier.weight(1f).padding(horizontal = 3.dp).offset(y = (-5).dp)
                             .clip(RoundedCornerShape(20.dp))
                             .background(Brush.verticalGradient(listOf(Color(0xFF762BEB), Color(0xFF32136C))))
                             .border(1.5.dp, Color(0xFFC58BFF), RoundedCornerShape(20.dp))
@@ -396,10 +396,10 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                     } else {
                         Column(Modifier.weight(1f).padding(horizontal = 2.dp).clip(RoundedCornerShape(15.dp))
                             .background(if (selected) Brush.verticalGradient(listOf(Color(0xFF462078), Color(0xFF24143E))) else Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent)))
-                            .clickable { selectedTab = item.first }.padding(vertical = 9.dp),
+                            .clickable { selectedTab = item.first }.padding(vertical = 7.dp),
                             horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(item.second, color = if (selected) Color(0xFFFF6BE8) else White, fontSize = 25.sp, fontWeight = FontWeight.Bold)
-                            Text(item.third, color = if (selected) White else Color(0xFFD1CDDE), fontSize = 10.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium, maxLines = 1)
+                            Text(item.second, color = if (selected) Color(0xFFFF6BE8) else White, fontSize = 23.sp, fontWeight = FontWeight.Bold)
+                            Text(item.third, color = if (selected) White else Color(0xFFD1CDDE), fontSize = 9.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium, maxLines = 1)
                         }
                     }
                 }
@@ -420,7 +420,7 @@ private fun FotoFotoGalaxyHome(
     val tr = language != "English" && language != "العربية"
     val glow = Color(0xFFB66BFF)
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Box(Modifier.fillMaxWidth().height(292.dp).clip(RoundedCornerShape(27.dp))
+        Box(Modifier.fillMaxWidth().height(250.dp).clip(RoundedCornerShape(27.dp))
             .border(1.5.dp, Color(0xFF8D63FF), RoundedCornerShape(27.dp))
             .background(Color(0xFF15133B))) {
             Image(
@@ -450,15 +450,15 @@ private fun FotoFotoGalaxyHome(
             FotoHomeMenuCard("♙", if (tr) "Karakter\nAnimasyonu" else if (language == "English") "Character\nAnimation" else "تحريك\nالشخصية",
                 Color(0xFFFFA13D), Modifier.weight(1f), onCharacter)
         }
-        Box(Modifier.fillMaxWidth().height(92.dp).clip(RoundedCornerShape(21.dp))
+        Box(Modifier.fillMaxWidth().height(78.dp).clip(RoundedCornerShape(19.dp))
             .background(Brush.horizontalGradient(listOf(Color(0xFF241052), Color(0xFF6122A1), Color(0xFF26104E))))
             .border(1.dp, Color(0xFF8659FF), RoundedCornerShape(21.dp))) {
-            Text("🤖", Modifier.align(Alignment.CenterStart).padding(start = 12.dp), fontSize = 47.sp)
+            Text("🤖", Modifier.align(Alignment.CenterStart).padding(start = 12.dp), fontSize = 38.sp)
             Column(Modifier.align(Alignment.Center).padding(start = 76.dp, end = 65.dp)) {
                 Text(if (tr) "Yapay Zekâ ile" else if (language == "English") "With AI" else "بالذكاء الاصطناعي",
-                    color = White, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold)
+                    color = White, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold)
                 Text(if (tr) "Sıradan Görselleri\nEtkileyici Videolara Dönüştür! 🚀" else if (language == "English") "Turn ordinary images into amazing videos! 🚀" else "حوّل الصور العادية إلى فيديوهات مذهلة! 🚀",
-                    color = White, fontSize = 13.sp, fontWeight = FontWeight.Bold, lineHeight = 17.sp)
+                    color = White, fontSize = 11.sp, fontWeight = FontWeight.Bold, lineHeight = 14.sp)
             }
             Text("🎞", Modifier.align(Alignment.CenterEnd).padding(end = 10.dp), color = Color(0xFFFFD66B), fontSize = 35.sp)
         }
@@ -475,12 +475,12 @@ private fun FotoFotoGalaxyHome(
 
 @Composable
 private fun FotoHomeMenuCard(icon: String, label: String, tint: Color, modifier: Modifier, onClick: () -> Unit) {
-    Column(modifier.height(112.dp).clip(RoundedCornerShape(23.dp))
+    Column(modifier.height(82.dp).clip(RoundedCornerShape(21.dp))
         .background(Brush.verticalGradient(listOf(tint.copy(alpha = 0.26f), Color(0xFF17132F))))
         .border(1.5.dp, tint, RoundedCornerShape(23.dp))
         .clickable(onClick = onClick).padding(horizontal = 3.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Text(icon, color = tint, fontSize = 31.sp, fontWeight = FontWeight.Black)
+        Text(icon, color = tint, fontSize = 27.sp, fontWeight = FontWeight.Black)
         Spacer(Modifier.height(8.dp))
         Text(label, color = White, fontSize = 10.sp, fontWeight = FontWeight.ExtraBold,
             lineHeight = 12.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
