@@ -579,7 +579,7 @@ private fun FotoFeatureIcon(kind: Int, tint: Color, modifier: Modifier = Modifie
                 drawCircle(tint, 3.5f*sx, p(32f,7f))
                 drawCircle(tint, 3.2f*sx, p(24f,30f))
                 drawCircle(tint, 3.2f*sx, p(40f,30f))
-                drawArc(tint, 15f*sx, 15f*sy, 180f, 180f, false, p(23f,32f), sz(18f,10f),
+                drawArc(tint, 180f, 180f, false, topLeft = p(23f,32f), size = sz(18f,10f),
                     style = androidx.compose.ui.graphics.drawscope.Stroke(2.8f*sx, cap=StrokeCap.Round))
                 drawLine(tint, p(20f,51f), p(15f,57f), strokeWidth=stroke, cap=StrokeCap.Round)
                 drawLine(tint, p(44f,51f), p(49f,57f), strokeWidth=stroke, cap=StrokeCap.Round)
