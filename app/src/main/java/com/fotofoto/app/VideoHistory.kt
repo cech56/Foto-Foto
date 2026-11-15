@@ -40,7 +40,20 @@ private fun historyHeaders(context: Context, builder: Request.Builder): Request.
 suspend fun saveVideoHistory(context: Context, taskId: String, prompt: String, duration: Int, ratio: String) =
     withContext(Dispatchers.IO) {
         try {
+            val token = SessionStore.read(context)?.optString("access_token").orEmpty()
+            if (token.isBlank()) return@withContext false
+            val userRequest = Request.Builder()
+                .url(BuildConfig.SUPABASE_URL.trimEnd('/') + "/auth/v1/user")
+                .addHeader("apikey", BuildConfig.SUPABASE_PUBLISHABLE_KEY)
+                .addHeader("Authorization", "Bearer $token")
+                .get().build()
+            val userId = historyHttp.newCall(userRequest).execute().use { response ->
+                if (!response.isSuccessful) return@withContext false
+                JSONObject(response.body?.string().orEmpty()).optString("id")
+            }
+            if (userId.isBlank()) return@withContext false
             val body = JSONObject()
+                .put("user_id", userId)
                 .put("provider_task_id", taskId)
                 .put("prompt", prompt)
                 .put("duration_seconds", duration)
