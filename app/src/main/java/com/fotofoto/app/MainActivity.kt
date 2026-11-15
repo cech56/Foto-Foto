@@ -79,6 +79,9 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
     var selectedTab by remember { mutableStateOf("home") }
     var settingsOpen by remember { mutableStateOf(false) }
     var appLanguage by remember { mutableStateOf(context.getSharedPreferences("foto_foto_settings", android.content.Context.MODE_PRIVATE).getString("language", "Türkçe") ?: "Türkçe") }
+    val en = appLanguage == "English"
+    val ar = appLanguage == "العربية"
+    fun tr(t: String, e: String, a: String) = if (en) e else if (ar) a else t
 
     MaterialTheme(colorScheme = darkColorScheme(primary = Accent, background = Bg, surface = Panel, onPrimary = Color(0xFF211721), onBackground = White, onSurface = White)) {
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFF21182A), Bg, Bg)))) {
@@ -156,15 +159,15 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 Spacer(Modifier.height(20.dp))
                 }
                 if (selectedTab == "create") {
-                Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF17172D)), shape = RoundedCornerShape(26.dp), elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)) {
+                Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF17172D)), shape = RoundedCornerShape(26.dp), elevation = CardDefaults.cardElevation(defaultElevation = 10.dp), modifier = Modifier.border(1.dp, Color(0xFF34304D), RoundedCornerShape(26.dp))) {
                     Column(Modifier.padding(18.dp)) {
-                        Text("✦  YARATIM MASASI", color = Color(0xFFB99AFF), fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.7.sp)
+                        Text(tr("✦  YARATIM MASASI", "✦  CREATION STUDIO", "✦  استوديو الإنشاء"), color = Color(0xFFB99AFF), fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.7.sp)
                         Spacer(Modifier.height(12.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                            ChoiceButton("OLUŞTUR", studioMode == "generate") { studioMode = "generate" }
-                            ChoiceButton("DÜZENLE", studioMode == "edit") { studioMode = "edit" }
-                            ChoiceButton("KALİTE", studioMode == "upscale") { studioMode = "upscale" }
-                            ChoiceButton("KARAKTER", studioMode == "character") { studioMode = "character" }
+                            ChoiceButton(tr("OLUŞTUR", "CREATE", "إنشاء"), studioMode == "generate") { studioMode = "generate" }
+                            ChoiceButton(tr("DÜZENLE", "EDIT", "تعديل"), studioMode == "edit") { studioMode = "edit" }
+                            ChoiceButton(tr("KALİTE", "ENHANCE", "تحسين"), studioMode == "upscale") { studioMode = "upscale" }
+                            ChoiceButton(tr("KARAKTER", "CHARACTER", "الشخصية"), studioMode == "character") { studioMode = "character" }
                         }
                         if (studioMode != "generate") {
                             Spacer(Modifier.height(10.dp))
@@ -174,7 +177,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                             )
                         }
                         Spacer(Modifier.height(12.dp))
-                        Text(when (studioMode) { "edit" -> "Videonda ne değişsin?"; "upscale" -> "Videonu hangi kaliteye yükseltelim?"; "character" -> "Karakterine hareket ver"; else -> "Ne hayal ediyorsun?" }, fontSize = 21.sp, fontWeight = FontWeight.Bold)
+                        Text(when (studioMode) { "edit" -> "Videonda ne değişsin?"; "upscale" -> "Videonu hangi kaliteye yükseltelim?"; "character" -> "Karakterine hareket ver"; else -> "Ne hayal ediyorsun?" }, color = White, fontSize = 21.sp, fontWeight = FontWeight.ExtraBold)
                         if (studioMode == "generate" && prompt.isBlank()) {
                             Text(if (appLanguage == "English") "GET INSPIRED" else if (appLanguage == "العربية") "استلهم فكرة" else "İLHAM AL", color = Color(0xFFB99AFF), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.3.sp)
                             Spacer(Modifier.height(6.dp))
@@ -200,20 +203,20 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         Text("${prompt.length} / 1000", color = Muted, fontSize = 10.sp, modifier = Modifier.align(Alignment.End).padding(top = 5.dp))
                         Spacer(Modifier.height(14.dp))
                         if (studioMode == "generate") {
-                            Text("REFERANS FOTOĞRAFI", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            Text(tr("REFERANS FOTOĞRAFI", "REFERENCE IMAGE", "الصورة المرجعية"), color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                             Spacer(Modifier.height(8.dp))
                             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                Button(onClick = { imagePicker.launch("image/*") }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF242D40))) { Text(if (selectedImageUri == null) "＋ FOTOĞRAF EKLE" else "FOTOĞRAFI DEĞİŞTİR", color = White) }
+                                Button(onClick = { imagePicker.launch("image/*") }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF242D40))) { Text(if (selectedImageUri == null) tr("＋ FOTOĞRAF EKLE", "＋ ADD PHOTO", "＋ أضف صورة") else tr("FOTOĞRAFI DEĞİŞTİR", "CHANGE PHOTO", "تغيير الصورة"), color = White) }
                                 if (selectedImageUri != null) TextButton(onClick = {
                                 selectedImageUri = null
                                 if (ratio !in listOf("1280:720", "720:1280")) ratio = "1280:720"
-                            }) { Text("KALDIR", color = Accent) }
+                            }) { Text(tr("KALDIR", "REMOVE", "إزالة"), color = Accent) }
                             }
                             if (selectedImageUri != null) {
                                 val previewBitmap = remember(selectedImageUri) { try { context.contentResolver.openInputStream(selectedImageUri!!)?.use { BitmapFactory.decodeStream(it) } } catch (_: Exception) { null } }
                                 previewBitmap?.let { Image(bitmap = it.asImageBitmap(), contentDescription = "Referans fotoğrafı", modifier = Modifier.fillMaxWidth().heightIn(max = 190.dp)) }
                                 Text("Fotoğraf videonun ilk karesi olarak kullanılacak.", color = Muted, fontSize = 10.sp)
-                            } else Text("Kendi fotoğrafını veya canlandırmak istediğin görseli ekle.", color = Muted, fontSize = 10.sp)
+                            } else Text(tr("Kendi fotoğrafını veya canlandırmak istediğin görseli ekle.", "Add your photo or the image you want to animate.", "أضف صورتك أو الصورة التي تريد تحريكها."), color = Muted, fontSize = 10.sp)
                         } else {
                             if (studioMode == "character") {
                                 Text("KARAKTER FOTOĞRAFI", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
@@ -246,7 +249,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                             }
                         }
                         Spacer(Modifier.height(17.dp))
-                        Text("VİDEO MOTORU", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                        Text(tr("VİDEO MOTORU", "VIDEO ENGINE", "محرك الفيديو"), color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                         Spacer(Modifier.height(9.dp))
                         EngineCard("RUNWAY", "Gen-4.5 · İlk aktif motor", true, true)
                         Spacer(Modifier.height(8.dp))
@@ -254,10 +257,10 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         Spacer(Modifier.height(8.dp))
                         EngineCard("VEO", "API bağlantısı sonraki aşamada", false, false)
                         Spacer(Modifier.height(18.dp))
-                        Text("VİDEO SÜRESİ", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                        Text(tr("VİDEO SÜRESİ", "VIDEO DURATION", "مدة الفيديو"), color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                         Row(horizontalArrangement = Arrangement.spacedBy(9.dp), modifier = Modifier.padding(top = 8.dp)) {
-                            ChoiceButton("5 saniye", duration == 5) { duration = 5 }
-                            ChoiceButton("10 saniye", duration == 10) { duration = 10 }
+                            ChoiceButton(tr("5 saniye", "5 seconds", "٥ ثوانٍ"), duration == 5) { duration = 5 }
+                            ChoiceButton(tr("10 saniye", "10 seconds", "١٠ ثوانٍ"), duration == 10) { duration = 10 }
                         }
                         if (studioMode == "generate") {
                             Text(
@@ -269,7 +272,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                             Text("Üretim başarısız olursa ayrılan krediler iade edilir.", color = Muted, fontSize = 10.sp)
                         }
                         Spacer(Modifier.height(15.dp))
-                        Text("VİDEO FORMATI", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                        Text(tr("VİDEO FORMATI", "VIDEO FORMAT", "تنسيق الفيديو"), color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 ChoiceButton("16:9", ratio == "1280:720") { ratio = "1280:720" }
@@ -321,7 +324,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                             }
                         }, enabled = !loading && studioMode == "generate" && prompt.trim().length >= 10, modifier = Modifier.fillMaxWidth().height(54.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Accent, contentColor = Color(0xFF211721)), shape = RoundedCornerShape(13.dp)) {
-                            Text(if (loading) "İŞLENİYOR…" else if (studioMode == "generate") "✦  VİDEOMU OLUŞTUR" else "YAKINDA KULLANIMA AÇILACAK", fontWeight = FontWeight.Black)
+                            Text(if (loading) tr("İŞLENİYOR…", "PROCESSING…", "جارٍ المعالجة…") else if (studioMode == "generate") tr("✦  VİDEOMU OLUŞTUR", "✦  CREATE MY VIDEO", "✦  أنشئ الفيديو") else tr("YAKINDA KULLANIMA AÇILACAK", "COMING SOON", "قريباً"), fontWeight = FontWeight.Black)
                         }
                         if (loading) {
                             Spacer(Modifier.height(10.dp))
@@ -379,7 +382,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 if (selectedTab == "home") {
                 Spacer(Modifier.height(16.dp))
                 Spacer(Modifier.height(26.dp))
-                Text("FOTO FOTO  ·  FİKRİNİ VİDEOYA DÖNÜŞTÜR", color = Muted, fontSize = 10.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
+                Text(tr("FOTO FOTO  ·  FİKRİNİ VİDEOYA DÖNÜŞTÜR", "FOTO FOTO  ·  TURN YOUR IDEA INTO VIDEO", "FOTO FOTO · حوّل فكرتك إلى فيديو"), color = Muted, fontSize = 10.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
                 Spacer(Modifier.height(28.dp))
                 }
             }
