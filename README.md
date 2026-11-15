@@ -14,7 +14,7 @@ FOTO FOTO is an Android-only AI video creation app, independent from Zubih. Ther
 Open this repository in Android Studio, sync Gradle, and build the app module. The backend URL must be configured in `app/build.gradle.kts` before video generation can work. Backend setup instructions are in `backend/README.md`.
 
 ## Not yet complete
-The current commit is an initial Android foundation. Authentication, credit wallet, payments, production hardening (authentication, credit controls, rate limiting and persistent task history), in-app task polling, generated video playback/download/history, app icon, release signing, Play Console setup, and end-to-end testing remain to be completed. No APK/AAB has been built or published yet.
+The current commit is an initial Android foundation. Supabase email registration/login, password reset request, encrypted Android Keystore session storage, refresh-token restoration, and sign-out are implemented in source. Automated Android build validation has been added with GitHub Actions. Credit wallet, payments, production backend hardening, reliable in-app task polling and playback/download/history, app icon, release signing, Play Console setup, and end-to-end testing remain to be completed. The build workflow must pass before calling the app build-verified. No APK/AAB has been built or published yet.
 
 ## Supabase setup
 - Project URL and the public publishable key are configured in the Android Gradle BuildConfig. The publishable key is intended for mobile clients; never add a Supabase secret/service-role key to the app.
