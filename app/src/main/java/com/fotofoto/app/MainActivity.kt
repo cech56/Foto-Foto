@@ -3,6 +3,8 @@ package com.fotofoto.app
 import android.os.Bundle
 import android.content.Intent
 import android.net.Uri
+import android.app.DownloadManager
+import android.os.Environment
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -149,11 +151,17 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         if (taskId.isNotBlank()) Text("Üretim kodu: $taskId", color = Muted, fontSize = 10.sp)
                         if (videoUrl.isNotBlank()) {
                             Spacer(Modifier.height(10.dp))
-                            Button(onClick = {
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(videoUrl))
-                                context.startActivity(intent)
-                            }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF242D40))) {
-                                Text("VİDEOYU AÇ", color = White, fontWeight = FontWeight.Bold)
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                                Button(onClick = {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(videoUrl))
+                                    context.startActivity(intent)
+                                }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF242D40))) {
+                                    Text("VİDEOYU AÇ", color = White, fontWeight = FontWeight.Bold)
+                                }
+                                Button(onClick = { downloadFotoVideo(context, videoUrl, taskId) }, modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Accent)) {
+                                    Text("İNDİR", color = Color(0xFF211721), fontWeight = FontWeight.Bold)
+                                }
                             }
                         }
                     }
@@ -234,4 +242,17 @@ private suspend fun submitGeneration(context: android.content.Context, prompt: S
             "Üretim isteği kabul edildi. Video hazırlanıyor…" to data.optString("taskId")
         }
     } catch (_: Exception) { "Sunucuya bağlanılamadı. İnternet bağlantını kontrol et." to "" }
+}
+
+private fun downloadFotoVideo(context: android.content.Context, videoUrl: String, taskId: String) {
+    if (!videoUrl.startsWith("https://")) return
+    val fileName = "foto-foto-${taskId.take(12).replace(Regex("[^A-Za-z0-9_-]"), "")}.mp4"
+    val request = DownloadManager.Request(Uri.parse(videoUrl))
+        .setTitle("FOTO FOTO videon")
+        .setDescription("Video indiriliyor…")
+        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+        .setMimeType("video/mp4")
+    val manager = context.getSystemService(android.content.Context.DOWNLOAD_SERVICE) as DownloadManager
+    manager.enqueue(request)
 }
