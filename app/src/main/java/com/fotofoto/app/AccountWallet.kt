@@ -149,7 +149,22 @@ fun AccountWalletCard(onRefresh: Int = 0, language: String = "Türkçe", onAccou
                 Box(Modifier.size(54.dp).background(Brush.linearGradient(listOf(Color(0xFF7045B5), Color(0xFFE66D8D))), RoundedCornerShape(18.dp)), contentAlignment = androidx.compose.ui.Alignment.Center) { Text("✦", color = Color.White, fontSize = 28.sp) }
             }
             Spacer(Modifier.height(14.dp))
-            Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color(0xFF302052)), shape = RoundedCornerShape(18.dp)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(
+                    Triple("✧", tr("YARATICI", "CREATIVE", "مبدع"), tr("Fikirlerini üretime taşı", "Bring ideas to life", "حوّل أفكارك إلى واقع")),
+                    Triple("▤", tr("PROJELER", "PROJECTS", "المشاريع"), tr("Videoların tek yerde", "Your videos in one place", "فيديوهاتك في مكان واحد")),
+                    Triple("♡", tr("KONTROL", "CONTROL", "التحكم"), tr("Hesabın güvende", "Your account, your control", "حسابك تحت سيطرتك"))
+                ).forEach { item ->
+                    Column(Modifier.weight(1f).background(Color(0xFF101827), RoundedCornerShape(14.dp)).padding(10.dp)) {
+                        Text(item.first, color = Color(0xFFFFA47D), fontSize = 18.sp)
+                        Spacer(Modifier.height(4.dp))
+                        Text(item.second, color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                        Text(item.third, color = Color(0xFF9AA3B6), fontSize = 8.sp, lineHeight = 11.sp)
+                    }
+                }
+            }
+            Spacer(Modifier.height(14.dp))
+            Card(modifier = Modifier.fillMaxWidth().border(1.dp, Color(0xFF694B91), RoundedCornerShape(20.dp)), colors = CardDefaults.cardColors(containerColor = Color(0xFF302052)), shape = RoundedCornerShape(20.dp)) {
                 Row(Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(Color(0xFF39266B), Color(0xFF8A3F83), Color(0xFFB45B59)))).padding(16.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
                         Text(tr("KREDİ CÜZDANIN", "YOUR CREDIT WALLET", "محفظة الرصيد"), color = Color.White.copy(alpha = 0.78f), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
