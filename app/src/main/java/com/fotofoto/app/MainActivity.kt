@@ -120,23 +120,30 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
             }
             Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 14.dp).padding(bottom = 104.dp)) {
                 Spacer(Modifier.height(10.dp))
-                Row(Modifier.fillMaxWidth().height(66.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.clip(RoundedCornerShape(24.dp)).border(1.dp, Color(0xFF9B72FF), RoundedCornerShape(24.dp))
-                        .background(Color(0xFF171638)).clickable { settingsOpen = true }.padding(horizontal = 12.dp, vertical = 9.dp)) {
-                        Text("◎  TR  ▾", color = White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Box(Modifier.fillMaxWidth().height(66.dp)) {
+                    Box(Modifier.align(Alignment.CenterStart).clip(RoundedCornerShape(24.dp))
+                        .border(1.dp, Color(0xFF9B72FF), RoundedCornerShape(24.dp))
+                        .background(Color(0xFF171638)).clickable { settingsOpen = true }
+                        .padding(horizontal = 12.dp, vertical = 9.dp)) {
+                        Text("🌐  TR  ▾", color = White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
-                    Spacer(Modifier.weight(1f))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.size(42.dp).clip(RoundedCornerShape(13.dp)).background(Brush.linearGradient(listOf(Color(0xFF19D8FF), Color(0xFF833BFF), Color(0xFFFF4FBA)))), contentAlignment = Alignment.Center) {
-                            Text("▶", color = White, fontSize = 23.sp, fontWeight = FontWeight.Black)
+                    Row(Modifier.align(Alignment.Center), verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(48.dp).clip(RoundedCornerShape(15.dp))
+                            .background(Brush.linearGradient(listOf(Color(0xFF19D8FF), Color(0xFF833BFF), Color(0xFFFF4FBA))))
+                            .graphicsLayer { shadowElevation = 15.dp.toPx(); ambientShadowColor = Color(0xFF9A42FF); spotShadowColor = Color(0xFF28DFFF) },
+                            contentAlignment = Alignment.Center) {
+                            Text("▶", color = White, fontSize = 26.sp, fontWeight = FontWeight.Black)
                         }
-                        Spacer(Modifier.width(8.dp))
+                        Spacer(Modifier.width(9.dp))
                         Column {
-                            Text("FOTO FOTO", color = White, fontSize = 19.sp, fontWeight = FontWeight.Black, letterSpacing = 0.7.sp)
-                            Text("AI VIDEO STÜDYOSU", color = Color(0xFF67D9FF), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
+                            Text("FOTO FOTO", color = White, fontSize = 22.sp, fontWeight = FontWeight.Black,
+                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic, letterSpacing = 0.5.sp,
+                                modifier = Modifier.graphicsLayer { shadowElevation = 10.dp.toPx(); ambientShadowColor = Color(0xFFB44DFF); spotShadowColor = Color(0xFF36DFFF) })
+                            Text("AI VIDEO STÜDYOSU", color = Color(0xFF67D9FF), fontSize = 10.sp, fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 1.25.sp,
+                                modifier = Modifier.graphicsLayer { shadowElevation = 8.dp.toPx(); ambientShadowColor = Color(0xFFB44DFF); spotShadowColor = Color(0xFF36DFFF) })
                         }
                     }
-                    Spacer(Modifier.weight(1f))
                 }
                 if (selectedTab == "home") {
                     FotoFotoGalaxyHome(
@@ -418,7 +425,7 @@ private fun FotoFotoGalaxyHome(
     val tr = language != "English" && language != "العربية"
     val glow = Color(0xFFB66BFF)
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Box(Modifier.fillMaxWidth().height(350.dp).clip(RoundedCornerShape(27.dp))
+        Box(Modifier.fillMaxWidth().height(410.dp).clip(RoundedCornerShape(27.dp))
             .border(1.5.dp, Color(0xFF8D63FF), RoundedCornerShape(27.dp))
             .background(Color(0xFF15133B))) {
             Image(
@@ -427,32 +434,32 @@ private fun FotoFotoGalaxyHome(
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
-            Box(Modifier.align(Alignment.TopStart).padding(start = 12.dp, top = 12.dp).width(205.dp).height(104.dp)) {
+            Box(Modifier.align(Alignment.TopStart).padding(start = 10.dp, top = 10.dp).width(174.dp).height(92.dp)) {
                 Canvas(Modifier.fillMaxSize()) {
-                    val radius = 19.dp.toPx()
+                    val radius = 18.dp.toPx()
                     drawRoundRect(Color(0xF20C1749), cornerRadius = CornerRadius(radius))
                     val tail = Path().apply {
-                        moveTo(size.width * .70f, size.height * .77f)
-                        lineTo(size.width * .84f, size.height * .99f)
-                        lineTo(size.width * .88f, size.height * .77f)
+                        moveTo(size.width * .18f, size.height * .78f)
+                        lineTo(size.width * .27f, size.height * .98f)
+                        lineTo(size.width * .36f, size.height * .78f)
                         close()
                     }
                     drawPath(tail, Color(0xF20C1749))
                     drawRoundRect(Color(0xFF9B7BFF), cornerRadius = CornerRadius(radius),
                         style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.5.dp.toPx()))
                     val tailLine = Path().apply {
-                        moveTo(size.width * .70f, size.height * .77f)
-                        lineTo(size.width * .84f, size.height * .99f)
-                        lineTo(size.width * .88f, size.height * .77f)
+                        moveTo(size.width * .18f, size.height * .78f)
+                        lineTo(size.width * .27f, size.height * .98f)
+                        lineTo(size.width * .36f, size.height * .78f)
                     }
                     drawPath(tailLine, Color(0xFF9B7BFF), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.5.dp.toPx()))
                 }
-                Column(Modifier.padding(start = 13.dp, end = 12.dp, top = 12.dp)) {
+                Column(Modifier.padding(start = 11.dp, end = 9.dp, top = 10.dp)) {
                     Text(if (tr) "Merhaba Serdar! 👋" else if (language == "English") "Hello! 👋" else "مرحباً! 👋",
-                        color = White, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, maxLines = 1)
+                        color = White, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp, maxLines = 1)
                     Spacer(Modifier.height(3.dp))
-                    Text(if (tr) "Bugün ne tür bir video\noluşturuyoruz?" else if (language == "English") "What video shall we\ncreate today?" else "ما الفيديو الذي\nسننشئه اليوم؟",
-                        color = White, fontSize = 12.sp, lineHeight = 17.sp)
+                    Text(if (tr) "Bugün ne tür bir video\\noluşturuyoruz?" else if (language == "English") "What video shall we\\ncreate today?" else "ما الفيديو الذي\\nسننشئه اليوم؟",
+                        color = White, fontSize = 10.sp, lineHeight = 14.sp)
                 }
             }
         }
@@ -466,17 +473,23 @@ private fun FotoFotoGalaxyHome(
             FotoHomeMenuCard("♙", if (tr) "Karakter\nAnimasyonu" else if (language == "English") "Character\nAnimation" else "تحريك\nالشخصية",
                 Color(0xFFFFA13D), Modifier.weight(1f), onCharacter)
         }
-        Box(Modifier.fillMaxWidth().height(96.dp).clip(RoundedCornerShape(19.dp))
-            .background(Brush.horizontalGradient(listOf(Color(0xFF241052), Color(0xFF6122A1), Color(0xFF26104E))))
-            .border(1.dp, Color(0xFF8659FF), RoundedCornerShape(21.dp))) {
-            Text("🤖", Modifier.align(Alignment.CenterStart).padding(start = 9.dp), fontSize = 37.sp)
-            Column(Modifier.align(Alignment.Center).padding(start = 62.dp, end = 56.dp)) {
+        Box(Modifier.fillMaxWidth().height(104.dp).clip(RoundedCornerShape(20.dp))
+            .border(1.2.dp, Color(0xFF8659FF), RoundedCornerShape(21.dp))) {
+            Image(painter = painterResource(id = R.drawable.foto_foto_promo_banner),
+                contentDescription = "FOTO FOTO robot yüzü, galaksi ve gerçekçi film makarası tanıtım görseli",
+                modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+            Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(
+                Color(0x660E0730), Color(0xAA28105D), Color(0x660E0730)
+            ))))
+            Column(Modifier.align(Alignment.Center).padding(start = 82.dp, end = 82.dp),
+                horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(if (tr) "Yapay Zekâ ile" else if (language == "English") "With AI" else "بالذكاء الاصطناعي",
-                    color = White, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold)
-                Text(if (tr) "Sıradan Görselleri\nEtkileyici Videolara Dönüştür! 🚀" else if (language == "English") "Turn ordinary images into\namazing videos! 🚀" else "حوّل الصور العادية إلى\nفيديوهات مذهلة! 🚀",
-                    color = White, fontSize = 11.sp, fontWeight = FontWeight.Bold, lineHeight = 15.sp)
+                    color = White, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                Text(if (tr) "Sıradan Görselleri\\nEtkileyici Videolara Dönüştür! 🚀" else if (language == "English") "Turn ordinary images into\\namazing videos! 🚀" else "حوّل الصور العادية إلى\\nفيديوهات مذهلة! 🚀",
+                    color = White, fontSize = 10.sp, fontWeight = FontWeight.Bold, lineHeight = 13.sp,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center)
             }
-            Text("🎞", Modifier.align(Alignment.CenterEnd).padding(end = 8.dp), color = Color(0xFFFFD66B), fontSize = 31.sp)
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             repeat(4) { index ->
@@ -496,7 +509,7 @@ private fun FotoHomeMenuCard(icon: String, label: String, tint: Color, modifier:
         .border(1.5.dp, tint, RoundedCornerShape(23.dp))
         .clickable(onClick = onClick).padding(horizontal = 3.dp, vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Text(icon, color = tint, fontSize = 31.sp, fontWeight = FontWeight.Black)
+        Text(icon, color = tint, fontSize = 31.sp, fontWeight = FontWeight.Black, modifier = Modifier.graphicsLayer { shadowElevation = 13.dp.toPx(); ambientShadowColor = tint; spotShadowColor = tint })
         Spacer(Modifier.height(9.dp))
         Text(label, color = White, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold,
             lineHeight = 14.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
