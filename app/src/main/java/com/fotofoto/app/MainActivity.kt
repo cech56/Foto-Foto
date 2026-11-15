@@ -125,7 +125,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         .border(1.dp, Color(0xFF9B72FF), RoundedCornerShape(24.dp))
                         .background(Color(0xFF171638)).clickable { settingsOpen = true }
                         .padding(horizontal = 12.dp, vertical = 9.dp)) {
-                        Text("🌐  TR  ▾", color = White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text("🌐  $appLanguage  ▾", color = White, fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1)
                     }
                     Row(Modifier.align(Alignment.Center), verticalAlignment = Alignment.CenterVertically) {
                         Box(Modifier.size(48.dp).clip(RoundedCornerShape(15.dp))
@@ -389,25 +389,31 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 navItems.forEach { item ->
                     val selected = selectedTab == item.first
                     if (item.first == "create") {
-                        Column(Modifier.weight(1f).padding(horizontal = 3.dp).offset(y = (-5).dp)
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(Brush.verticalGradient(listOf(Color(0xFF9A35FF), Color(0xFF5A1CB4), Color(0xFF28105E))))
-                            .border(1.8.dp, Color(0xFFE2A5FF), RoundedCornerShape(20.dp))
-                            .graphicsLayer { shadowElevation = 20.dp.toPx(); ambientShadowColor = Color(0xFFB34CFF); spotShadowColor = Color(0xFFB34CFF) }
-                            .clickable { selectedTab = "create"; studioMode = "generate" }.padding(vertical = 9.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("＋", color = White, fontSize = 34.sp, fontWeight = FontWeight.Light)
-                            Text(item.third, color = White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Column(Modifier.weight(1f).padding(horizontal = 3.dp).offset(y = (-7).dp)
+                            .height(68.dp).clip(RoundedCornerShape(20.dp))
+                            .background(Brush.verticalGradient(listOf(Color(0xFFB34BFF), Color(0xFF6A22D0), Color(0xFF32106E))))
+                            .border(1.8.dp, Color(0xFFE5B4FF), RoundedCornerShape(20.dp))
+                            .graphicsLayer { shadowElevation = 22.dp.toPx(); ambientShadowColor = Color(0xFFB34CFF); spotShadowColor = Color(0xFFB34CFF) }
+                            .clickable { selectedTab = "create"; studioMode = "generate" }.padding(vertical = 7.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                            Text("＋", color = White, fontSize = 32.sp, fontWeight = FontWeight.Light,
+                                modifier = Modifier.graphicsLayer { shadowElevation = 12.dp.toPx(); ambientShadowColor = Color.White; spotShadowColor = Color.White })
+                            Text(item.third, color = White, fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
                         }
                     } else {
-                        Column(Modifier.weight(1f).padding(horizontal = 2.dp).clip(RoundedCornerShape(15.dp))
-                            .background(if (selected) Brush.verticalGradient(listOf(Color(0xFF6330A0), Color(0xFF281747))) else Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent)))
-                            .border(if (selected) 1.dp else 0.dp, if (selected) Color(0xFF9B5BFF) else Color.Transparent, RoundedCornerShape(15.dp))
-                            .graphicsLayer { shadowElevation = if (selected) 12.dp.toPx() else 0f; ambientShadowColor = Color(0xFFB34CFF); spotShadowColor = Color(0xFFB34CFF) }
-                            .clickable { selectedTab = item.first }.padding(vertical = 7.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(item.second, color = if (selected) Color(0xFFFF82F4) else White, fontSize = 25.sp, fontWeight = FontWeight.Bold, modifier = Modifier.graphicsLayer { shadowElevation = 10.dp.toPx(); ambientShadowColor = if (selected) Color(0xFFFF4FE1) else Color(0xFF40CFFF); spotShadowColor = if (selected) Color(0xFFFF4FE1) else Color(0xFF40CFFF) })
-                            Text(item.third, color = if (selected) White else Color(0xFFD1CDDE), fontSize = 9.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium, maxLines = 1)
+                        Column(Modifier.weight(1f).height(65.dp).clip(RoundedCornerShape(16.dp))
+                            .background(if (selected) Brush.verticalGradient(listOf(Color(0xFF51247F), Color(0xFF211438))) else Brush.verticalGradient(listOf(Color(0x221A2440), Color(0x080F1427))))
+                            .border(if (selected) 1.2.dp else 0.7.dp, if (selected) Color(0xFFB86BFF) else Color(0x334D5D8A), RoundedCornerShape(16.dp))
+                            .graphicsLayer { shadowElevation = if (selected) 16.dp.toPx() else 3.dp.toPx(); ambientShadowColor = if (selected) Color(0xFFB34CFF) else Color(0xFF20CFFF); spotShadowColor = if (selected) Color(0xFFB34CFF) else Color(0xFF20CFFF) }
+                            .clickable { selectedTab = item.first }.padding(vertical = 5.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                            FotoBottomNavIcon(item.first, selected, Modifier.size(25.dp))
+                            Spacer(Modifier.height(3.dp))
+                            Text(item.third, color = if (selected) White else Color(0xFFD1D8EA), fontSize = 9.sp,
+                                fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium, maxLines = 1)
+                            if (selected) Box(Modifier.padding(top = 2.dp).width(23.dp).height(2.dp).clip(RoundedCornerShape(50))
+                                .background(Color(0xFFFF73E8))
+                                .graphicsLayer { shadowElevation = 7.dp.toPx(); ambientShadowColor = Color(0xFFFF73E8); spotShadowColor = Color(0xFFFF73E8) })
                         }
                     }
                 }
@@ -498,14 +504,38 @@ private fun FotoFotoGalaxyHome(
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center)
             }
         }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            repeat(4) { index ->
-                Box(Modifier.padding(horizontal = 4.dp).size(if (index == 0) 9.dp else 8.dp)
-                    .clip(RoundedCornerShape(50))
-                    .background(if (index == 0) White else Color(0xFF70449A)))
+    }
+}
+
+@Composable
+private fun FotoBottomNavIcon(kind: String, selected: Boolean, modifier: Modifier = Modifier) {
+    val tint = if (selected) Color(0xFFFF82F4) else Color(0xFFE6EEFF)
+    Canvas(modifier) {
+        val k = size.minDimension / 28f
+        fun p(x: Float, y: Float) = Offset(x*k, y*k)
+        val stroke = 2.1f*k
+        drawCircle(Brush.radialGradient(listOf(tint.copy(alpha = if (selected) .25f else .10f), Color.Transparent),
+            center = Offset(size.width/2f,size.height/2f), radius = size.minDimension*.58f),
+            size.minDimension*.58f, Offset(size.width/2f,size.height/2f))
+        when(kind) {
+            "home" -> {
+                val path = Path().apply { moveTo(p(3f,13f).x,p(3f,13f).y); lineTo(p(14f,3f).x,p(14f,3f).y); lineTo(p(25f,13f).x,p(25f,13f).y); lineTo(p(22f,13f).x,p(22f,13f).y); lineTo(p(22f,25f).x,p(22f,25f).y); lineTo(p(16f,25f).x,p(16f,25f).y); lineTo(p(16f,18f).x,p(16f,18f).y); lineTo(p(12f,18f).x,p(12f,18f).y); lineTo(p(12f,25f).x,p(12f,25f).y); lineTo(p(6f,25f).x,p(6f,25f).y); lineTo(p(6f,13f).x,p(6f,13f).y); close() }
+                drawPath(path,tint,style=androidx.compose.ui.graphics.drawscope.Stroke(stroke,cap=StrokeCap.Round,join=androidx.compose.ui.graphics.StrokeJoin.Round))
+            }
+            "projects" -> {
+                drawRoundRect(tint,p(5f,3f),Size(18f*k,22f*k),CornerRadius(3f*k),style=androidx.compose.ui.graphics.drawscope.Stroke(stroke))
+                for(y in listOf(9f,14f,19f)) drawLine(tint,p(9f,y),p(19f,y),stroke,cap=StrokeCap.Round)
+            }
+            "tools" -> {
+                val path=Path().apply { moveTo(p(14f,2f).x,p(14f,2f).y); lineTo(p(17f,11f).x,p(17f,11f).y); lineTo(p(26f,14f).x,p(26f,14f).y); lineTo(p(17f,17f).x,p(17f,17f).y); lineTo(p(14f,26f).x,p(14f,26f).y); lineTo(p(11f,17f).x,p(11f,17f).y); lineTo(p(2f,14f).x,p(2f,14f).y); lineTo(p(11f,11f).x,p(11f,11f).y); close() }
+                drawPath(path,tint,style=androidx.compose.ui.graphics.drawscope.Stroke(stroke,join=androidx.compose.ui.graphics.StrokeJoin.Round))
+                drawCircle(tint,1.4f*k,p(14f,14f))
+            }
+            "account" -> {
+                drawCircle(tint,4.2f*k,p(14f,8f),style=androidx.compose.ui.graphics.drawscope.Stroke(stroke))
+                drawRoundRect(tint,p(5f,15f),Size(18f*k,11f*k),CornerRadius(6f*k),style=androidx.compose.ui.graphics.drawscope.Stroke(stroke))
             }
         }
-        Spacer(Modifier.height(7.dp))
     }
 }
 
