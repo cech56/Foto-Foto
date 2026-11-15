@@ -129,9 +129,17 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         }
                         Spacer(Modifier.height(15.dp))
                         Text("VİDEO FORMATI", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
-                            ChoiceButton("16:9", ratio == "1280:720") { ratio = "1280:720" }
-                            ChoiceButton("9:16", ratio == "720:1280") { ratio = "720:1280" }
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                ChoiceButton("16:9", ratio == "1280:720") { ratio = "1280:720" }
+                                ChoiceButton("9:16", ratio == "720:1280") { ratio = "720:1280" }
+                                ChoiceButton("1:1", ratio == "960:960") { ratio = "960:960" }
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                ChoiceButton("4:3", ratio == "1104:832") { ratio = "1104:832" }
+                                ChoiceButton("3:4", ratio == "832:1104") { ratio = "832:1104" }
+                                ChoiceButton("21:9", ratio == "1584:672") { ratio = "1584:672" }
+                            }
                         }
                         Spacer(Modifier.height(22.dp))
                         Button(onClick = {
