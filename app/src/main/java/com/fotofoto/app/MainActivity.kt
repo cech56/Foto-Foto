@@ -37,12 +37,12 @@ private val White = Color(0xFFF8F6F2)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { AuthGate { FotoFotoApp() } }
+        setContent { AuthGate { onSignOut -> FotoFotoApp(onSignOut) } }
     }
 }
 
 @Composable
-private fun FotoFotoApp() {
+private fun FotoFotoApp(onSignOut: () -> Unit) {
     var prompt by remember { mutableStateOf("") }
     var duration by remember { mutableIntStateOf(5) }
     var ratio by remember { mutableStateOf("1280:720") }
@@ -62,7 +62,7 @@ private fun FotoFotoApp() {
                     Spacer(Modifier.width(12.dp))
                     Text("FOTO FOTO", fontSize = 19.sp, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
                     Spacer(Modifier.weight(1f))
-                    Text("AI STUDIO", color = Muted, fontSize = 10.sp, letterSpacing = 1.5.sp)
+                    TextButton(onClick = onSignOut) { Text("ÇIKIŞ", color = Muted, fontSize = 10.sp) }
                 }
                 Spacer(Modifier.height(34.dp))
                 Text("HAYAL ET.", color = White, fontSize = 35.sp, fontWeight = FontWeight.Black)
