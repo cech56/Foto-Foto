@@ -16,6 +16,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -72,9 +73,34 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
     var historyRefresh by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    var settingsOpen by remember { mutableStateOf(false) }
+    var appLanguage by remember { mutableStateOf(context.getSharedPreferences("foto_foto_settings", android.content.Context.MODE_PRIVATE).getString("language", "Türkçe") ?: "Türkçe") }
 
     MaterialTheme(colorScheme = darkColorScheme(primary = Accent, background = Bg, surface = Panel, onPrimary = Color(0xFF211721), onBackground = White, onSurface = White)) {
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFF21182A), Bg, Bg)))) {
+            if (settingsOpen) {
+                AlertDialog(
+                    onDismissRequest = { settingsOpen = false },
+                    containerColor = Color(0xFF1B2033),
+                    title = { Text(if (appLanguage == "English") "Settings" else if (appLanguage == "العربية") "الإعدادات" else "Ayarlar", color = White, fontWeight = FontWeight.Black) },
+                    text = {
+                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Text(if (appLanguage == "English") "App language" else if (appLanguage == "العربية") "لغة التطبيق" else "Uygulama dili", color = Muted, fontWeight = FontWeight.Bold)
+                            listOf("Türkçe", "English", "العربية").forEach { language ->
+                                Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(if (appLanguage == language) Color(0xFF342653) else Color(0xFF111827)).clickable {
+                                    appLanguage = language
+                                    context.getSharedPreferences("foto_foto_settings", android.content.Context.MODE_PRIVATE).edit().putString("language", language).apply()
+                                }.padding(13.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Text(language, color = White, modifier = Modifier.weight(1f), fontWeight = FontWeight.SemiBold)
+                                    if (appLanguage == language) Text("✓", color = Color(0xFF45D6E8), fontWeight = FontWeight.Black)
+                                }
+                            }
+                            Text(if (appLanguage == "English") "Your choice is saved on this device. Full interface translations are being added." else if (appLanguage == "العربية") "يتم حفظ اختيارك على هذا الجهاز. تتم إضافة ترجمات الواجهة بالكامل." else "Dil tercihin bu cihaza kaydedilir. Arayüzün tüm bölümlerinin çevirileri aşamalı olarak eklenecek.", color = Muted, fontSize = 11.sp, lineHeight = 16.sp)
+                        }
+                    },
+                    confirmButton = { TextButton(onClick = { settingsOpen = false }) { Text(if (appLanguage == "English") "Done" else if (appLanguage == "العربية") "تم" else "Tamam", color = Accent) } }
+                )
+            }
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
                 Spacer(Modifier.height(18.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -89,6 +115,9 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         Text("AI VIDEO STÜDYOSU", color = Muted, fontSize = 9.sp, letterSpacing = 2.sp)
                     }
                     Spacer(Modifier.weight(1f))
+                    IconButton(onClick = { settingsOpen = true }) {
+                        Text("⚙", color = White, fontSize = 23.sp)
+                    }
                     TextButton(onClick = onSignOut) { Text("ÇIKIŞ", color = Muted, fontSize = 10.sp) }
                 }
                 Spacer(Modifier.height(20.dp))
