@@ -423,12 +423,29 @@ private fun FotoFotoGalaxyHome(
         Box(Modifier.fillMaxWidth().height(250.dp).clip(RoundedCornerShape(27.dp))
             .border(1.5.dp, Color(0xFF8D63FF), RoundedCornerShape(27.dp))
             .background(Color(0xFF15133B))) {
-            Image(
-                painter = painterResource(id = R.drawable.foto_foto_3d_mascot),
-                contentDescription = "FOTO FOTO robot ve kedi galaksi sahnesi",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
+            Canvas(Modifier.fillMaxSize()) {
+                val w = size.width; val h = size.height
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF111A49), Color(0xFF39206D), Color(0xFF11152E))))
+                for (i in 0..46) {
+                    val x = ((i * 97) % 997) / 997f * w
+                    val y = ((i * 53) % 617) / 617f * h
+                    drawCircle(Color(0xFFB9D9FF).copy(alpha = if (i % 4 == 0) .9f else .38f), if (i % 4 == 0) 2.2f else 1.1f, Offset(x,y))
+                }
+                drawCircle(Brush.radialGradient(listOf(Color(0xFF5BE5FF), Color(0xFF3458D8), Color(0xFF171C56)), center = Offset(w*.53f,h*.27f), radius = h*.30f), h*.24f, Offset(w*.53f,h*.27f))
+                drawArc(Color(0xFFCE73FF).copy(alpha=.8f), 195f, 150f, false, topLeft=Offset(w*.25f,h*.10f), size=androidx.compose.ui.geometry.Size(w*.58f,h*.36f), style=androidx.compose.ui.graphics.drawscope.Stroke(width=5f))
+                drawRoundRect(Color(0xFF263A66), Offset(w*.08f,h*.79f), androidx.compose.ui.geometry.Size(w*.84f,h*.13f), CornerRadius(24f))
+                drawRoundRect(Brush.horizontalGradient(listOf(Color(0xFF1B6B70),Color(0xFF69B77B),Color(0xFF1D6A78))), Offset(w*.08f,h*.77f), androidx.compose.ui.geometry.Size(w*.84f,h*.055f), CornerRadius(22f))
+                drawCircle(Color(0xFFFFA4E8), 20f, Offset(w*.12f,h*.33f))
+                drawCircle(Color(0xFF69DFFF), 13f, Offset(w*.88f,h*.50f))
+            }
+            FotoRobotMascot(Modifier.align(Alignment.Center).offset(y = 22.dp).size(width = 196.dp, height = 218.dp))
+            FotoCatMascot(Modifier.align(Alignment.BottomStart).padding(start = 17.dp, bottom = 7.dp).size(width = 88.dp, height = 72.dp))
+            Box(Modifier.align(Alignment.CenterEnd).padding(end = 15.dp).offset(y = 57.dp)
+                .size(width = 66.dp, height = 48.dp).clip(RoundedCornerShape(12.dp))
+                .background(Brush.linearGradient(listOf(Color(0xFF1CDBFF), Color(0xFF733DFF))))
+                .border(1.dp, Color(0xFF9AF5FF), RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
+                Text("▶", color = White, fontSize = 26.sp, fontWeight = FontWeight.Black)
+            }
             Column(Modifier.align(Alignment.TopStart).padding(start = 13.dp, top = 14.dp)
                 .clip(RoundedCornerShape(19.dp))
                 .background(Color(0xE9161644))
