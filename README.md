@@ -18,15 +18,33 @@ FOTO FOTO is an Android-only AI video creation app, independent from Zubih. Ther
 - GitHub Actions builds a debug APK on pushes and pull requests.
 
 ## Supabase setup
-Use the SQL Editor in the separate FOTO FOTO Supabase project and run migrations in this order:
+Use the SQL Editor in the separate FOTO FOTO Supabase project and run each migration once, in numerical order:
 1. `supabase/migrations/0001_profiles.sql`
 2. `supabase/migrations/0002_wallet.sql`
 3. `supabase/migrations/0003_video_history.sql`
+4. `supabase/migrations/0004_gen45_aspect_ratios.sql`
+5. `supabase/migrations/0005_credit_reservations.sql`
+6. `supabase/migrations/0006_wallet_read_grants.sql`
 
-The mobile app uses only the public publishable key. Never put a Supabase secret/service-role key or the Runway API key in the Android app or Git repository.
+The mobile app uses only the public publishable key. Never put a Supabase secret/service-role key or the Runway API key in the Android app or Git repository. The service-role key belongs only in the private backend hosting environment.
 
 ## Build and release
 Open this repository in Android Studio, sync Gradle, and build the app module. GitHub Actions produces a debug APK artifact; that is not a signed Google Play release. A production backend URL, secure hosting secrets, billing/credit accounting, release signing, Play Console setup, and real-device end-to-end tests are still required before public launch.
 
 ## Backend
-The separate Node.js API is in `backend/`. It verifies FOTO FOTO sessions and restricts task status lookup to task IDs recorded in the signed-in user's history. It still requires production hardening, rate limits, credit reservation/refunds, payment processing, and a deployed HTTPS URL before public exposure.
+The separate Node.js API is in `backend/`. It verifies FOTO FOTO sessions, reserves credits atomically before Gen-4.5 requests, refunds failed/cancelled or rejected requests, and restricts task status lookup to reservations belonging to the signed-in user. The app also lets users manually re-check pending history items so a task can still be reconciled after the initial foreground polling window ends.
+
+Runway Gen-4.5 is the only enabled generation mode. Aleph 2 editing, Act-Two character animation, and video upscaling remain deliberately disabled until secure file uploads, server-verified media metadata, and exact credit calculations are implemented. Kling and Veo are not connected.
+
+## Pre-payment / pre-release completion checklist
+- [ ] Run all six Supabase migrations in order in the FOTO FOTO project.
+- [ ] Configure `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` as private backend environment variables.
+- [ ] Confirm the Render health endpoint reports the expected safe configuration checks.
+- [ ] Configure Runway API credentials only when provider access/credits are available.
+- [ ] Add account deletion and associated-data deletion flow, privacy policy, terms, support contact, and data-retention disclosures before public release.
+- [ ] Add a production-grade upload flow for large video files and validate duration/frames server-side before enabling advanced tools.
+- [ ] Add background reconciliation for stale reservations and provider tasks, plus abuse controls and request limits.
+- [ ] Complete signed release configuration, Play Console declarations, content-rating/privacy forms, and real-device tests.
+- [ ] Verify signup/email confirmation, password recovery, session expiry, logout, insufficient balance, provider rejection, success, failure/refund, app restart, and flaky-network recovery end to end.
+
+Payment gateway integration and wallet top-ups are intentionally tracked separately from the checklist above.
