@@ -81,8 +81,8 @@ const server = http.createServer(async (req, res) => {
         return send(res, 400, { message: "Açıklama 10–1000 karakter arasında olmalı." });
       }
       if (![5, 10].includes(duration)) return send(res, 400, { message: "Video süresi 5 veya 10 saniye olmalı." });
-      if (!["1280:720", "720:1280"].includes(ratio)) {
-        return send(res, 400, { message: "Bu motor 16:9 veya 9:16 formatını destekliyor." });
+      if (!["1280:720", "720:1280", "960:960", "1104:832", "832:1104", "1584:672"].includes(ratio)) {
+        return send(res, 400, { message: "Desteklenmeyen video formatı." });
       }
       const imageUri = typeof input.imageUri === "string" ? input.imageUri : "";
       if (imageUri && (!imageUri.startsWith("data:image/") || imageUri.length > 4_800_000)) {
