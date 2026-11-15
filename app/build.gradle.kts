@@ -19,7 +19,7 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
-        buildConfigField("String", "API_BASE_URL", "\"https://YOUR-BACKEND-DOMAIN\"")
+        buildConfigField("String", "API_BASE_URL", "\"https://foto-foto-api.onrender.com\"")
         buildConfigField("String", "SUPABASE_URL", "\"https://jccfdrtxbsnljfkswmog.supabase.co\"")
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"sb_publishable_pA1nlIxTD7-ea1Mo3XH3sQ_EYvC-Vtb\"")
     }
