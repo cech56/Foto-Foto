@@ -53,6 +53,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
     var loading by remember { mutableStateOf(false) }
     var taskId by remember { mutableStateOf("") }
     var videoUrl by remember { mutableStateOf("") }
+    var historyRefresh by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
