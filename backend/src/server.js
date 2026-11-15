@@ -22,7 +22,7 @@ async function readJson(req) {
   let raw = "";
   for await (const chunk of req) {
     raw += chunk;
-    if (raw.length > 20_000) throw new Error("İstek çok büyük.");
+    if (raw.length > 6_500_000) throw new Error("Fotoğraf dosyası çok büyük. Daha küçük bir görsel seç.");
   }
   return JSON.parse(raw || "{}");
 }
@@ -84,10 +84,15 @@ const server = http.createServer(async (req, res) => {
       if (!["1280:720", "720:1280"].includes(ratio)) {
         return send(res, 400, { message: "Bu motor 16:9 veya 9:16 formatını destekliyor." });
       }
-      const task = await runway("/v1/text_to_video", {
-        method: "POST",
-        body: JSON.stringify({ model: "gen4.5", promptText: prompt, duration, ratio })
-      });
+      const imageUri = typeof input.imageUri === "string" ? input.imageUri : "";
+      if (imageUri && (!imageUri.startsWith("data:image/") || imageUri.length > 4_800_000)) {
+        return send(res, 400, { message: "Fotoğraf biçimi geçersiz veya dosya çok büyük." });
+      }
+      const endpoint = imageUri ? "/v1/image_to_video" : "/v1/text_to_video";
+      const payload = imageUri
+        ? { model: "gen4.5", promptText: prompt, uri: imageUri, position: "first", duration, ratio }
+        : { model: "gen4.5", promptText: prompt, duration, ratio };
+      const task = await runway(endpoint, { method: "POST", body: JSON.stringify(payload) });
       return send(res, 202, { taskId: task.id || task.taskId, status: task.status || "PENDING" });
     }
 
