@@ -15,3 +15,10 @@ This folder is a private server/API component for the Android app. It is not a p
 - `GET /api/tasks/:taskId` — retrieves task status/output.
 
 The provider key is never sent to the Android app. This initial backend does not yet implement user authentication, credit reservation/refunds, abuse protection, persistent task history, or payment processing. Do not expose it publicly until those controls are added.
+
+## Required server environment
+- `SUPABASE_URL`: FOTO FOTO Supabase project URL.
+- `SUPABASE_PUBLISHABLE_KEY`: FOTO FOTO public publishable key; used only to verify user access tokens against Supabase Auth.
+- `RUNWAY_API_KEY`: Runway API secret; keep it in the hosting provider's secret manager and never commit it.
+
+Video generation and task status routes now require a valid FOTO FOTO Supabase access token in the Authorization Bearer header.
