@@ -115,7 +115,10 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                             Spacer(Modifier.height(8.dp))
                             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                                 Button(onClick = { imagePicker.launch("image/*") }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF242D40))) { Text(if (selectedImageUri == null) "＋ FOTOĞRAF EKLE" else "FOTOĞRAFI DEĞİŞTİR", color = White) }
-                                if (selectedImageUri != null) TextButton(onClick = { selectedImageUri = null }) { Text("KALDIR", color = Accent) }
+                                if (selectedImageUri != null) TextButton(onClick = {
+                                selectedImageUri = null
+                                if (ratio !in listOf("1280:720", "720:1280")) ratio = "1280:720"
+                            }) { Text("KALDIR", color = Accent) }
                             }
                             if (selectedImageUri != null) {
                                 val previewBitmap = remember(selectedImageUri) { try { context.contentResolver.openInputStream(selectedImageUri!!)?.use { BitmapFactory.decodeStream(it) } } catch (_: Exception) { null } }
@@ -153,12 +156,14 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 ChoiceButton("16:9", ratio == "1280:720") { ratio = "1280:720" }
                                 ChoiceButton("9:16", ratio == "720:1280") { ratio = "720:1280" }
-                                ChoiceButton("1:1", ratio == "960:960") { ratio = "960:960" }
                             }
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                ChoiceButton("4:3", ratio == "1104:832") { ratio = "1104:832" }
-                                ChoiceButton("3:4", ratio == "832:1104") { ratio = "832:1104" }
-                                ChoiceButton("21:9", ratio == "1584:672") { ratio = "1584:672" }
+                            if (selectedImageUri != null) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    ChoiceButton("1:1", ratio == "960:960") { ratio = "960:960" }
+                                    ChoiceButton("4:3", ratio == "1104:832") { ratio = "1104:832" }
+                                    ChoiceButton("3:4", ratio == "832:1104") { ratio = "832:1104" }
+                                    ChoiceButton("21:9", ratio == "1584:672") { ratio = "1584:672" }
+                                }
                             }
                         }
                         Spacer(Modifier.height(22.dp))
