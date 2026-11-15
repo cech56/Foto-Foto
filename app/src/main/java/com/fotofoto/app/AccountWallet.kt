@@ -15,8 +15,13 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.concurrent.TimeUnit
 
-private val walletHttp = OkHttpClient()
+private val walletHttp = OkHttpClient.Builder()
+    .connectTimeout(15, TimeUnit.SECONDS)
+    .readTimeout(20, TimeUnit.SECONDS)
+    .callTimeout(25, TimeUnit.SECONDS)
+    .build()
 
 data class CreditEntry(val amount: Long, val type: String, val description: String, val createdAt: String)
 data class AccountSummary(
@@ -25,11 +30,24 @@ data class AccountSummary(
     val credits: Long,
     val entries: List<CreditEntry>
 )
+data class AccountLoadResult(val summary: AccountSummary?, val error: String? = null)
 
-suspend fun loadAccountSummary(context: Context): AccountSummary? = withContext(Dispatchers.IO) {
-    val session = SessionStore.read(context) ?: return@withContext null
+private fun responseError(stage: String, code: Int, body: String): String {
+    val detail = try {
+        val json = JSONObject(body)
+        json.optString("message").ifBlank {
+            json.optString("msg").ifBlank { json.optString("error_description").ifBlank { json.optString("hint") } }
+        }
+    } catch (_: Exception) { "" }
+    val safeDetail = detail.take(180)
+    return "$stage başarısız (HTTP $code)" + if (safeDetail.isNotBlank()) ": $safeDetail" else "."
+}
+
+suspend fun loadAccountSummary(context: Context): AccountLoadResult = withContext(Dispatchers.IO) {
+    val session = SessionStore.read(context)
+        ?: return@withContext AccountLoadResult(null, "Oturum bulunamadı. Çıkış yapıp tekrar giriş yap.")
     val token = session.optString("access_token")
-    if (token.isBlank()) return@withContext null
+    if (token.isBlank()) return@withContext AccountLoadResult(null, "Oturum anahtarı eksik. Tekrar giriş yap.")
     try {
         val userReq = Request.Builder()
             .url(BuildConfig.SUPABASE_URL.trimEnd('/') + "/auth/v1/user")
@@ -37,19 +55,21 @@ suspend fun loadAccountSummary(context: Context): AccountSummary? = withContext(
             .addHeader("Authorization", "Bearer $token")
             .get().build()
         val user = walletHttp.newCall(userReq).execute().use { response ->
-            if (!response.isSuccessful) return@withContext null
-            JSONObject(response.body?.string().orEmpty())
+            val body = response.body?.string().orEmpty()
+            if (!response.isSuccessful) return@withContext AccountLoadResult(null, responseError("Kullanıcı doğrulaması", response.code, body))
+            JSONObject(body)
         }
         val id = user.optString("id")
-        if (id.isBlank()) return@withContext null
+        if (id.isBlank()) return@withContext AccountLoadResult(null, "Supabase kullanıcı kimliği boş döndü. Tekrar giriş yap.")
         val walletReq = Request.Builder()
             .url(BuildConfig.SUPABASE_URL.trimEnd('/') + "/rest/v1/wallets?select=balance_credits&user_id=eq.$id")
             .addHeader("apikey", BuildConfig.SUPABASE_PUBLISHABLE_KEY)
             .addHeader("Authorization", "Bearer $token")
             .get().build()
         val credits = walletHttp.newCall(walletReq).execute().use { response ->
-            if (!response.isSuccessful) return@withContext null
-            val rows = JSONArray(response.body?.string().orEmpty())
+            val body = response.body?.string().orEmpty()
+            if (!response.isSuccessful) return@withContext AccountLoadResult(null, responseError("Cüzdan sorgusu", response.code, body))
+            val rows = JSONArray(body)
             if (rows.length() > 0) rows.getJSONObject(0).optLong("balance_credits", 0L) else 0L
         }
         val ledgerReq = Request.Builder()
@@ -58,42 +78,39 @@ suspend fun loadAccountSummary(context: Context): AccountSummary? = withContext(
             .addHeader("Authorization", "Bearer $token")
             .get().build()
         val entries = walletHttp.newCall(ledgerReq).execute().use { response ->
-            if (!response.isSuccessful) emptyList()
-            else {
-                val rows = JSONArray(response.body?.string().orEmpty())
-                (0 until rows.length()).map { index ->
-                    val row = rows.getJSONObject(index)
-                    CreditEntry(
-                        row.optLong("amount_credits"),
-                        row.optString("entry_type"),
-                        row.optString("description"),
-                        row.optString("created_at")
-                    )
-                }
+            val body = response.body?.string().orEmpty()
+            if (!response.isSuccessful) return@withContext AccountLoadResult(null, responseError("Kredi geçmişi sorgusu", response.code, body))
+            val rows = JSONArray(body)
+            (0 until rows.length()).map { index ->
+                val row = rows.getJSONObject(index)
+                CreditEntry(row.optLong("amount_credits"), row.optString("entry_type"), row.optString("description"), row.optString("created_at"))
             }
         }
         val metadata = user.optJSONObject("user_metadata") ?: JSONObject()
-        AccountSummary(user.optString("email"), metadata.optString("display_name"), credits, entries)
-    } catch (_: Exception) { null }
+        AccountLoadResult(AccountSummary(user.optString("email"), metadata.optString("display_name"), credits, entries))
+    } catch (e: Exception) {
+        AccountLoadResult(null, "Bağlantı hatası: " + (e.message ?: "Bilinmeyen ağ hatası").take(140))
+    }
 }
 
 @Composable
 fun AccountWalletCard(onRefresh: Int = 0) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    var summary by remember { mutableStateOf<AccountSummary?>(null) }
+    var result by remember { mutableStateOf<AccountLoadResult?>(null) }
     var loading by remember { mutableStateOf(true) }
     var refreshKey by remember { mutableIntStateOf(onRefresh) }
     LaunchedEffect(onRefresh, refreshKey) {
         loading = true
-        summary = loadAccountSummary(context)
+        result = loadAccountSummary(context)
         loading = false
     }
+    val summary = result?.summary
     Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF151B2B)), shape = RoundedCornerShape(18.dp)) {
         Column(Modifier.fillMaxWidth().padding(18.dp)) {
             Text("HESABIM & KREDİ CÜZDANIM", color = Color(0xFF9AA3B6), fontSize = 10.sp)
             Spacer(Modifier.height(8.dp))
             Text(summary?.displayName?.takeIf { it.isNotBlank() } ?: "FOTO FOTO kullanıcısı", color = Color.White, fontSize = 19.sp)
-            Text(summary?.email ?: if (loading) "Hesap bilgisi yükleniyor…" else "Hesap bilgisi alınamadı. İnternetini kontrol et.", color = Color(0xFF9AA3B6), fontSize = 11.sp)
+            Text(summary?.email ?: if (loading) "Hesap bilgisi yükleniyor…" else (result?.error ?: "Hesap bilgisi alınamadı."), color = Color(0xFF9AA3B6), fontSize = 11.sp)
             Spacer(Modifier.height(14.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
@@ -110,18 +127,15 @@ fun AccountWalletCard(onRefresh: Int = 0) {
             when {
                 loading -> Text("Hareketler yükleniyor…", color = Color(0xFF9AA3B6), fontSize = 11.sp)
                 summary == null -> Text("Kredi hareketleri alınamadı.", color = Color(0xFF9AA3B6), fontSize = 11.sp)
-                summary!!.entries.isEmpty() -> Text("Henüz kredi hareketi yok.", color = Color(0xFF9AA3B6), fontSize = 11.sp)
-                else -> summary!!.entries.forEach { entry ->
+                summary.entries.isEmpty() -> Text("Henüz kredi hareketi yok.", color = Color(0xFF9AA3B6), fontSize = 11.sp)
+                else -> summary.entries.forEach { entry ->
                     Row(Modifier.fillMaxWidth().padding(vertical = 5.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                         Column(Modifier.weight(1f)) {
                             Text(entry.description.ifBlank { entry.type }, color = Color.White, fontSize = 11.sp, maxLines = 2)
                             Text(entry.type.uppercase(), color = Color(0xFF9AA3B6), fontSize = 9.sp)
                         }
-                        Text(
-                            (if (entry.amount > 0) "+" else "") + entry.amount + " kredi",
-                            color = if (entry.amount > 0) Color(0xFF8BC6A0) else Color(0xFFFF795E),
-                            fontSize = 11.sp
-                        )
+                        Text((if (entry.amount > 0) "+" else "") + entry.amount + " kredi",
+                            color = if (entry.amount > 0) Color(0xFF8BC6A0) else Color(0xFFFF795E), fontSize = 11.sp)
                     }
                 }
             }
