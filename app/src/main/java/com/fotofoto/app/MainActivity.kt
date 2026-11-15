@@ -73,6 +73,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
     var historyRefresh by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    var selectedTab by remember { mutableStateOf("home") }
     var settingsOpen by remember { mutableStateOf(false) }
     var appLanguage by remember { mutableStateOf(context.getSharedPreferences("foto_foto_settings", android.content.Context.MODE_PRIVATE).getString("language", "Türkçe") ?: "Türkçe") }
 
@@ -101,7 +102,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                     confirmButton = { TextButton(onClick = { settingsOpen = false }) { Text(if (appLanguage == "English") "Done" else if (appLanguage == "العربية") "تم" else "Tamam", color = Accent) } }
                 )
             }
-            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
+            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 92.dp)) {
                 Spacer(Modifier.height(18.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(Modifier.size(46.dp).clip(RoundedCornerShape(16.dp)).background(
@@ -120,6 +121,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                     }
                     TextButton(onClick = onSignOut) { Text("ÇIKIŞ", color = Muted, fontSize = 10.sp) }
                 }
+                if (selectedTab == "home") {
                 Spacer(Modifier.height(20.dp))
                 Box(
                     Modifier.fillMaxWidth().clip(RoundedCornerShape(26.dp))
@@ -149,6 +151,8 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                     QuickStatCard("03", "İndir", "Videonu al", Modifier.weight(1f), listOf(Color(0xFF176E9B), Color(0xFF3A9FBE)))
                 }
                 Spacer(Modifier.height(20.dp))
+                }
+                if (selectedTab == "create") {
                 Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF17172D)), shape = RoundedCornerShape(26.dp), elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)) {
                     Column(Modifier.padding(18.dp)) {
                         Text("✦  YARATIM MASASI", color = Color(0xFFB99AFF), fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.7.sp)
@@ -322,14 +326,44 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         }
                     }
                 }
-                Spacer(Modifier.height(16.dp))
-                AccountWalletCard(historyRefresh, onAccountDeleted = onSignOut)
-                Spacer(Modifier.height(16.dp))
-                VideoHistoryCard(historyRefresh)
+                }
+                if (selectedTab == "account") {
+                    Spacer(Modifier.height(18.dp))
+                    AccountWalletCard(historyRefresh, onAccountDeleted = onSignOut)
+                }
+                if (selectedTab == "projects") {
+                    Spacer(Modifier.height(18.dp))
+                    VideoHistoryCard(historyRefresh)
+                }
+                if (selectedTab == "tools") {
+                    Spacer(Modifier.height(22.dp))
+                    Text("YARATICI ARAÇLAR", color = Color(0xFFB99AFF), fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
+                    Spacer(Modifier.height(12.dp))
+                    listOf(Triple("✦", "Fotoğraftan video", "Tek bir görseli sinematik sahneye dönüştür."), Triple("◈", "Video düzenleme", "Mevcut videolar üzerinde yapay zekâ düzenlemeleri yakında."), Triple("⬆", "Video kalite artırma", "Daha yüksek çözünürlük araçları hazırlanıyor."), Triple("☺", "Karakter animasyonu", "Karakterini referans hareketlerle canlandırma yakında." )).forEachIndexed { index, item ->
+                        Card(Modifier.fillMaxWidth().padding(bottom = 10.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF1A2032)), shape = RoundedCornerShape(18.dp)) {
+                            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Box(Modifier.size(46.dp).clip(RoundedCornerShape(14.dp)).background(listOf(Color(0xFF5535A6), Color(0xFF9B3F82), Color(0xFF176E9B), Color(0xFFB56A3C))[index]), contentAlignment = Alignment.Center) { Text(item.first, color = White, fontSize = 22.sp, fontWeight = FontWeight.Black) }
+                                Spacer(Modifier.width(13.dp))
+                                Column(Modifier.weight(1f)) { Text(item.second, color = White, fontWeight = FontWeight.Bold, fontSize = 15.sp); Text(item.third, color = Muted, fontSize = 11.sp, lineHeight = 16.sp) }
+                                if (index == 0) TextButton(onClick = { selectedTab = "create" }) { Text("AÇ", color = Accent) } else Text("YAKINDA", color = Muted, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+                if (selectedTab == "home") {
                 Spacer(Modifier.height(16.dp))
                 Spacer(Modifier.height(26.dp))
                 Text("FOTO FOTO  ·  FİKRİNİ VİDEOYA DÖNÜŞTÜR", color = Muted, fontSize = 10.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
                 Spacer(Modifier.height(28.dp))
+                }
+            }
+            Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().background(Color(0xF2171B2C)).padding(horizontal = 5.dp, vertical = 8.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
+                listOf(Triple("home", "⌂", "Ana Sayfa"), Triple("projects", "▤", "Projelerim"), Triple("create", "＋", "Oluştur"), Triple("tools", "✧", "Araçlar"), Triple("account", "◉", "Hesabım")).forEach { item ->
+                    Column(Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).clickable { selectedTab = item.first }.padding(vertical = 5.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(item.second, color = if (selectedTab == item.first) Color(0xFFFF8B72) else Muted, fontSize = 20.sp, fontWeight = FontWeight.Black)
+                        Text(item.third, color = if (selectedTab == item.first) White else Muted, fontSize = 9.sp, fontWeight = if (selectedTab == item.first) FontWeight.Bold else FontWeight.Normal)
+                    }
+                }
             }
         }
     }
