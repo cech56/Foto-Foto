@@ -160,7 +160,7 @@ private suspend fun registerFoto(context: Context, email: String, password: Stri
                 SessionStore.save(context, access, refresh)
                 "Giriş başarılı."
             } else {
-                "OTP_SENT"
+                "Hesap yanıtı alındı ancak oturum açılamadı. Giriş ekranından tekrar dene."
             }
         }
     } catch (_: Exception) { "Sunucuya bağlanılamadı. İnternet bağlantını kontrol et." }
