@@ -265,7 +265,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                     }
                 }
                 Spacer(Modifier.height(16.dp))
-                AccountWalletCard(historyRefresh)
+                AccountWalletCard(historyRefresh, onAccountDeleted = onSignOut)
                 Spacer(Modifier.height(16.dp))
                 VideoHistoryCard(historyRefresh)
                 Spacer(Modifier.height(16.dp))
