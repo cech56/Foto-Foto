@@ -418,7 +418,7 @@ private fun FotoFotoGalaxyHome(
     val tr = language != "English" && language != "العربية"
     val glow = Color(0xFFB66BFF)
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Box(Modifier.fillMaxWidth().height(250.dp).clip(RoundedCornerShape(27.dp))
+        Box(Modifier.fillMaxWidth().height(350.dp).clip(RoundedCornerShape(27.dp))
             .border(1.5.dp, Color(0xFF8D63FF), RoundedCornerShape(27.dp))
             .background(Color(0xFF15133B))) {
             Image(
@@ -451,7 +451,7 @@ private fun FotoFotoGalaxyHome(
                     Text(if (tr) "Merhaba Serdar! 👋" else if (language == "English") "Hello! 👋" else "مرحباً! 👋",
                         color = White, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, maxLines = 1)
                     Spacer(Modifier.height(3.dp))
-                    Text(if (tr) "Bugün ne tür bir video\\noluşturuyoruz?" else if (language == "English") "What video shall we\\ncreate today?" else "ما الفيديو الذي\\nسننشئه اليوم؟",
+                    Text(if (tr) "Bugün ne tür bir video\noluşturuyoruz?" else if (language == "English") "What video shall we\ncreate today?" else "ما الفيديو الذي\nسننشئه اليوم؟",
                         color = White, fontSize = 12.sp, lineHeight = 17.sp)
                 }
             }
@@ -473,7 +473,7 @@ private fun FotoFotoGalaxyHome(
             Column(Modifier.align(Alignment.Center).padding(start = 62.dp, end = 56.dp)) {
                 Text(if (tr) "Yapay Zekâ ile" else if (language == "English") "With AI" else "بالذكاء الاصطناعي",
                     color = White, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold)
-                Text(if (tr) "Sıradan Görselleri\\nEtkileyici Videolara Dönüştür! 🚀" else if (language == "English") "Turn ordinary images into\\namazing videos! 🚀" else "حوّل الصور العادية إلى\\nفيديوهات مذهلة! 🚀",
+                Text(if (tr) "Sıradan Görselleri\nEtkileyici Videolara Dönüştür! 🚀" else if (language == "English") "Turn ordinary images into\namazing videos! 🚀" else "حوّل الصور العادية إلى\nفيديوهات مذهلة! 🚀",
                     color = White, fontSize = 11.sp, fontWeight = FontWeight.Bold, lineHeight = 15.sp)
             }
             Text("🎞", Modifier.align(Alignment.CenterEnd).padding(end = 8.dp), color = Color(0xFFFFD66B), fontSize = 31.sp)
