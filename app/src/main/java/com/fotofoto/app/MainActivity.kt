@@ -147,6 +147,27 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                     }
                 }
                 Spacer(Modifier.height(20.dp))
+                Text(tr("FOTO FOTO İLE NELER YAPABİLİRSİN?", "WHAT CAN YOU CREATE WITH FOTO FOTO?", "ماذا يمكنك أن تصنع مع FOTO FOTO؟"), color = Color(0xFFB99AFF), fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.1.sp)
+                Spacer(Modifier.height(10.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(9.dp), modifier = Modifier.fillMaxWidth()) {
+                    HomeFeatureTile("✦", tr("Fotoğrafı canlandır", "Animate a photo", "حرّك صورة"), tr("Tek kareden video", "Turn a still into video", "حوّل صورة إلى فيديو"), Color(0xFF5834A0), Modifier.weight(1f)) { selectedTab = "create" }
+                    HomeFeatureTile("◈", tr("Sinematik sahne", "Cinematic scene", "مشهد سينمائي"), tr("Fikrini tarif et", "Describe your idea", "صف فكرتك"), Color(0xFFB64282), Modifier.weight(1f)) { selectedTab = "create" }
+                }
+                Spacer(Modifier.height(18.dp))
+                Card(Modifier.fillMaxWidth().border(1.dp, Color(0xFF343B5C), RoundedCornerShape(22.dp)),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF151B2B)), shape = RoundedCornerShape(22.dp)) {
+                    Column(Modifier.padding(17.dp)) {
+                        Text(tr("NASIL ÇALIŞIR?", "HOW IT WORKS", "كيف يعمل؟"), color = Color(0xFFFFA17D), fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.2.sp)
+                        Spacer(Modifier.height(13.dp))
+                        HomeStepRow("01", tr("Fotoğrafını ekle", "Add your photo", "أضف صورتك"), tr("Galerinden bir görsel seç.", "Choose an image from your gallery.", "اختر صورة من معرضك."))
+                        HomeStepRow("02", tr("Hayalini anlat", "Describe your vision", "صف رؤيتك"), tr("Sahneyi ve kamera hareketini yaz.", "Describe the scene and camera movement.", "صف المشهد وحركة الكاميرا."))
+                        HomeStepRow("03", tr("Videonu oluştur", "Create your video", "أنشئ الفيديو"), tr("Ayarlarını seç ve üretimi başlat.", "Choose your settings and start generation.", "اختر الإعدادات وابدأ الإنشاء."))
+                        Spacer(Modifier.height(12.dp))
+                        Button(onClick = { selectedTab = "create" }, modifier = Modifier.fillMaxWidth().height(48.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6E42B5)), shape = RoundedCornerShape(14.dp)) {
+                            Text(tr("YARATIM STÜDYOSUNA GİT  →", "OPEN CREATION STUDIO  →", "انتقل إلى استوديو الإنشاء  ←"), color = White, fontWeight = FontWeight.ExtraBold, fontSize = 11.sp)
+                        }
+                    }
+                }
                 Spacer(Modifier.height(20.dp))
                 }
                 if (selectedTab == "create") {
@@ -388,6 +409,34 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun HomeFeatureTile(icon: String, title: String, subtitle: String, tint: Color, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Card(modifier.clickable(onClick = onClick).border(1.dp, tint.copy(alpha = 0.65f), RoundedCornerShape(19.dp)),
+        colors = CardDefaults.cardColors(containerColor = tint.copy(alpha = 0.20f)), shape = RoundedCornerShape(19.dp)) {
+        Column(Modifier.fillMaxWidth().padding(13.dp)) {
+            Text(icon, color = tint.copy(alpha = 0.95f), fontSize = 26.sp, fontWeight = FontWeight.Black)
+            Spacer(Modifier.height(8.dp))
+            Text(title, color = White, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold)
+            Spacer(Modifier.height(4.dp))
+            Text(subtitle, color = Muted, fontSize = 9.sp, lineHeight = 13.sp)
+        }
+    }
+}
+
+@Composable
+private fun HomeStepRow(number: String, title: String, detail: String) {
+    Row(Modifier.fillMaxWidth().padding(bottom = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(38.dp).background(Color(0xFF30234B), RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
+            Text(number, color = Color(0xFFD0A8FF), fontWeight = FontWeight.Black, fontSize = 11.sp)
+        }
+        Spacer(Modifier.width(11.dp))
+        Column {
+            Text(title, color = White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            Text(detail, color = Muted, fontSize = 10.sp)
         }
     }
 }
