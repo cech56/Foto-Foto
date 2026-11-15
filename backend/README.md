@@ -11,10 +11,12 @@ This folder is a private server/API component for the Android app. It is not a p
 
 ## Routes
 - `GET /health` — health check.
-- `POST /api/generate` — starts a Runway Gen-4.5 text-to-video task.
+- `POST /api/generate` — starts a Runway Gen-4.5 text-to-video or image-to-video task.
+- `POST /api/edit-video` — starts an Aleph 2 video-to-video edit task.
+- `POST /api/upscale-video` — starts a Magnific Video Upscaler task.
 - `GET /api/tasks/:taskId` — retrieves task status/output.
 
-The provider key is never sent to the Android app. This initial backend does not yet implement user authentication, credit reservation/refunds, abuse protection, persistent task history, or payment processing. Do not expose it publicly until those controls are added.
+The provider key is never sent to the Android app. The backend verifies FOTO FOTO Supabase access tokens and checks task ownership. Credit reservation/refunds, payment processing, and robust abuse protection are still pending. Do not expose paid generation publicly until those controls are implemented.
 
 ## Required server environment
 - `SUPABASE_URL`: FOTO FOTO Supabase project URL.
