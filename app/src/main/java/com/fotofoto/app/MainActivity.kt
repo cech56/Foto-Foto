@@ -401,9 +401,12 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
             }
             Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().navigationBarsPadding().background(Color(0xF2171B2C)).padding(horizontal = 5.dp, vertical = 10.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
                 listOf(Triple("home", "⌂", if (appLanguage == "English") "Home" else if (appLanguage == "العربية") "الرئيسية" else "Ana Sayfa"), Triple("projects", "▤", if (appLanguage == "English") "Projects" else if (appLanguage == "العربية") "مشاريعي" else "Projelerim"), Triple("create", "＋", if (appLanguage == "English") "Create" else if (appLanguage == "العربية") "إنشاء" else "Oluştur"), Triple("tools", "✧", if (appLanguage == "English") "Tools" else if (appLanguage == "العربية") "الأدوات" else "Araçlar"), Triple("account", "◉", if (appLanguage == "English") "Account" else if (appLanguage == "العربية") "حسابي" else "Hesabım")).forEach { item ->
-                    Column(Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).clickable { selectedTab = item.first }.padding(vertical = 5.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(item.second, color = if (selectedTab == item.first) Color(0xFFFF8B72) else Muted, fontSize = 20.sp, fontWeight = FontWeight.Black)
-                        Text(item.third, color = if (selectedTab == item.first) White else Muted, fontSize = 9.sp, fontWeight = if (selectedTab == item.first) FontWeight.Bold else FontWeight.Normal)
+                    Column(Modifier.weight(1f).padding(horizontal = 2.dp).clip(RoundedCornerShape(15.dp))
+                        .background(if (selectedTab == item.first) Brush.verticalGradient(listOf(Color(0xFF59318A), Color(0xFF302342))) else Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent)))
+                        .border(1.dp, if (selectedTab == item.first) Color(0xFF9B6BCE) else Color.Transparent, RoundedCornerShape(15.dp))
+                        .clickable { selectedTab = item.first }.padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(item.second, color = if (selectedTab == item.first) Color(0xFFFFA17D) else Color(0xFF9AA3B6), fontSize = 22.sp, fontWeight = FontWeight.Black)
+                        Text(item.third, color = if (selectedTab == item.first) White else Color(0xFF9AA3B6), fontSize = 9.sp, fontWeight = if (selectedTab == item.first) FontWeight.ExtraBold else FontWeight.Medium)
                     }
                 }
             }
@@ -439,11 +442,15 @@ private fun EngineCard(name: String, detail: String, active: Boolean, selected: 
 
 @Composable
 private fun RowScope.ChoiceButton(label: String, selected: Boolean, onClick: () -> Unit) {
-    OutlinedButton(onClick = onClick, modifier = Modifier.weight(1f),
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = if (selected) Accent else White),
-        border = androidx.compose.foundation.BorderStroke(1.dp, if (selected) Accent else Color(0xFF394154)),
-        contentPadding = PaddingValues(horizontal = 7.dp, vertical = 5.dp), shape = RoundedCornerShape(10.dp)) {
-        Text(label, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+    OutlinedButton(onClick = onClick, modifier = Modifier.weight(1f).heightIn(min = 44.dp),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = if (selected) Color(0xFF603A9B) else Color(0xFF111827),
+            contentColor = if (selected) Color.White else Color(0xFFB9C2D3)
+        ),
+        border = androidx.compose.foundation.BorderStroke(if (selected) 1.5.dp else 1.dp, if (selected) Color(0xFFCB9CFF) else Color(0xFF394154)),
+        contentPadding = PaddingValues(horizontal = 5.dp, vertical = 7.dp), shape = RoundedCornerShape(13.dp)) {
+        Text(label, fontSize = 10.sp, fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold, maxLines = 1)
+    }
     }
 }
 
