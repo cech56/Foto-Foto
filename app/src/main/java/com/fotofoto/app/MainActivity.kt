@@ -355,11 +355,11 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 }
                 if (selectedTab == "account") {
                     Spacer(Modifier.height(18.dp))
-                    AccountWalletCard(historyRefresh, onAccountDeleted = onSignOut)
+                    AccountWalletCard(historyRefresh, appLanguage, onAccountDeleted = onSignOut)
                 }
                 if (selectedTab == "projects") {
                     Spacer(Modifier.height(18.dp))
-                    VideoHistoryCard(historyRefresh)
+                    VideoHistoryCard(historyRefresh, appLanguage)
                 }
                 if (selectedTab == "tools") {
                     Spacer(Modifier.height(22.dp))
