@@ -150,6 +150,8 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 Spacer(Modifier.height(16.dp))
                 AccountWalletCard()
                 Spacer(Modifier.height(16.dp))
+                VideoHistoryCard(historyRefresh)
+                Spacer(Modifier.height(16.dp))
                 Spacer(Modifier.height(26.dp))
                 Text("FOTO FOTO  ·  HAYAL ET, OLUŞTUR.", color = Muted, fontSize = 10.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
                 Spacer(Modifier.height(28.dp))
@@ -199,9 +201,9 @@ private suspend fun checkGeneration(context: android.content.Context, taskId: St
                     if (videoUrl.startsWith("https://")) TaskCheck("Video hazır! Aşağıdaki butondan açabilirsin.", true, videoUrl)
                     else TaskCheck("Video tamamlandı; ancak video bağlantısı yanıtta bulunamadı.", true)
                 }
-                "FAILED" -> TaskCheck("Video üretimi başarısız oldu. Başka bir açıklamayla tekrar deneyebilirsin.", true)
-                "CANCELED", "CANCELLED" -> TaskCheck("Video üretimi iptal edildi.", true)
-                else -> TaskCheck("Video hazırlanıyor… Durum: " + data.optString("status", "BEKLEMEDE"), false)
+                "FAILED" -> { updateVideoHistory(context, taskId, "FAILED"); TaskCheck("Video üretimi başarısız oldu. Başka bir açıklamayla tekrar deneyebilirsin.", true) }
+                "CANCELED", "CANCELLED" -> { updateVideoHistory(context, taskId, "CANCELED"); TaskCheck("Video üretimi iptal edildi.", true) }
+                else -> { updateVideoHistory(context, taskId, data.optString("status", "PENDING")); TaskCheck("Video hazırlanıyor… Durum: " + data.optString("status", "BEKLEMEDE"), false) }
             }
         }
     } catch (_: Exception) { TaskCheck("Görev durumu kontrol edilemedi. Bağlantı yeniden denenecek.", false) }
