@@ -1,5 +1,6 @@
 package com.fotofoto.app
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -24,20 +26,30 @@ import org.json.JSONObject
 private val AuthAccent = Color(0xFFFF795E)
 private val AuthBg = Color(0xFF0B0E18)
 private val AuthPanel = Color(0xFF151B2B)
+private val authClient = OkHttpClient()
 
 @Composable
 fun AuthGate(content: @Composable () -> Unit) {
+    val context = LocalContext.current
     var signedIn by remember { mutableStateOf(false) }
-    if (signedIn) {
-        content()
-    } else {
-        AuthScreen(onSignedIn = { signedIn = true })
+    var checking by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) {
+        signedIn = restoreFotoSession(context)
+        checking = false
+    }
+    when {
+        checking -> Box(Modifier.fillMaxSize().background(AuthBg), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = AuthAccent)
+        }
+        signedIn -> content()
+        else -> AuthScreen(onSignedIn = { signedIn = true })
     }
 }
 
 @Composable
 private fun AuthScreen(onSignedIn: () -> Unit) {
-    var isRegister by remember { mutableStateOf(true) }
+    val context = LocalContext.current
+    var mode by remember { mutableStateOf("register") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var displayName by remember { mutableStateOf("") }
@@ -48,39 +60,60 @@ private fun AuthScreen(onSignedIn: () -> Unit) {
     MaterialTheme(colorScheme = darkColorScheme(primary = AuthAccent, background = AuthBg, surface = AuthPanel)) {
         Box(Modifier.fillMaxSize().background(AuthBg).padding(22.dp), contentAlignment = Alignment.Center) {
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("FOTO FOTO", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
+                Text("FOTO FOTO", color = Color.White, fontSize = 29.sp, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
                 Spacer(Modifier.height(8.dp))
                 Text("Hayallerini videoya dönüştür.", color = Color.LightGray)
                 Spacer(Modifier.height(25.dp))
                 Card(colors = CardDefaults.cardColors(containerColor = AuthPanel), shape = RoundedCornerShape(22.dp)) {
                     Column(Modifier.padding(20.dp)) {
-                        Text(if (isRegister) "Hesap oluştur" else "Giriş yap", color = Color.White, fontSize = 23.sp, fontWeight = FontWeight.Bold)
+                        Text(when(mode) { "register" -> "Hesap oluştur"; "reset" -> "Şifremi yenile"; else -> "Giriş yap" },
+                            color = Color.White, fontSize = 23.sp, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.height(16.dp))
-                        if (isRegister) {
+                        if (mode == "register") {
                             OutlinedTextField(value = displayName, onValueChange = { displayName = it }, label = { Text("Adın") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                             Spacer(Modifier.height(10.dp))
                         }
                         OutlinedTextField(value = email, onValueChange = { email = it.trim() }, label = { Text("E-posta") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                        Spacer(Modifier.height(10.dp))
-                        OutlinedTextField(value = password, onValueChange = { password = it }, label = { Text("Şifre (en az 8 karakter)") }, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth(), singleLine = true)
+                        if (mode != "reset") {
+                            Spacer(Modifier.height(10.dp))
+                            OutlinedTextField(value = password, onValueChange = { password = it }, label = { Text("Şifre (en az 8 karakter)") },
+                                visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth(), singleLine = true)
+                        }
                         Spacer(Modifier.height(16.dp))
                         Button(
                             onClick = {
                                 scope.launch {
                                     busy = true
-                                    message = if (isRegister) createFotoAccount(email, password, displayName) else loginFotoAccount(email, password).first
-                                    val success = message == "Giriş başarılı."
-                                    if (success) onSignedIn()
+                                    message = when(mode) {
+                                        "register" -> registerFoto(context, email, password, displayName)
+                                        "reset" -> resetFotoPassword(email)
+                                        else -> loginFoto(context, email, password)
+                                    }
+                                    if (message == "Giriş başarılı.") onSignedIn()
                                     busy = false
                                 }
                             },
-                            enabled = !busy && email.contains("@") && password.length >= 8 && (!isRegister || displayName.isNotBlank()),
+                            enabled = !busy && email.contains("@") &&
+                                (mode == "reset" || (password.length >= 8 && (mode != "register" || displayName.isNotBlank()))),
                             modifier = Modifier.fillMaxWidth().height(52.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = AuthAccent, contentColor = Color(0xFF211721))
-                        ) { Text(if (busy) "İŞLENİYOR…" else if (isRegister) "ÜCRETSİZ HESAP OLUŞTUR" else "GİRİŞ YAP", fontWeight = FontWeight.Black) }
-                        Spacer(Modifier.height(12.dp))
-                        TextButton(onClick = { isRegister = !isRegister; message = if (isRegister) "Hesap oluşturabilirsin." else "FOTO FOTO hesabına giriş yap." }, modifier = Modifier.fillMaxWidth()) {
-                            Text(if (isRegister) "Zaten hesabın var mı? Giriş yap" else "Hesabın yok mu? Kayıt ol", color = AuthAccent)
+                        ) {
+                            Text(if (busy) "İŞLENİYOR…" else when(mode) {
+                                "register" -> "ÜCRETSİZ HESAP OLUŞTUR"
+                                "reset" -> "YENİLEME E-POSTASI GÖNDER"
+                                else -> "GİRİŞ YAP"
+                            }, fontWeight = FontWeight.Black)
+                        }
+                        if (mode == "login") {
+                            TextButton(onClick = { mode = "reset"; message = "Şifre yenileme bağlantısı e-posta adresine gönderilecek." }, modifier = Modifier.fillMaxWidth()) {
+                                Text("Şifremi unuttum", color = AuthAccent)
+                            }
+                        }
+                        TextButton(onClick = {
+                            mode = if (mode == "login") "register" else "login"
+                            message = if (mode == "register") "Hesap oluşturabilirsin." else "FOTO FOTO hesabına giriş yap."
+                        }, modifier = Modifier.fillMaxWidth()) {
+                            Text(if (mode == "register") "Zaten hesabın var mı? Giriş yap" else "Giriş ekranına / kayıt ekranına dön", color = AuthAccent)
                         }
                         Text(message, color = Color.LightGray, fontSize = 12.sp)
                     }
@@ -92,39 +125,75 @@ private fun AuthScreen(onSignedIn: () -> Unit) {
     }
 }
 
-private suspend fun createFotoAccount(email: String, password: String, displayName: String): String = withContext(Dispatchers.IO) {
-    if (BuildConfig.SUPABASE_PUBLISHABLE_KEY.isBlank()) return@withContext "Supabase anahtarı yapılandırılmamış."
+private fun authRequest(path: String, body: JSONObject): Request = Request.Builder()
+    .url(BuildConfig.SUPABASE_URL.trimEnd('/') + path)
+    .addHeader("apikey", BuildConfig.SUPABASE_PUBLISHABLE_KEY)
+    .post(body.toString().toRequestBody("application/json".toMediaType()))
+    .build()
+
+private fun authError(data: JSONObject, fallback: String): String =
+    data.optString("msg").ifBlank { data.optString("message").ifBlank { data.optString("error_description").ifBlank { fallback } } }
+
+private suspend fun registerFoto(context: Context, email: String, password: String, displayName: String): String = withContext(Dispatchers.IO) {
     try {
-        val payload = JSONObject()
-            .put("email", email)
-            .put("password", password)
+        val body = JSONObject().put("email", email).put("password", password)
             .put("data", JSONObject().put("display_name", displayName))
-        val request = Request.Builder()
-            .url(BuildConfig.SUPABASE_URL.trimEnd('/') + "/auth/v1/signup")
-            .addHeader("apikey", BuildConfig.SUPABASE_PUBLISHABLE_KEY)
-            .post(payload.toString().toRequestBody("application/json".toMediaType()))
-            .build()
-        OkHttpClient().newCall(request).execute().use { response ->
+        authClient.newCall(authRequest("/auth/v1/signup", body)).execute().use { response ->
             val data = JSONObject(response.body?.string().orEmpty())
-            if (!response.isSuccessful) return@withContext data.optString("msg", data.optString("message", "Kayıt tamamlanamadı. Bilgilerini kontrol et."))
-            if (data.optString("access_token").isNotBlank()) "Hesap oluşturuldu. Giriş başarılı."
-            else "Hesabın oluşturuldu. E-posta doğrulama bağlantısını kontrol et, ardından giriş yap."
+            if (!response.isSuccessful) return@withContext authError(data, "Kayıt tamamlanamadı. Bilgilerini kontrol et.")
+            val access = data.optString("access_token")
+            val refresh = data.optString("refresh_token")
+            if (access.isNotBlank() && refresh.isNotBlank()) {
+                SessionStore.save(context, access, refresh)
+                "Giriş başarılı."
+            } else {
+                "Hesabın oluşturuldu. E-posta doğrulama bağlantısını kontrol et, ardından giriş yap."
+            }
         }
     } catch (_: Exception) { "Sunucuya bağlanılamadı. İnternet bağlantını kontrol et." }
 }
 
-private suspend fun loginFotoAccount(email: String, password: String): Pair<String, String> = withContext(Dispatchers.IO) {
+private suspend fun loginFoto(context: Context, email: String, password: String): String = withContext(Dispatchers.IO) {
     try {
-        val payload = JSONObject().put("email", email).put("password", password)
-        val request = Request.Builder()
-            .url(BuildConfig.SUPABASE_URL.trimEnd('/') + "/auth/v1/token?grant_type=password")
-            .addHeader("apikey", BuildConfig.SUPABASE_PUBLISHABLE_KEY)
-            .post(payload.toString().toRequestBody("application/json".toMediaType()))
-            .build()
-        OkHttpClient().newCall(request).execute().use { response ->
+        val body = JSONObject().put("email", email).put("password", password)
+        authClient.newCall(authRequest("/auth/v1/token?grant_type=password", body)).execute().use { response ->
             val data = JSONObject(response.body?.string().orEmpty())
-            if (!response.isSuccessful) data.optString("msg", data.optString("message", "Giriş başarısız. E-posta ve şifreni kontrol et.")) to ""
-            else "Giriş başarılı." to data.optString("access_token")
+            if (!response.isSuccessful) return@withContext authError(data, "Giriş başarısız. E-posta ve şifreni kontrol et.")
+            val access = data.optString("access_token")
+            val refresh = data.optString("refresh_token")
+            if (access.isBlank() || refresh.isBlank()) return@withContext "Oturum bilgisi alınamadı. Tekrar dene."
+            SessionStore.save(context, access, refresh)
+            "Giriş başarılı."
         }
-    } catch (_: Exception) { "Sunucuya bağlanılamadı." to "" }
+    } catch (_: Exception) { "Sunucuya bağlanılamadı. İnternet bağlantını kontrol et." }
+}
+
+private suspend fun resetFotoPassword(email: String): String = withContext(Dispatchers.IO) {
+    try {
+        authClient.newCall(authRequest("/auth/v1/recover", JSONObject().put("email", email))).execute().use { response ->
+            if (response.isSuccessful) "Şifre yenileme bağlantısı e-posta adresine gönderildi."
+            else authError(JSONObject(response.body?.string().orEmpty()), "E-posta gönderilemedi.")
+        }
+    } catch (_: Exception) { "Sunucuya bağlanılamadı. İnternet bağlantını kontrol et." }
+}
+
+private suspend fun restoreFotoSession(context: Context): Boolean = withContext(Dispatchers.IO) {
+    val saved = SessionStore.read(context) ?: return@withContext false
+    val refresh = saved.optString("refresh_token")
+    if (refresh.isBlank()) { SessionStore.clear(context); return@withContext false }
+    try {
+        val request = authRequest("/auth/v1/token?grant_type=refresh_token", JSONObject().put("refresh_token", refresh))
+        authClient.newCall(request).execute().use { response ->
+            val data = JSONObject(response.body?.string().orEmpty())
+            val access = data.optString("access_token")
+            val newRefresh = data.optString("refresh_token")
+            if (!response.isSuccessful || access.isBlank() || newRefresh.isBlank()) {
+                SessionStore.clear(context)
+                false
+            } else {
+                SessionStore.save(context, access, newRefresh)
+                true
+            }
+        }
+    } catch (_: Exception) { false }
 }
