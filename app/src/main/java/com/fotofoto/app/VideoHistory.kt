@@ -2,6 +2,8 @@ package com.fotofoto.app
 
 import android.content.Context
 import android.content.Intent
+import android.app.DownloadManager
+import android.os.Environment
 import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -125,10 +127,25 @@ fun VideoHistoryCard(refreshKey: Int) {
                         Spacer(Modifier.height(4.dp))
                         Text(item.status, color = Color(0xFFFF795E), fontSize = 10.sp)
                         if (item.videoUrl.startsWith("https://")) {
-                            TextButton(onClick = {
-                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(item.videoUrl)))
-                            }, contentPadding = PaddingValues(0.dp)) {
-                                Text("VİDEOYU AÇ", color = Color(0xFFFF795E), fontSize = 10.sp)
+                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                TextButton(onClick = {
+                                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(item.videoUrl)))
+                                }, contentPadding = PaddingValues(0.dp)) {
+                                    Text("VİDEOYU AÇ", color = Color(0xFFFF795E), fontSize = 10.sp)
+                                }
+                                TextButton(onClick = {
+                                    val safeId = item.taskId.take(12).replace(Regex("[^A-Za-z0-9_-]"), "")
+                                    val request = DownloadManager.Request(Uri.parse(item.videoUrl))
+                                        .setTitle("FOTO FOTO videon")
+                                        .setDescription("Video indiriliyor…")
+                                        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                                        .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "foto-foto-$safeId.mp4")
+                                        .setMimeType("video/mp4")
+                                    val manager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                                    manager.enqueue(request)
+                                }, contentPadding = PaddingValues(0.dp)) {
+                                    Text("İNDİR", color = Color(0xFFFF795E), fontSize = 10.sp)
+                                }
                             }
                         }
                     }
