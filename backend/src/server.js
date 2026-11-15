@@ -91,7 +91,7 @@ async function settleTask(taskId, success) {
 
 async function ownsTask(req, taskId) {
   const auth = req.headers.authorization || "";
-  const url = SUPABASE_URL + "/rest/v1/video_generations?select=id&provider_task_id=eq." + encodeURIComponent(taskId);
+  const url = SUPABASE_URL + "/rest/v1/credit_reservations?select=id&provider_task_id=eq." + encodeURIComponent(taskId);
   const response = await fetch(url, { headers: { apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: auth } });
   if (!response.ok) return false;
   const rows = await response.json();
