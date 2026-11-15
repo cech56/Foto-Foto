@@ -18,6 +18,8 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -407,32 +409,12 @@ private fun FotoFotoGalaxyHome(
         Box(Modifier.fillMaxWidth().height(390.dp).clip(RoundedCornerShape(28.dp))
             .border(1.dp, Color(0xFF8D63FF), RoundedCornerShape(28.dp))
             .background(Brush.verticalGradient(listOf(Color(0xFF11133C), Color(0xFF28145A), Color(0xFF8C3D9D), Color(0xFF18234D))))) {
-            // Nebulae and stars
-            Box(Modifier.fillMaxSize().background(Brush.radialGradient(listOf(Color(0x66FF72D2), Color.Transparent), radius = 650f)))
-            listOf(0.08f to 0.16f, 0.19f to 0.34f, 0.82f to 0.17f, 0.91f to 0.39f, 0.13f to 0.67f, 0.78f to 0.72f, 0.48f to 0.10f, 0.60f to 0.27f).forEachIndexed { i, p ->
-                Box(Modifier.fillMaxWidth(p.first).fillMaxHeight(0.02f).align(Alignment.TopStart).padding(start = 0.dp)
-                    .offset(x = (i * 17).dp, y = (i * 29 + 20).dp).size(if (i % 3 == 0) 4.dp else 2.dp)
-                    .background(Color.White.copy(alpha = 0.45f), RoundedCornerShape(50)))
-            }
-            Box(Modifier.align(Alignment.TopCenter).padding(top = 66.dp).size(184.dp)
-                .graphicsLayer { translationY = floatY * 0.35f; alpha = glow }
-                .background(Brush.radialGradient(listOf(Color(0xFFB9F5FF), Color(0xFF287BFF), Color(0xFF261B80))), RoundedCornerShape(100))
-                .border(3.dp, Color(0xFF8BE9FF), RoundedCornerShape(100)))
-            Box(Modifier.align(Alignment.TopCenter).padding(top = 78.dp).size(198.dp)
-                .border(2.dp, Color(0xFFCA8BFF).copy(alpha = 0.8f), RoundedCornerShape(50)))
-            // Floating islands
-            Text("🏰", Modifier.align(Alignment.TopEnd).padding(top = 95.dp, end = 12.dp).graphicsLayer { translationY = -floatY }, fontSize = 48.sp)
-            Text("🌸", Modifier.align(Alignment.CenterStart).padding(start = 4.dp, top = 12.dp), fontSize = 38.sp)
-            Text("🪐", Modifier.align(Alignment.TopStart).padding(start = 18.dp, top = 55.dp), fontSize = 32.sp)
-            Text("🐋", Modifier.align(Alignment.TopEnd).padding(end = 72.dp, top = 35.dp), fontSize = 34.sp)
-            Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(112.dp)
-                .background(Brush.verticalGradient(listOf(Color.Transparent, Color(0xFF21164D), Color(0xFF101632)))))
-            Text("🪨  ✨  🪨", Modifier.align(Alignment.BottomCenter).padding(bottom = 6.dp), fontSize = 34.sp)
-            // Character and companion
-            FotoRobotMascot(Modifier.align(Alignment.Center).offset(y = 42.dp).graphicsLayer { translationY = floatY }.size(width = 204.dp, height = 226.dp))
-            FotoCatMascot(Modifier.align(Alignment.BottomCenter).padding(bottom = 31.dp, end = 112.dp).size(width = 88.dp, height = 72.dp))
-            Text("🎬", Modifier.align(Alignment.CenterEnd).padding(top = 90.dp, end = 18.dp).graphicsLayer { rotationZ = floatY }, fontSize = 39.sp)
-            Text("🎞️", Modifier.align(Alignment.BottomEnd).padding(end = 23.dp, bottom = 58.dp), fontSize = 30.sp)
+            Image(
+                painter = painterResource(id = R.drawable.foto_foto_3d_mascot),
+                contentDescription = "FOTO FOTO 3D robot ve kedi maskotu",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
             Column(Modifier.align(Alignment.TopStart).padding(start = 12.dp, top = 14.dp)
                 .clip(RoundedCornerShape(18.dp)).background(Color(0xE91A1745)).border(1.dp, Color(0xFF9B7BFF), RoundedCornerShape(18.dp)).padding(horizontal = 13.dp, vertical = 10.dp)) {
                 Text(if (tr) "Merhaba! 👋" else if (language == "English") "Hello! 👋" else "مرحباً! 👋", color = White, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
