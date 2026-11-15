@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
@@ -132,21 +133,37 @@ fun AccountWalletCard(onRefresh: Int = 0, onAccountDeleted: () -> Unit = {}) {
     val summary = result?.summary
     Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF151B2B)), shape = RoundedCornerShape(18.dp)) {
         Column(Modifier.fillMaxWidth().padding(18.dp)) {
-            Text("HESABIM & KREDİ CÜZDANIM", color = Color(0xFF9AA3B6), fontSize = 10.sp)
-            Spacer(Modifier.height(8.dp))
-            Text(summary?.displayName?.takeIf { it.isNotBlank() } ?: "FOTO FOTO kullanıcısı", color = Color.White, fontSize = 19.sp)
-            Text(summary?.email ?: if (loading) "Hesap bilgisi yükleniyor…" else (result?.error ?: "Hesap bilgisi alınamadı."), color = Color(0xFF9AA3B6), fontSize = 11.sp)
-            Spacer(Modifier.height(14.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Column {
-                    Text("KREDİ BAKİYESİ", color = Color(0xFF9AA3B6), fontSize = 9.sp)
-                    Text(if (loading) "…" else summary?.let { "${it.credits} kredi" } ?: "—", color = Color(0xFFFF795E), fontSize = 24.sp)
-                    Text("1 kredi = 1 TL", color = Color(0xFF9AA3B6), fontSize = 10.sp)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text("SENİN YARATICI ALANIN", color = Color(0xFFB99AFF), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.5.sp)
+                    Spacer(Modifier.height(5.dp))
+                    Text("Merhaba, ${summary?.displayName?.takeIf { it.isNotBlank() } ?: "yaratıcı dostumuz"}! ✨", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+                    Text(summary?.email ?: if (loading) "Hesap bilgisi yükleniyor…" else (result?.error ?: "Hesap bilgisi alınamadı."), color = Color(0xFF9AA3B6), fontSize = 10.sp)
                 }
-                TextButton(onClick = { refreshKey++ }, enabled = !loading) { Text(if (loading) "YÜKLENİYOR" else "YENİLE", color = Color(0xFFFF795E)) }
+                Box(Modifier.size(42.dp).background(Color(0xFF38265A), RoundedCornerShape(15.dp)), contentAlignment = androidx.compose.ui.Alignment.Center) { Text("✦", color = Color(0xFFFFB36B), fontSize = 24.sp) }
             }
-            Text("Gen-4.5 fiyatı: 5 sn = 59 kredi · 10 sn = 119 kredi. 1 kredi = 1 TL.", color = Color(0xFF9AA3B6), fontSize = 10.sp)
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(14.dp))
+            Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color(0xFF302052)), shape = RoundedCornerShape(18.dp)) {
+                Row(Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(Color(0xFF39266B), Color(0xFF8A3F83), Color(0xFFB45B59)))).padding(16.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text("KREDİ CÜZDANIN", color = Color.White.copy(alpha = 0.78f), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
+                        Spacer(Modifier.height(5.dp))
+                        Text(if (loading) "…" else summary?.let { "${it.credits} kredi" } ?: "—", color = Color.White, fontSize = 27.sp, fontWeight = FontWeight.Black)
+                        Text("1 kredi = 1 TL", color = Color.White.copy(alpha = 0.78f), fontSize = 10.sp)
+                    }
+                    Text("✧", color = Color.White, fontSize = 34.sp)
+                }
+            }
+            Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Text("Bakiye bilgisi hesabına özeldir.", color = Color(0xFF9AA3B6), fontSize = 9.sp)
+                TextButton(onClick = { refreshKey++ }, enabled = !loading, contentPadding = PaddingValues(4.dp)) { Text(if (loading) "YÜKLENİYOR" else "↻ YENİLE", color = Color(0xFFFF795E), fontSize = 10.sp) }
+            }
+            Text("ÜRETİM ÜCRETLERİ", color = Color(0xFF9AA3B6), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+            Row(Modifier.fillMaxWidth().padding(top = 7.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(Modifier.weight(1f).background(Color(0xFF101726), RoundedCornerShape(12.dp)).padding(11.dp)) { Text("5 SANİYE", color = Color(0xFF9AA3B6), fontSize = 9.sp); Text("59 kredi", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold) }
+                Column(Modifier.weight(1f).background(Color(0xFF101726), RoundedCornerShape(12.dp)).padding(11.dp)) { Text("10 SANİYE", color = Color(0xFF9AA3B6), fontSize = 9.sp); Text("119 kredi", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold) }
+            }
+                        Spacer(Modifier.height(12.dp))
             Text("SON KREDİ HAREKETLERİ", color = Color(0xFFFF795E), fontSize = 10.sp)
             Spacer(Modifier.height(6.dp))
             when {
