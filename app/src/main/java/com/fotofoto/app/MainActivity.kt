@@ -469,7 +469,6 @@ private fun FotoFotoGalaxyHome(
                         color = White, fontSize = 9.sp, lineHeight = 12.sp)
                 }
             }
-            }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FotoHomeMenuCard("▧", if (tr) "Fotoğraftan\nVideo" else if (language == "English") "Photo to\nVideo" else "صورة إلى\nفيديو",
