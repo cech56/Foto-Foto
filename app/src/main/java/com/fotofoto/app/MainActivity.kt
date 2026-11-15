@@ -350,7 +350,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         }
                         Spacer(Modifier.height(12.dp))
                         Text(status, color = Accent, fontSize = 12.sp, lineHeight = 18.sp)
-                        if (taskId.isNotBlank()) Text("Üretim kodu: $taskId", color = Muted, fontSize = 10.sp)
+                        if (taskId.isNotBlank()) Text(tr("Üretim kodu: $taskId", "Generation ID: $taskId", "معرّف الإنشاء: $taskId"), color = Muted, fontSize = 10.sp)
                         if (videoUrl.isNotBlank()) {
                             Spacer(Modifier.height(10.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
@@ -382,12 +382,12 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                     Text(if (appLanguage == "English") "CREATIVE TOOLS" else if (appLanguage == "العربية") "أدوات إبداعية" else "YARATICI ARAÇLAR", color = Color(0xFFB99AFF), fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
                     Spacer(Modifier.height(12.dp))
                     listOf(Triple("✦", if (appLanguage == "English") "Photo to video" else if (appLanguage == "العربية") "صورة إلى فيديو" else "Fotoğraftan video", if (appLanguage == "English") "Turn a still image into a cinematic scene." else if (appLanguage == "العربية") "حوّل صورة ثابتة إلى مشهد سينمائي." else "Tek bir görseli sinematik sahneye dönüştür."), Triple("◈", if (appLanguage == "English") "Video editing" else if (appLanguage == "العربية") "تحرير الفيديو" else "Video düzenleme", if (appLanguage == "English") "AI editing for existing videos is coming soon." else if (appLanguage == "العربية") "تحرير مقاطع الفيديو بالذكاء الاصطناعي قريباً." else "Mevcut videolar üzerinde yapay zekâ düzenlemeleri yakında."), Triple("⬆", if (appLanguage == "English") "Video upscaling" else if (appLanguage == "العربية") "تحسين جودة الفيديو" else "Video kalite artırma", if (appLanguage == "English") "Higher-resolution tools are in development." else if (appLanguage == "العربية") "أدوات الدقة الأعلى قيد التطوير." else "Daha yüksek çözünürlük araçları hazırlanıyor."), Triple("☺", if (appLanguage == "English") "Character animation" else if (appLanguage == "العربية") "تحريك الشخصيات" else "Karakter animasyonu", if (appLanguage == "English") "Animate a character with reference motion. Coming soon." else if (appLanguage == "العربية") "حرّك شخصيتك باستخدام حركة مرجعية. قريباً." else "Karakterini referans hareketlerle canlandırma yakında." )).forEachIndexed { index, item ->
-                        Card(Modifier.fillMaxWidth().padding(bottom = 10.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF1A2032)), shape = RoundedCornerShape(18.dp)) {
+                        Card(Modifier.fillMaxWidth().padding(bottom = 10.dp).border(1.dp, Color(0xFF303A55), RoundedCornerShape(18.dp)), colors = CardDefaults.cardColors(containerColor = Color(0xFF1A2032)), shape = RoundedCornerShape(18.dp)) {
                             Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Box(Modifier.size(46.dp).clip(RoundedCornerShape(14.dp)).background(listOf(Color(0xFF5535A6), Color(0xFF9B3F82), Color(0xFF176E9B), Color(0xFFB56A3C))[index]), contentAlignment = Alignment.Center) { Text(item.first, color = White, fontSize = 22.sp, fontWeight = FontWeight.Black) }
                                 Spacer(Modifier.width(13.dp))
                                 Column(Modifier.weight(1f)) { Text(item.second, color = White, fontWeight = FontWeight.Bold, fontSize = 15.sp); Text(item.third, color = Muted, fontSize = 11.sp, lineHeight = 16.sp) }
-                                if (index == 0) TextButton(onClick = { selectedTab = "create" }) { Text("AÇ", color = Accent) } else Text("YAKINDA", color = Muted, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                                if (index == 0) TextButton(onClick = { selectedTab = "create" }) { Text(tr("AÇ", "OPEN", "افتح"), color = Accent) } else Text(tr("YAKINDA", "COMING SOON", "قريباً"), color = Muted, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
