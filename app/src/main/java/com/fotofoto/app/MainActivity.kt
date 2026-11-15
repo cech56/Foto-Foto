@@ -377,7 +377,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 }
             }
             Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().navigationBarsPadding()
-                .background(Color(0xF2171B2C)).border(1.dp, Color(0xFF33245B), RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+                .background(Brush.verticalGradient(listOf(Color(0xF21C2038), Color(0xFF111426)))).border(1.2.dp, Color(0xFF51318B), RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
                 .padding(horizontal = 12.dp, vertical = 5.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
                 val navItems = listOf(
                     Triple("home", "⌂", if (appLanguage == "English") "Home" else if (appLanguage == "العربية") "الرئيسية" else "Ana Sayfa"),
@@ -391,8 +391,9 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                     if (item.first == "create") {
                         Column(Modifier.weight(1f).padding(horizontal = 3.dp).offset(y = (-5).dp)
                             .clip(RoundedCornerShape(20.dp))
-                            .background(Brush.verticalGradient(listOf(Color(0xFF762BEB), Color(0xFF32136C))))
-                            .border(1.5.dp, Color(0xFFC58BFF), RoundedCornerShape(20.dp))
+                            .background(Brush.verticalGradient(listOf(Color(0xFF9A35FF), Color(0xFF5A1CB4), Color(0xFF28105E))))
+                            .border(1.8.dp, Color(0xFFE2A5FF), RoundedCornerShape(20.dp))
+                            .graphicsLayer { shadowElevation = 20.dp.toPx(); ambientShadowColor = Color(0xFFB34CFF); spotShadowColor = Color(0xFFB34CFF) }
                             .clickable { selectedTab = "create"; studioMode = "generate" }.padding(vertical = 9.dp),
                             horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("＋", color = White, fontSize = 34.sp, fontWeight = FontWeight.Light)
@@ -400,10 +401,12 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         }
                     } else {
                         Column(Modifier.weight(1f).padding(horizontal = 2.dp).clip(RoundedCornerShape(15.dp))
-                            .background(if (selected) Brush.verticalGradient(listOf(Color(0xFF462078), Color(0xFF24143E))) else Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent)))
+                            .background(if (selected) Brush.verticalGradient(listOf(Color(0xFF6330A0), Color(0xFF281747))) else Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent)))
+                            .border(if (selected) 1.dp else 0.dp, if (selected) Color(0xFF9B5BFF) else Color.Transparent, RoundedCornerShape(15.dp))
+                            .graphicsLayer { shadowElevation = if (selected) 12.dp.toPx() else 0f; ambientShadowColor = Color(0xFFB34CFF); spotShadowColor = Color(0xFFB34CFF) }
                             .clickable { selectedTab = item.first }.padding(vertical = 7.dp),
                             horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(item.second, color = if (selected) Color(0xFFFF6BE8) else White, fontSize = 23.sp, fontWeight = FontWeight.Bold)
+                            Text(item.second, color = if (selected) Color(0xFFFF82F4) else White, fontSize = 25.sp, fontWeight = FontWeight.Bold, modifier = Modifier.graphicsLayer { shadowElevation = 10.dp.toPx(); ambientShadowColor = if (selected) Color(0xFFFF4FE1) else Color(0xFF40CFFF); spotShadowColor = if (selected) Color(0xFFFF4FE1) else Color(0xFF40CFFF) })
                             Text(item.third, color = if (selected) White else Color(0xFFD1CDDE), fontSize = 9.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium, maxLines = 1)
                         }
                     }
@@ -434,35 +437,38 @@ private fun FotoFotoGalaxyHome(
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
-            Box(Modifier.align(Alignment.TopStart).padding(start = 10.dp, top = 10.dp).width(174.dp).height(92.dp)) {
+            Box(Modifier.align(Alignment.TopStart).padding(start = 10.dp, top = 10.dp).width(158.dp).height(82.dp)) {
                 Canvas(Modifier.fillMaxSize()) {
-                    val r = 18.dp.toPx()
-                    val bubble = Path().apply {
+                    val r = 17.dp.toPx()
+                    val bubbleBody = Path().apply {
                         moveTo(r, 0f)
                         lineTo(size.width-r, 0f)
                         quadraticTo(size.width, 0f, size.width, r)
-                        lineTo(size.width, size.height-r)
-                        quadraticTo(size.width, size.height, size.width-r, size.height)
-                        lineTo(size.width*.55f, size.height)
-                        lineTo(size.width*.40f, size.height*.98f)
-                        lineTo(size.width*.34f, size.height)
-                        lineTo(r, size.height)
-                        quadraticTo(0f, size.height, 0f, size.height-r)
+                        lineTo(size.width, size.height-r-10.dp.toPx())
+                        quadraticTo(size.width, size.height-10.dp.toPx(), size.width-r, size.height-10.dp.toPx())
+                        lineTo(size.width*.69f, size.height-10.dp.toPx())
+                        quadraticTo(size.width*.66f, size.height-10.dp.toPx(), size.width*.64f, size.height-5.dp.toPx())
+                        lineTo(size.width*.57f, size.height)
+                        quadraticTo(size.width*.55f, size.height+2.dp.toPx(), size.width*.54f, size.height-1.dp.toPx())
+                        lineTo(size.width*.53f, size.height-10.dp.toPx())
+                        lineTo(r, size.height-10.dp.toPx())
+                        quadraticTo(0f, size.height-10.dp.toPx(), 0f, size.height-10.dp.toPx()-r)
                         lineTo(0f, r)
                         quadraticTo(0f, 0f, r, 0f)
                         close()
                     }
-                    drawPath(bubble, Color(0xF20C1749))
-                    drawPath(bubble, Color(0xFF9B7BFF),
-                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.5.dp.toPx()))
+                    drawPath(bubbleBody, Color(0xF20B1646))
+                    drawPath(bubbleBody, Color(0xFFB46BFF),
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.6.dp.toPx()))
                 }
-                Column(Modifier.padding(start = 11.dp, end = 9.dp, top = 10.dp)) {
+                Column(Modifier.padding(start = 10.dp, end = 8.dp, top = 9.dp)) {
                     Text(if (tr) "Merhaba Serdar! 👋" else if (language == "English") "Hello! 👋" else "مرحباً! 👋",
-                        color = White, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp, maxLines = 1)
+                        color = White, fontWeight = FontWeight.ExtraBold, fontSize = 11.sp, maxLines = 1)
                     Spacer(Modifier.height(3.dp))
                     Text(if (tr) "Bugün ne tür bir video\\noluşturuyoruz?" else if (language == "English") "What video shall we\\ncreate today?" else "ما الفيديو الذي\\nسننشئه اليوم؟",
-                        color = White, fontSize = 10.sp, lineHeight = 14.sp)
+                        color = White, fontSize = 9.sp, lineHeight = 12.sp)
                 }
+            }
             }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -506,18 +512,81 @@ private fun FotoFotoGalaxyHome(
 
 @Composable
 private fun FotoHomeMenuCard(icon: String, label: String, tint: Color, modifier: Modifier, onClick: () -> Unit) {
-    Column(modifier.height(104.dp).clip(RoundedCornerShape(21.dp))
-        .background(Brush.verticalGradient(listOf(tint.copy(alpha = 0.26f), Color(0xFF17132F))))
-        .border(1.5.dp, tint, RoundedCornerShape(23.dp))
-        .clickable(onClick = onClick).padding(horizontal = 3.dp, vertical = 10.dp),
+    val kind = when (icon) { "▧" -> 0; "▣" -> 1; "HD" -> 2; else -> 3 }
+    Column(modifier.height(112.dp).clip(RoundedCornerShape(22.dp))
+        .background(Brush.verticalGradient(listOf(tint.copy(alpha = 0.30f), Color(0xFF17132F), Color(0xFF100F25))))
+        .border(1.7.dp, tint, RoundedCornerShape(23.dp))
+        .clickable(onClick = onClick).padding(horizontal = 3.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Text(icon, color = tint, fontSize = 31.sp, fontWeight = FontWeight.Black, modifier = Modifier.graphicsLayer { shadowElevation = 13.dp.toPx(); ambientShadowColor = tint; spotShadowColor = tint })
-        Spacer(Modifier.height(9.dp))
-        Text(label, color = White, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold,
-            lineHeight = 14.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        FotoFeatureIcon(kind, tint, Modifier.size(51.dp))
+        Spacer(Modifier.height(7.dp))
+        Text(label, color = White, fontSize = 10.5.sp, fontWeight = FontWeight.ExtraBold,
+            lineHeight = 13.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
     }
 }
 
+@Composable
+private fun FotoFeatureIcon(kind: Int, tint: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier) {
+        val sx = size.width / 64f
+        val sy = size.height / 64f
+        fun p(x: Float, y: Float) = Offset(x*sx, y*sy)
+        fun sz(w: Float, h: Float) = Size(w*sx, h*sy)
+        val stroke = 3.8f * minOf(sx, sy)
+        // Soft colored aura and a double neon outline make the icons read like the reference artwork.
+        drawCircle(Brush.radialGradient(listOf(tint.copy(alpha = .34f), tint.copy(alpha = .08f), Color.Transparent),
+            center = p(32f, 30f), radius = 31f*sx), 31f*sx, p(32f, 30f))
+        when (kind) {
+            0 -> { // Photo frame with play badge
+                drawRoundRect(tint, p(7f, 7f), sz(43f, 40f), CornerRadius(7f*sx),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(stroke))
+                drawCircle(tint, 4f*sx, p(19f, 19f))
+                val mountain = Path().apply { moveTo(p(11f, 42f).x,p(11f,42f).y); lineTo(p(23f,29f).x,p(23f,29f).y); lineTo(p(31f,37f).x,p(31f,37f).y); lineTo(p(38f,30f).x,p(38f,30f).y); lineTo(p(47f,42f).x,p(47f,42f).y) }
+                drawPath(mountain, tint, style = androidx.compose.ui.graphics.drawscope.Stroke(stroke, cap = StrokeCap.Round, join = androidx.compose.ui.graphics.StrokeJoin.Round))
+                drawCircle(Color(0xFF170F35), 12f*sx, p(48f, 47f))
+                drawCircle(tint, 12f*sx, p(48f, 47f), style = androidx.compose.ui.graphics.drawscope.Stroke(stroke*.8f))
+                val play = Path().apply { moveTo(p(45f,40f).x,p(45f,40f).y); lineTo(p(54f,47f).x,p(54f,47f).y); lineTo(p(45f,54f).x,p(45f,54f).y); close() }
+                drawPath(play, tint)
+            }
+            1 -> { // Cinematic clapperboard and play
+                drawRoundRect(tint, p(8f, 19f), sz(48f, 34f), CornerRadius(5f*sx),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(stroke))
+                drawRoundRect(tint, p(8f, 9f), sz(48f, 13f), CornerRadius(3f*sx))
+                for (i in 0..3) {
+                    val x = 11f + i*12f
+                    val stripe = Path().apply { moveTo(p(x,10f).x,p(x,10f).y); lineTo(p(x+6f,21f).x,p(x+6f,21f).y) }
+                    drawPath(stripe, Color(0xFF10152E), style = androidx.compose.ui.graphics.drawscope.Stroke(2.8f*sx))
+                }
+                val play = Path().apply { moveTo(p(26f,28f).x,p(26f,28f).y); lineTo(p(42f,37f).x,p(42f,37f).y); lineTo(p(26f,46f).x,p(26f,46f).y); close() }
+                drawPath(play, tint)
+            }
+            2 -> { // HD display monitor
+                drawRoundRect(tint, p(6f, 8f), sz(52f, 39f), CornerRadius(6f*sx),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(stroke))
+                drawRoundRect(tint.copy(alpha=.20f), p(11f,13f), sz(42f,29f), CornerRadius(3f*sx))
+                val hd = Path().apply {
+                    moveTo(p(15f,19f).x,p(15f,19f).y); lineTo(p(25f,19f).x,p(25f,19f).y); lineTo(p(25f,25f).x,p(25f,25f).y); lineTo(p(18f,25f).x,p(18f,25f).y); lineTo(p(18f,29f).x,p(18f,29f).y); lineTo(p(25f,29f).x,p(25f,29f).y)
+                    moveTo(p(30f,19f).x,p(30f,19f).y); lineTo(p(30f,29f).x,p(30f,29f).y); lineTo(p(39f,29f).x,p(39f,29f).y); lineTo(p(39f,19f).x,p(39f,19f).y); close()
+                }
+                drawPath(hd, tint, style = androidx.compose.ui.graphics.drawscope.Stroke(3f*sx, cap=StrokeCap.Round, join=androidx.compose.ui.graphics.StrokeJoin.Round))
+                drawLine(tint, p(32f,48f), p(32f,56f), strokeWidth=stroke, cap=StrokeCap.Round)
+                drawLine(tint, p(21f,57f), p(43f,57f), strokeWidth=stroke, cap=StrokeCap.Round)
+            }
+            else -> { // Friendly robot character
+                drawRoundRect(tint, p(13f, 17f), sz(38f, 32f), CornerRadius(11f*sx),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(stroke))
+                drawLine(tint, p(32f,8f), p(32f,16f), strokeWidth=stroke, cap=StrokeCap.Round)
+                drawCircle(tint, 3.5f*sx, p(32f,7f))
+                drawCircle(tint, 3.2f*sx, p(24f,30f))
+                drawCircle(tint, 3.2f*sx, p(40f,30f))
+                drawArc(tint, 15f*sx, 15f*sy, 180f, 180f, false, p(23f,32f), sz(18f,10f),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(2.8f*sx, cap=StrokeCap.Round))
+                drawLine(tint, p(20f,51f), p(15f,57f), strokeWidth=stroke, cap=StrokeCap.Round)
+                drawLine(tint, p(44f,51f), p(49f,57f), strokeWidth=stroke, cap=StrokeCap.Round)
+            }
+        }
+    }
+}
 @Composable
 private fun FotoRobotMascot(modifier: Modifier = Modifier) {
     Canvas(modifier) {
