@@ -103,7 +103,7 @@ fun AccountWalletCard(onRefresh: Int = 0) {
                 }
                 TextButton(onClick = { refreshKey++ }, enabled = !loading) { Text(if (loading) "YÜKLENİYOR" else "YENİLE", color = Color(0xFFFF795E)) }
             }
-            Text("Gen-4.5 tahmini tüketim: 5 sn = 60 kredi · 10 sn = 120 kredi.", color = Color(0xFF9AA3B6), fontSize = 10.sp)
+            Text("Gen-4.5 fiyatı: 5 sn = 59 kredi · 10 sn = 119 kredi. 1 kredi = 1 TL.", color = Color(0xFF9AA3B6), fontSize = 10.sp)
             Spacer(Modifier.height(12.dp))
             Text("SON KREDİ HAREKETLERİ", color = Color(0xFFFF795E), fontSize = 10.sp)
             Spacer(Modifier.height(6.dp))
