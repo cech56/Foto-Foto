@@ -115,6 +115,37 @@ const server = http.createServer(async (req, res) => {
       return send(res, 202, { taskId: task.id || task.taskId, status: task.status || "PENDING" });
     }
 
+    if (req.method === "POST" && req.url === "/api/upscale-video") {
+      const user = await requireUser(req);
+      if (!user?.id) return send(res, 401, { message: "FOTO FOTO hesabına giriş yapmalısın." });
+      const input = await readJson(req);
+      const videoUri = typeof input.videoUri === "string" ? input.videoUri : "";
+      const resolution = typeof input.resolution === "string" ? input.resolution : "2k";
+      const creativity = Number.isInteger(input.creativity) ? input.creativity : 30;
+      const sharpen = Number.isInteger(input.sharpen) ? input.sharpen : 40;
+      if (!videoUri.startsWith("data:video/") || videoUri.length > 4_800_000) {
+        return send(res, 400, { message: "Video biçimi geçersiz veya dosya 3,5 MB sınırını aşıyor." });
+      }
+      if (!["720p", "1k", "2k", "4k"].includes(resolution)) {
+        return send(res, 400, { message: "Desteklenmeyen çözünürlük." });
+      }
+      if (creativity < 0 || creativity > 100 || sharpen < 0 || sharpen > 100) {
+        return send(res, 400, { message: "Görüntü ayarları 0–100 arasında olmalı." });
+      }
+      const task = await runway("/v1/video_upscale", {
+        method: "POST",
+        body: JSON.stringify({
+          model: "magnific_video_upscaler_creative",
+          videoUri,
+          resolution,
+          creativity,
+          sharpen,
+          flavor: "natural"
+        })
+      });
+      return send(res, 202, { taskId: task.id || task.taskId, status: task.status || "PENDING" });
+    }
+
     const match = req.method === "GET" && req.url?.match(/^\/api\/tasks\/([a-zA-Z0-9_-]+)$/);
     if (match) {
       const user = await requireUser(req);
