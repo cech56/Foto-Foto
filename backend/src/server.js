@@ -119,7 +119,7 @@ async function runway(path, options = {}) {
 
 const server = http.createServer(async (req, res) => {
   if (req.method === "OPTIONS") return send(res, 204, {});
-  if (req.method === "GET" && req.url === "/health") {
+  if (req.method === "GET" && new URL(req.url, "http://localhost").pathname === "/health") {
     const checks = {
       supabaseUrl: Boolean(SUPABASE_URL),
       supabasePublishableKey: Boolean(SUPABASE_PUBLISHABLE_KEY),
