@@ -118,13 +118,23 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                                 status = result.first
                                 taskId = result.second
                                 if (taskId.isNotBlank()) {
-                                    status = "Video kuyruğa alındı. Üretim durumu kontrol ediliyor…"
+                                    val saved = saveVideoHistory(context, taskId, prompt, duration, ratio)
+                                    if (saved) {
+                                        historyRefresh++
+                                        status = "Video kuyruğa alındı. Üretim durumu kontrol ediliyor…"
+                                    } else {
+                                        status = "Video görevi alındı ancak geçmişe kaydedilemedi. İşlem güvenli şekilde izlenemiyor."
+                                    }
                                     for (attempt in 0 until 120) {
                                         delay(5000)
                                         val task = checkGeneration(context, taskId)
                                         status = task.message
                                         if (task.videoUrl.isNotBlank()) videoUrl = task.videoUrl
-                                        if (task.finished) break
+                                        if (task.finished) {
+                                            if (task.videoUrl.isNotBlank()) updateVideoHistory(context, taskId, "SUCCEEDED", task.videoUrl)
+                                            historyRefresh++
+                                            break
+                                        }
                                     }
                                 }
                                 if (loading && taskId.isNotBlank() && videoUrl.isBlank() && status.contains("kontrol")) status = "Üretim takibi zaman aşımına uğradı. Daha sonra tekrar kontrol edebilirsin."
