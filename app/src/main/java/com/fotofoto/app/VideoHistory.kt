@@ -86,6 +86,33 @@ suspend fun updateVideoHistory(context: Context, taskId: String, status: String,
         } catch (_: Exception) { false }
     }
 
+suspend fun refreshVideoHistoryItem(context: Context, taskId: String): String = withContext(Dispatchers.IO) {
+    try {
+        val token = SessionStore.read(context)?.optString("access_token").orEmpty()
+        if (token.isBlank()) return@withContext "Oturum bulunamadı. Tekrar giriş yap."
+        val request = Request.Builder()
+            .url(BuildConfig.API_BASE_URL.trimEnd('/') + "/api/tasks/" + Uri.encode(taskId))
+            .header("Authorization", "Bearer $token")
+            .get().build()
+        historyHttp.newCall(request).execute().use { response ->
+            val data = JSONObject(response.body?.string().orEmpty())
+            if (!response.isSuccessful) return@withContext data.optString("message").ifBlank { "Görev durumu alınamadı." }
+            val status = data.optString("status", "PENDING").uppercase()
+            val output = data.optJSONArray("output")
+            val videoUrl = output?.optString(0).orEmpty().takeIf { it.startsWith("https://") }
+            updateVideoHistory(context, taskId, status, videoUrl)
+            when (status) {
+                "SUCCEEDED" -> "Video hazır."
+                "FAILED" -> "Üretim başarısız oldu. Ayrılan krediler iade edildi."
+                "CANCELED", "CANCELLED" -> "Üretim iptal edildi. Ayrılan krediler iade edildi."
+                else -> "Video hâlâ hazırlanıyor: $status"
+            }
+        }
+    } catch (_: Exception) {
+        "Durum kontrol edilemedi. İnternet bağlantını kontrol et."
+    }
+}
+
 suspend fun loadVideoHistory(context: Context): List<VideoHistoryItem> = withContext(Dispatchers.IO) {
     try {
         val request = historyHeaders(context, Request.Builder()
@@ -106,16 +133,26 @@ suspend fun loadVideoHistory(context: Context): List<VideoHistoryItem> = withCon
 @Composable
 fun VideoHistoryCard(refreshKey: Int) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var items by remember { mutableStateOf<List<VideoHistoryItem>>(emptyList()) }
     var loading by remember { mutableStateOf(true) }
-    LaunchedEffect(refreshKey) {
+    var checkingTask by remember { mutableStateOf("") }
+    var feedback by remember { mutableStateOf("") }
+    suspend fun reloadHistory() {
         loading = true
         items = loadVideoHistory(context)
         loading = false
     }
+    LaunchedEffect(refreshKey) { reloadHistory() }
     Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF151B2B)), shape = RoundedCornerShape(18.dp)) {
         Column(Modifier.fillMaxWidth().padding(18.dp)) {
-            Text("VİDEO GEÇMİŞİ", color = Color(0xFFFF795E), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("VİDEO GEÇMİŞİ", color = Color(0xFFFF795E), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                TextButton(onClick = { scope.launch { reloadHistory() } }, enabled = !loading && checkingTask.isBlank(), contentPadding = PaddingValues(0.dp)) {
+                    Text("YENİLE", color = Color(0xFFFF795E), fontSize = 10.sp)
+                }
+            }
+            if (feedback.isNotBlank()) Text(feedback, color = Color(0xFF9AA3B6), fontSize = 10.sp)
             Spacer(Modifier.height(8.dp))
             when {
                 loading -> Text("Geçmiş yükleniyor…", color = Color(0xFF9AA3B6), fontSize = 12.sp)
@@ -126,6 +163,23 @@ fun VideoHistoryCard(refreshKey: Int) {
                         Text(item.prompt, color = Color.White, fontSize = 12.sp, maxLines = 2)
                         Spacer(Modifier.height(4.dp))
                         Text(item.status, color = Color(0xFFFF795E), fontSize = 10.sp)
+                        if (item.status.uppercase() !in listOf("SUCCEEDED", "FAILED", "CANCELED", "CANCELLED")) {
+                            TextButton(
+                                onClick = {
+                                    checkingTask = item.taskId
+                                    feedback = ""
+                                    scope.launch {
+                                        feedback = refreshVideoHistoryItem(context, item.taskId)
+                                        checkingTask = ""
+                                        reloadHistory()
+                                    }
+                                },
+                                enabled = checkingTask.isBlank(),
+                                contentPadding = PaddingValues(0.dp)
+                            ) {
+                                Text(if (checkingTask == item.taskId) "KONTROL EDİLİYOR…" else "DURUMU KONTROL ET", color = Color(0xFFFF795E), fontSize = 10.sp)
+                            }
+                        }
                         if (item.videoUrl.startsWith("https://")) {
                             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 TextButton(onClick = {
