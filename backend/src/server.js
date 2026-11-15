@@ -2,6 +2,8 @@ import http from "node:http";
 
 const PORT = Number(process.env.PORT || 8080);
 const RUNWAY_API_KEY = process.env.RUNWAY_API_KEY;
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
 const RUNWAY_BASE = "https://api.dev.runwayml.com";
 const RUNWAY_VERSION = "2024-11-06";
 
@@ -23,6 +25,14 @@ async function readJson(req) {
     if (raw.length > 20_000) throw new Error("İstek çok büyük.");
   }
   return JSON.parse(raw || "{}");
+}
+
+async function requireUser(req) {
+  const auth = req.headers.authorization || "";
+  if (!auth.startsWith("Bearer ") || !SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) return null;
+  const response = await fetch(SUPABASE_URL + "/auth/v1/user", { headers: { apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: auth } });
+  if (!response.ok) return null;
+  return response.json();
 }
 
 async function runway(path, options = {}) {
@@ -52,6 +62,8 @@ const server = http.createServer(async (req, res) => {
 
   try {
     if (req.method === "POST" && req.url === "/api/generate") {
+      const user = await requireUser(req);
+      if (!user?.id) return send(res, 401, { message: "FOTO FOTO hesabına giriş yapmalısın." });
       const input = await readJson(req);
       const prompt = typeof input.prompt === "string" ? input.prompt.trim() : "";
       const duration = Number(input.duration);
@@ -72,6 +84,8 @@ const server = http.createServer(async (req, res) => {
 
     const match = req.method === "GET" && req.url?.match(/^\/api\/tasks\/([a-zA-Z0-9_-]+)$/);
     if (match) {
+      const user = await requireUser(req);
+      if (!user?.id) return send(res, 401, { message: "Oturum doğrulanamadı." });
       const task = await runway("/v1/tasks/" + encodeURIComponent(match[1]), { method: "GET" });
       return send(res, 200, task);
     }
