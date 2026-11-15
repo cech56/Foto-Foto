@@ -113,7 +113,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                     Spacer(Modifier.width(12.dp))
                     Column {
                         Text("FOTO FOTO", fontSize = 19.sp, fontWeight = FontWeight.Black, letterSpacing = 1.6.sp)
-                        Text("AI VIDEO STÜDYOSU", color = Muted, fontSize = 9.sp, letterSpacing = 2.sp)
+                        Text(if (appLanguage == "English") "AI VIDEO STUDIO" else if (appLanguage == "العربية") "استوديو فيديو ذكي" else "AI VIDEO STÜDYOSU", color = Muted, fontSize = 9.sp, letterSpacing = 2.sp)
                     }
                     Spacer(Modifier.weight(1f))
                     IconButton(onClick = { settingsOpen = true }) {
@@ -129,11 +129,11 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         .padding(20.dp)
                 ) {
                     Column {
-                        Text("HAYALİNİ HAREKETE GEÇİR", color = Color.White.copy(alpha = 0.78f), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.6.sp)
+                        Text(if (appLanguage == "English") "BRING YOUR IMAGINATION TO LIFE" else if (appLanguage == "العربية") "حوّل خيالك إلى واقع" else "HAYALİNİ HAREKETE GEÇİR", color = Color.White.copy(alpha = 0.78f), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.6.sp)
                         Spacer(Modifier.height(9.dp))
                         Text("Fotoğrafından\nSinematik Video Üret", color = White, fontSize = 27.sp, lineHeight = 31.sp, fontWeight = FontWeight.Black)
                         Spacer(Modifier.height(8.dp))
-                        Text("Bir fikir yaz. Gerisini yapay zekâya bırak.", color = White.copy(alpha = 0.86f), fontSize = 12.sp)
+                        Text(if (appLanguage == "English") "Write an idea. Let AI do the rest." else if (appLanguage == "العربية") "اكتب فكرتك ودع الذكاء الاصطناعي يتولى الباقي." else "Bir fikir yaz. Gerisini yapay zekâya bırak.", color = White.copy(alpha = 0.86f), fontSize = 12.sp)
                         Spacer(Modifier.height(15.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(Modifier.background(Color.White.copy(alpha = 0.20f), RoundedCornerShape(50)).padding(horizontal = 13.dp, vertical = 8.dp)) {
@@ -337,7 +337,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 }
                 if (selectedTab == "tools") {
                     Spacer(Modifier.height(22.dp))
-                    Text("YARATICI ARAÇLAR", color = Color(0xFFB99AFF), fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
+                    Text(if (appLanguage == "English") "CREATIVE TOOLS" else if (appLanguage == "العربية") "أدوات إبداعية" else "YARATICI ARAÇLAR", color = Color(0xFFB99AFF), fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
                     Spacer(Modifier.height(12.dp))
                     listOf(Triple("✦", "Fotoğraftan video", "Tek bir görseli sinematik sahneye dönüştür."), Triple("◈", "Video düzenleme", "Mevcut videolar üzerinde yapay zekâ düzenlemeleri yakında."), Triple("⬆", "Video kalite artırma", "Daha yüksek çözünürlük araçları hazırlanıyor."), Triple("☺", "Karakter animasyonu", "Karakterini referans hareketlerle canlandırma yakında." )).forEachIndexed { index, item ->
                         Card(Modifier.fillMaxWidth().padding(bottom = 10.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF1A2032)), shape = RoundedCornerShape(18.dp)) {
@@ -358,7 +358,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 }
             }
             Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().background(Color(0xF2171B2C)).padding(horizontal = 5.dp, vertical = 8.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
-                listOf(Triple("home", "⌂", "Ana Sayfa"), Triple("projects", "▤", "Projelerim"), Triple("create", "＋", "Oluştur"), Triple("tools", "✧", "Araçlar"), Triple("account", "◉", "Hesabım")).forEach { item ->
+                listOf(Triple("home", "⌂", if (appLanguage == "English") "Home" else if (appLanguage == "العربية") "الرئيسية" else "Ana Sayfa"), Triple("projects", "▤", if (appLanguage == "English") "Projects" else if (appLanguage == "العربية") "مشاريعي" else "Projelerim"), Triple("create", "＋", if (appLanguage == "English") "Create" else if (appLanguage == "العربية") "إنشاء" else "Oluştur"), Triple("tools", "✧", if (appLanguage == "English") "Tools" else if (appLanguage == "العربية") "الأدوات" else "Araçlar"), Triple("account", "◉", if (appLanguage == "English") "Account" else if (appLanguage == "العربية") "حسابي" else "Hesabım")).forEach { item ->
                     Column(Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).clickable { selectedTab = item.first }.padding(vertical = 5.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(item.second, color = if (selectedTab == item.first) Color(0xFFFF8B72) else Muted, fontSize = 20.sp, fontWeight = FontWeight.Black)
                         Text(item.third, color = if (selectedTab == item.first) White else Muted, fontSize = 9.sp, fontWeight = if (selectedTab == item.first) FontWeight.Bold else FontWeight.Normal)
