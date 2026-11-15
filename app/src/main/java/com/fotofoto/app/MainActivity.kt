@@ -249,7 +249,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                     }
                 }
                 Spacer(Modifier.height(16.dp))
-                AccountWalletCard()
+                AccountWalletCard(historyRefresh)
                 Spacer(Modifier.height(16.dp))
                 VideoHistoryCard(historyRefresh)
                 Spacer(Modifier.height(16.dp))
