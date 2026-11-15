@@ -21,4 +21,4 @@ The provider key is never sent to the Android app. This initial backend does not
 - `SUPABASE_PUBLISHABLE_KEY`: FOTO FOTO public publishable key; used only to verify user access tokens against Supabase Auth.
 - `RUNWAY_API_KEY`: Runway API secret; keep it in the hosting provider's secret manager and never commit it.
 
-Video generation and task status routes now require a valid FOTO FOTO Supabase access token in the Authorization Bearer header.
+Video generation and task status routes require a valid FOTO FOTO Supabase access token in the Authorization Bearer header. Task status lookup additionally checks that the provider task ID exists in the signed-in user's `video_generations` rows. Run `supabase/migrations/0003_video_history.sql` before using task polling. The Android app creates and updates its own history rows using the user JWT.
