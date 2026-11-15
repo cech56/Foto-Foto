@@ -146,7 +146,7 @@ const server = http.createServer(async (req, res) => {
       const payload = imageUri
         ? { model: "gen4.5", promptText: prompt, uri: imageUri, position: "first", duration, ratio }
         : { model: "gen4.5", promptText: prompt, duration, ratio };
-      const cost = duration * 12;
+      const cost = duration === 5 ? 59 : 119;
       const reservationId = await reserveCredits(user.id, cost, "Gen-4.5 video üretimi (" + duration + " saniye)");
       try {
         const task = await runway(endpoint, { method: "POST", body: JSON.stringify(payload) });
