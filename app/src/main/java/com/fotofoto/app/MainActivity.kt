@@ -118,7 +118,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                     confirmButton = { TextButton(onClick = { settingsOpen = false }) { Text(if (appLanguage == "English") "Done" else if (appLanguage == "العربية") "تم" else "Tamam", color = Accent) } }
                 )
             }
-            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 92.dp)) {
+            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 12.dp).padding(bottom = 84.dp)) {
                 Spacer(Modifier.height(10.dp))
                 Row(Modifier.fillMaxWidth().height(66.dp), verticalAlignment = Alignment.CenterVertically) {
                     Box(Modifier.clip(RoundedCornerShape(24.dp)).border(1.dp, Color(0xFF9B72FF), RoundedCornerShape(24.dp))
@@ -370,12 +370,6 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         }
                     }
                 }
-                if (selectedTab == "home") {
-                Spacer(Modifier.height(16.dp))
-                Spacer(Modifier.height(26.dp))
-                Text(tr("FOTO FOTO  ·  FİKRİNİ VİDEOYA DÖNÜŞTÜR", "FOTO FOTO  ·  TURN YOUR IDEA INTO VIDEO", "FOTO FOTO · حوّل فكرتك إلى فيديو"), color = Muted, fontSize = 10.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
-                Spacer(Modifier.height(28.dp))
-                }
             }
             Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().navigationBarsPadding()
                 .background(Color(0xF2171B2C)).border(1.dp, Color(0xFF33245B), RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
@@ -426,7 +420,7 @@ private fun FotoFotoGalaxyHome(
     val tr = language != "English" && language != "العربية"
     val glow = Color(0xFFB66BFF)
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Box(Modifier.fillMaxWidth().height(286.dp).clip(RoundedCornerShape(27.dp))
+        Box(Modifier.fillMaxWidth().height(225.dp).clip(RoundedCornerShape(27.dp))
             .border(1.5.dp, Color(0xFF8D63FF), RoundedCornerShape(27.dp))
             .background(Color(0xFF15133B))) {
             Image(
@@ -456,10 +450,10 @@ private fun FotoFotoGalaxyHome(
             FotoHomeMenuCard("♙", if (tr) "Karakter\nAnimasyonu" else if (language == "English") "Character\nAnimation" else "تحريك\nالشخصية",
                 Color(0xFFFFA13D), Modifier.weight(1f), onCharacter)
         }
-        Box(Modifier.fillMaxWidth().height(91.dp).clip(RoundedCornerShape(21.dp))
+        Box(Modifier.fillMaxWidth().height(70.dp).clip(RoundedCornerShape(21.dp))
             .background(Brush.horizontalGradient(listOf(Color(0xFF241052), Color(0xFF6122A1), Color(0xFF26104E))))
             .border(1.dp, Color(0xFF8659FF), RoundedCornerShape(21.dp))) {
-            Text("🤖", Modifier.align(Alignment.CenterStart).padding(start = 12.dp), fontSize = 47.sp)
+            Text("🤖", Modifier.align(Alignment.CenterStart).padding(start = 12.dp), fontSize = 39.sp)
             Column(Modifier.align(Alignment.Center).padding(start = 76.dp, end = 65.dp)) {
                 Text(if (tr) "Yapay Zekâ ile" else if (language == "English") "With AI" else "بالذكاء الاصطناعي",
                     color = White, fontSize = 13.sp, fontWeight = FontWeight.ExtraBold)
@@ -481,14 +475,14 @@ private fun FotoFotoGalaxyHome(
 
 @Composable
 private fun FotoHomeMenuCard(icon: String, label: String, tint: Color, modifier: Modifier, onClick: () -> Unit) {
-    Column(modifier.height(116.dp).clip(RoundedCornerShape(23.dp))
+    Column(modifier.height(78.dp).clip(RoundedCornerShape(23.dp))
         .background(Brush.verticalGradient(listOf(tint.copy(alpha = 0.26f), Color(0xFF17132F))))
         .border(1.5.dp, tint, RoundedCornerShape(23.dp))
         .clickable(onClick = onClick).padding(horizontal = 3.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Text(icon, color = tint, fontSize = 31.sp, fontWeight = FontWeight.Black)
-        Spacer(Modifier.height(8.dp))
-        Text(label, color = White, fontSize = 10.sp, fontWeight = FontWeight.ExtraBold,
+        Text(icon, color = tint, fontSize = 26.sp, fontWeight = FontWeight.Black)
+        Spacer(Modifier.height(5.dp))
+        Text(label, color = White, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold,
             lineHeight = 12.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
     }
 }
