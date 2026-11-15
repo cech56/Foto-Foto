@@ -96,6 +96,25 @@ const server = http.createServer(async (req, res) => {
       return send(res, 202, { taskId: task.id || task.taskId, status: task.status || "PENDING" });
     }
 
+    if (req.method === "POST" && req.url === "/api/edit-video") {
+      const user = await requireUser(req);
+      if (!user?.id) return send(res, 401, { message: "FOTO FOTO hesabına giriş yapmalısın." });
+      const input = await readJson(req);
+      const prompt = typeof input.prompt === "string" ? input.prompt.trim() : "";
+      const videoUri = typeof input.videoUri === "string" ? input.videoUri : "";
+      if (prompt.length < 3 || prompt.length > 1000) {
+        return send(res, 400, { message: "Düzenleme açıklaması 3–1000 karakter arasında olmalı." });
+      }
+      if (!videoUri.startsWith("data:video/") || videoUri.length > 4_800_000) {
+        return send(res, 400, { message: "Video biçimi geçersiz veya dosya 3,5 MB sınırını aşıyor." });
+      }
+      const task = await runway("/v1/video_to_video", {
+        method: "POST",
+        body: JSON.stringify({ model: "aleph2", videoUri, promptText: prompt })
+      });
+      return send(res, 202, { taskId: task.id || task.taskId, status: task.status || "PENDING" });
+    }
+
     const match = req.method === "GET" && req.url?.match(/^\/api\/tasks\/([a-zA-Z0-9_-]+)$/);
     if (match) {
       const user = await requireUser(req);
