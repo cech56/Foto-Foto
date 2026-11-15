@@ -133,7 +133,10 @@ suspend fun loadVideoHistory(context: Context): List<VideoHistoryItem> = withCon
 }
 
 @Composable
-fun VideoHistoryCard(refreshKey: Int) {
+fun VideoHistoryCard(refreshKey: Int, language: String = "Türkçe") {
+    val en = language == "English"
+    val ar = language == "العربية"
+    fun tr(t: String, e: String, a: String) = if (en) e else if (ar) a else t
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var items by remember { mutableStateOf<List<VideoHistoryItem>>(emptyList()) }
@@ -149,16 +152,16 @@ fun VideoHistoryCard(refreshKey: Int) {
     Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF151B2B)), shape = RoundedCornerShape(18.dp)) {
         Column(Modifier.fillMaxWidth().padding(18.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("VİDEO GEÇMİŞİ", color = Color(0xFFFF795E), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text(tr("VİDEO GEÇMİŞİ", "VIDEO HISTORY", "سجل الفيديو"), color = Color(0xFFFF795E), fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 TextButton(onClick = { scope.launch { reloadHistory() } }, enabled = !loading && checkingTask.isBlank(), contentPadding = PaddingValues(0.dp)) {
-                    Text("YENİLE", color = Color(0xFFFF795E), fontSize = 10.sp)
+                    Text(tr("YENİLE", "REFRESH", "تحديث"), color = Color(0xFFFF795E), fontSize = 10.sp)
                 }
             }
             if (feedback.isNotBlank()) Text(feedback, color = Color(0xFF9AA3B6), fontSize = 10.sp)
             Spacer(Modifier.height(8.dp))
             when {
-                loading -> Text("Geçmiş yükleniyor…", color = Color(0xFF9AA3B6), fontSize = 12.sp)
-                items.isEmpty() -> Text("Henüz oluşturulmuş video yok.", color = Color(0xFF9AA3B6), fontSize = 12.sp)
+                loading -> Text(tr("Geçmiş yükleniyor…", "Loading history…", "جارٍ تحميل السجل…"), color = Color(0xFF9AA3B6), fontSize = 12.sp)
+                items.isEmpty() -> Text(tr("Henüz oluşturulmuş video yok.", "No videos created yet.", "لم يتم إنشاء مقاطع فيديو بعد."), color = Color(0xFF9AA3B6), fontSize = 12.sp)
                 else -> items.forEachIndexed { index, item ->
                     val state = item.status.uppercase()
                     val done = state == "SUCCEEDED"
@@ -176,11 +179,11 @@ fun VideoHistoryCard(refreshKey: Int) {
                                 }
                                 Spacer(Modifier.width(10.dp))
                                 Column(Modifier.weight(1f)) {
-                                    Text("FOTO FOTO PROJESİ", color = Color(0xFF9AA3B6), fontSize = 8.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-                                    Text(item.prompt.ifBlank { "İsimsiz video projesi" }, color = Color.White, fontSize = 12.sp, maxLines = 2)
+                                    Text(tr("FOTO FOTO PROJESİ", "FOTO FOTO PROJECT", "مشروع FOTO FOTO"), color = Color(0xFF9AA3B6), fontSize = 8.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                                    Text(item.prompt.ifBlank { tr("İsimsiz video projesi", "Untitled video project", "مشروع فيديو بلا عنوان") }, color = Color.White, fontSize = 12.sp, maxLines = 2)
                                 }
                                 Box(Modifier.background(stateColor.copy(alpha = 0.14f), RoundedCornerShape(50)).padding(horizontal = 9.dp, vertical = 5.dp)) {
-                                    Text(when { done -> "HAZIR"; failed -> "BAŞARISIZ"; state == "PENDING" || state == "THROTTLED" -> "SIRADA"; else -> "ÜRETİLİYOR" }, color = stateColor, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                    Text(when { done -> tr("HAZIR", "READY", "جاهز"); failed -> tr("BAŞARISIZ", "FAILED", "فشل"); state == "PENDING" || state == "THROTTLED" -> tr("SIRADA", "QUEUED", "في الانتظار"); else -> tr("ÜRETİLİYOR", "GENERATING", "قيد الإنشاء") }, color = stateColor, fontSize = 8.sp, fontWeight = FontWeight.Bold)
                                 }
                             }
                             Spacer(Modifier.height(7.dp))
@@ -198,13 +201,13 @@ fun VideoHistoryCard(refreshKey: Int) {
                                     enabled = checkingTask.isBlank(),
                                     contentPadding = PaddingValues(0.dp)
                                 ) {
-                                    Text(if (checkingTask == item.taskId) "KONTROL EDİLİYOR…" else "↻  DURUMU KONTROL ET", color = Color(0xFFFFB36B), fontSize = 10.sp)
+                                    Text(if (checkingTask == item.taskId) tr("KONTROL EDİLİYOR…", "CHECKING…", "جارٍ التحقق…") else "↻  " + tr("DURUMU KONTROL ET", "CHECK STATUS", "تحقق من الحالة"), color = Color(0xFFFFB36B), fontSize = 10.sp)
                                 }
                             }
                             if (item.videoUrl.startsWith("https://")) {
                                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                     TextButton(onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(item.videoUrl))) }, contentPadding = PaddingValues(0.dp)) {
-                                        Text("▶  VİDEOYU AÇ", color = Color(0xFF55D6D0), fontSize = 10.sp)
+                                        Text("▶  " + tr("VİDEOYU AÇ", "OPEN VIDEO", "افتح الفيديو"), color = Color(0xFF55D6D0), fontSize = 10.sp)
                                     }
                                     TextButton(onClick = {
                                         val safeId = item.taskId.take(12).replace(Regex("[^A-Za-z0-9_-]"), "")
@@ -215,7 +218,7 @@ fun VideoHistoryCard(refreshKey: Int) {
                                             .setMimeType("video/mp4")
                                         (context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
                                     }, contentPadding = PaddingValues(0.dp)) {
-                                        Text("↓  İNDİR", color = Color(0xFFFFB36B), fontSize = 10.sp)
+                                        Text("↓  " + tr("İNDİR", "DOWNLOAD", "تنزيل"), color = Color(0xFFFFB36B), fontSize = 10.sp)
                                     }
                                 }
                             }
