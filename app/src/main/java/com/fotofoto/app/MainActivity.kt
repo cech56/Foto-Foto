@@ -430,7 +430,7 @@ private fun FotoFotoGalaxyHome(
             Text("🪨  ✨  🪨", Modifier.align(Alignment.BottomCenter).padding(bottom = 6.dp), fontSize = 34.sp)
             // Character and companion
             FotoRobotMascot(Modifier.align(Alignment.Center).offset(y = 42.dp).graphicsLayer { translationY = floatY }.size(width = 204.dp, height = 226.dp))
-            Text("🐱", Modifier.align(Alignment.BottomCenter).padding(bottom = 36.dp, end = 116.dp), fontSize = 49.sp)
+            FotoCatMascot(Modifier.align(Alignment.BottomCenter).padding(bottom = 31.dp, end = 112.dp).size(width = 88.dp, height = 72.dp))
             Text("🎬", Modifier.align(Alignment.CenterEnd).padding(top = 90.dp, end = 18.dp).graphicsLayer { rotationZ = floatY }, fontSize = 39.sp)
             Text("🎞️", Modifier.align(Alignment.BottomEnd).padding(end = 23.dp, bottom = 58.dp), fontSize = 30.sp)
             Column(Modifier.align(Alignment.TopStart).padding(start = 12.dp, top = 14.dp)
@@ -471,7 +471,7 @@ private fun FotoRobotMascot(modifier: Modifier = Modifier) {
         val sx = size.width / 204f
         val sy = size.height / 226f
         fun p(x: Float, y: Float) = Offset(x * sx, y * sy)
-        fun rect(x: Float, y: Float, w: Float, h: Float) = Size(w * sx, h * sy)
+        fun rect(w: Float, h: Float) = Size(w * sx, h * sy)
         // Soft neon aura behind the mascot
         drawCircle(Brush.radialGradient(listOf(Color(0x886A5CFF), Color(0x3326DFFF), Color.Transparent), center = p(102f, 116f), radius = 112f * sx), radius = 112f * sx, center = p(102f, 116f))
         // Legs and rounded boots
@@ -515,6 +515,60 @@ private fun FotoRobotMascot(modifier: Modifier = Modifier) {
         // Shell highlights
         drawLine(Color.White.copy(alpha = 0.8f), p(58f, 36f), p(82f, 29f), strokeWidth = 3f * sx, cap = StrokeCap.Round)
         drawCircle(Color(0xFF64E8FF), 2.5f * sx, p(153f, 116f))
+    }
+}
+
+
+@Composable
+private fun FotoCatMascot(modifier: Modifier = Modifier) {
+    Canvas(modifier) {
+        val sx = size.width / 100f
+        val sy = size.height / 82f
+        fun pt(x: Float, y: Float) = Offset(x * sx, y * sy)
+        fun rr(w: Float, h: Float) = Size(w * sx, h * sy)
+        val orange = Color(0xFFFFA34B)
+        val deepOrange = Color(0xFFE87527)
+        val cream = Color(0xFFFFF4E8)
+        // Soft shadow
+        drawOval(Color(0x66301858), topLeft = pt(7f, 67f), size = rr(88f, 12f))
+        // Tail
+        drawArc(orange, 205f, 250f, false, topLeft = pt(3f, 30f), size = rr(38f, 40f),
+            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 11f * sx, cap = StrokeCap.Round))
+        // Body
+        drawOval(Brush.linearGradient(listOf(Color(0xFFFFD18C), orange, deepOrange), pt(25f, 35f), pt(78f, 70f)), topLeft = pt(19f, 36f), size = rr(64f, 38f))
+        drawOval(cream, topLeft = pt(38f, 49f), size = rr(32f, 25f))
+        // Ears
+        val leftEar = Path().apply { moveTo(23f*sx, 37f*sy); lineTo(27f*sx, 5f*sy); lineTo(48f*sx, 27f*sy); close() }
+        val rightEar = Path().apply { moveTo(52f*sx, 27f*sy); lineTo(76f*sx, 5f*sy); lineTo(79f*sx, 39f*sy); close() }
+        drawPath(leftEar, orange); drawPath(rightEar, orange)
+        drawPath(Path().apply { moveTo(29f*sx, 27f*sy); lineTo(30f*sx, 13f*sy); lineTo(42f*sx, 27f*sy); close() }, Color(0xFFFFB4B4))
+        drawPath(Path().apply { moveTo(60f*sx, 27f*sy); lineTo(73f*sx, 14f*sy); lineTo(72f*sx, 30f*sy); close() }, Color(0xFFFFB4B4))
+        // Head and cheeks
+        drawCircle(orange, 30f*sx, pt(50f, 38f))
+        drawCircle(cream, 25f*sx, pt(50f, 41f))
+        drawCircle(orange, 17f*sx, pt(34f, 48f))
+        drawCircle(orange, 17f*sx, pt(66f, 48f))
+        drawCircle(cream, 13f*sx, pt(39f, 50f))
+        drawCircle(cream, 13f*sx, pt(61f, 50f))
+        // Eyes
+        drawCircle(Color(0xFF16385C), 4.1f*sx, pt(39f, 37f))
+        drawCircle(Color(0xFF16385C), 4.1f*sx, pt(61f, 37f))
+        drawCircle(Color.White, 1.4f*sx, pt(40f, 35.5f))
+        drawCircle(Color.White, 1.4f*sx, pt(62f, 35.5f))
+        // Nose and smile
+        val nose = Path().apply { moveTo(47f*sx, 46f*sy); lineTo(53f*sx, 46f*sy); lineTo(50f*sx, 50f*sy); close() }
+        drawPath(nose, Color(0xFFFF8EAA))
+        drawLine(Color(0xFF8D5A53), pt(50f, 50f), pt(50f, 54f), 1.4f*sx, cap = StrokeCap.Round)
+        drawArc(Color(0xFF8D5A53), 5f, 80f, false, topLeft = pt(43f, 49f), size = rr(8f, 7f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.3f*sx))
+        drawArc(Color(0xFF8D5A53), 95f, 80f, false, topLeft = pt(50f, 49f), size = rr(8f, 7f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.3f*sx))
+        // Whiskers
+        drawLine(Color(0xFFFFE7D1), pt(12f, 45f), pt(29f, 48f), 1.5f*sx)
+        drawLine(Color(0xFFFFE7D1), pt(11f, 54f), pt(29f, 53f), 1.5f*sx)
+        drawLine(Color(0xFFFFE7D1), pt(71f, 48f), pt(89f, 44f), 1.5f*sx)
+        drawLine(Color(0xFFFFE7D1), pt(71f, 53f), pt(90f, 55f), 1.5f*sx)
+        // Collar
+        drawArc(Color(0xFF35DFFF), 5f, 170f, false, topLeft = pt(28f, 55f), size = rr(44f, 18f),
+            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 4f*sx))
     }
 }
 
