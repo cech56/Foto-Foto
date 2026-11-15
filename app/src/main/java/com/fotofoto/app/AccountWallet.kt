@@ -58,7 +58,8 @@ fun AccountWalletCard(onRefresh: Int = 0) {
     val context = androidx.compose.ui.platform.LocalContext.current
     var summary by remember { mutableStateOf<AccountSummary?>(null) }
     var loading by remember { mutableStateOf(true) }
-    LaunchedEffect(onRefresh) {
+    var refreshKey by remember { mutableIntStateOf(onRefresh) }
+    LaunchedEffect(onRefresh, refreshKey) {
         loading = true
         summary = loadAccountSummary(context)
         loading = false
@@ -68,17 +69,17 @@ fun AccountWalletCard(onRefresh: Int = 0) {
             Text("HESABIM & KREDİ CÜZDANIM", color = Color(0xFF9AA3B6), fontSize = 10.sp)
             Spacer(Modifier.height(8.dp))
             Text(summary?.displayName?.takeIf { it.isNotBlank() } ?: "FOTO FOTO kullanıcısı", color = Color.White, fontSize = 19.sp)
-            Text(summary?.email ?: "Hesap bilgisi yükleniyor…", color = Color(0xFF9AA3B6), fontSize = 11.sp)
+            Text(summary?.email ?: if (loading) "Hesap bilgisi yükleniyor…" else "Hesap bilgisi alınamadı. İnternetini kontrol et.", color = Color(0xFF9AA3B6), fontSize = 11.sp)
             Spacer(Modifier.height(14.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
                     Text("KREDİ BAKİYESİ", color = Color(0xFF9AA3B6), fontSize = 9.sp)
-                    Text(if (loading) "…" else "${summary?.credits ?: 0} kredi", color = Color(0xFFFF795E), fontSize = 24.sp)
+                    Text(if (loading) "…" else summary?.let { "${it.credits} kredi" } ?: "—", color = Color(0xFFFF795E), fontSize = 24.sp)
                     Text("1 kredi = 1 TL", color = Color(0xFF9AA3B6), fontSize = 10.sp)
                 }
-                TextButton(onClick = { /* refreshed when screen recomposes */ }) { Text("YAKINDA", color = Color(0xFFFF795E)) }
+                TextButton(onClick = { refreshKey++ }, enabled = !loading) { Text(if (loading) "YÜKLENİYOR" else "YENİLE", color = Color(0xFFFF795E)) }
             }
-            Text("Kredi yükleme ve ödeme özelliği sonraki aşamada açılacak.", color = Color(0xFF9AA3B6), fontSize = 10.sp)
+            Text("Kredi yükleme ve ödeme özelliği henüz etkin değil.", color = Color(0xFF9AA3B6), fontSize = 10.sp)
         }
     }
 }
