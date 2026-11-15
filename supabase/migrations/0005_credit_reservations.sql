@@ -157,3 +157,32 @@ revoke all on function public.settle_foto_credits(text, boolean) from public, an
 grant execute on function public.reserve_foto_credits(uuid, uuid, bigint, text) to service_role;
 grant execute on function public.attach_foto_task(uuid, text) to service_role;
 grant execute on function public.settle_foto_credits(text, boolean) to service_role;
+
+create or replace function public.release_foto_reservation(p_reservation_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_reservation public.credit_reservations%rowtype;
+  v_balance bigint;
+begin
+  select * into v_reservation from public.credit_reservations
+   where id = p_reservation_id for update;
+  if not found then return jsonb_build_object('ok', false, 'reason', 'reservation_not_found'); end if;
+  if v_reservation.status <> 'reserved' then
+    select balance_credits into v_balance from public.wallets where user_id = v_reservation.user_id;
+    return jsonb_build_object('ok', true, 'status', v_reservation.status, 'balance', v_balance);
+  end if;
+  update public.wallets set balance_credits = balance_credits + v_reservation.amount_credits,
+    updated_at = now() where user_id = v_reservation.user_id returning balance_credits into v_balance;
+  update public.credit_reservations set status = 'refunded', settled_at = now() where id = p_reservation_id;
+  insert into public.credit_ledger(user_id, amount_credits, entry_type, description, reference_id)
+    values(v_reservation.user_id, v_reservation.amount_credits, 'refund',
+      'Başlatılamayan üretim için kredi iadesi', p_reservation_id::text);
+  return jsonb_build_object('ok', true, 'status', 'refunded', 'balance', v_balance);
+end;
+$$;
+revoke all on function public.release_foto_reservation(uuid) from public, anon, authenticated;
+grant execute on function public.release_foto_reservation(uuid) to service_role;
