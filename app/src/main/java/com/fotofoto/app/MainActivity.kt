@@ -1,6 +1,8 @@
 package com.fotofoto.app
 
 import android.os.Bundle
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -50,6 +52,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
     var status by remember { mutableStateOf("Fikrini yaz, ilk videonu oluşturmaya hazırlan.") }
     var loading by remember { mutableStateOf(false) }
     var taskId by remember { mutableStateOf("") }
+    var videoUrl by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -109,7 +112,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         Spacer(Modifier.height(22.dp))
                         Button(onClick = {
                             scope.launch {
-                                loading = true; status = "İstek gönderiliyor…"; taskId = ""
+                                loading = true; status = "İstek gönderiliyor…"; taskId = ""; videoUrl = ""
                                 val result = submitGeneration(context, prompt, duration, ratio)
                                 status = result.first
                                 taskId = result.second
@@ -119,9 +122,11 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                                         delay(5000)
                                         val task = checkGeneration(context, taskId)
                                         status = task.message
+                                        if (task.videoUrl.isNotBlank()) videoUrl = task.videoUrl
                                         if (task.finished) break
                                     }
                                 }
+                                if (loading && taskId.isNotBlank() && videoUrl.isBlank() && status.contains("kontrol")) status = "Üretim takibi zaman aşımına uğradı. Daha sonra tekrar kontrol edebilirsin."
                                 loading = false
                             }
                         }, enabled = !loading && prompt.trim().length >= 10, modifier = Modifier.fillMaxWidth().height(54.dp),
@@ -131,6 +136,15 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         Spacer(Modifier.height(12.dp))
                         Text(status, color = Accent, fontSize = 12.sp, lineHeight = 18.sp)
                         if (taskId.isNotBlank()) Text("Üretim kodu: $taskId", color = Muted, fontSize = 10.sp)
+                        if (videoUrl.isNotBlank()) {
+                            Spacer(Modifier.height(10.dp))
+                            Button(onClick = {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(videoUrl))
+                                context.startActivity(intent)
+                            }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF242D40))) {
+                                Text("VİDEOYU AÇ", color = White, fontWeight = FontWeight.Bold)
+                            }
+                        }
                     }
                 }
                 Spacer(Modifier.height(16.dp))
@@ -166,7 +180,7 @@ private fun RowScope.ChoiceButton(label: String, selected: Boolean, onClick: () 
     }
 }
 
-private data class TaskCheck(val message: String, val finished: Boolean)
+private data class TaskCheck(val message: String, val finished: Boolean, val videoUrl: String = "")
 
 private suspend fun checkGeneration(context: android.content.Context, taskId: String): TaskCheck = withContext(Dispatchers.IO) {
     try {
@@ -182,7 +196,7 @@ private suspend fun checkGeneration(context: android.content.Context, taskId: St
                 "SUCCEEDED" -> {
                     val output = data.optJSONArray("output")
                     val videoUrl = output?.optString(0).orEmpty()
-                    if (videoUrl.isNotBlank()) TaskCheck("Video hazır! Bağlantı: $videoUrl", true)
+                    if (videoUrl.startsWith("https://")) TaskCheck("Video hazır! Aşağıdaki butondan açabilirsin.", true, videoUrl)
                     else TaskCheck("Video tamamlandı; ancak video bağlantısı yanıtta bulunamadı.", true)
                 }
                 "FAILED" -> TaskCheck("Video üretimi başarısız oldu. Başka bir açıklamayla tekrar deneyebilirsin.", true)
@@ -204,7 +218,7 @@ private suspend fun submitGeneration(context: android.content.Context, prompt: S
         OkHttpClient().newCall(request).execute().use { response ->
             val data = JSONObject(response.body?.string().orEmpty())
             if (!response.isSuccessful) return@withContext data.optString("message", "Üretim başlatılamadı.") to ""
-            "Üretim isteği gönderildi. Görev takibi sonraki aşamada eklenecek." to data.optString("taskId")
+            "Üretim isteği kabul edildi. Video hazırlanıyor…" to data.optString("taskId")
         }
     } catch (_: Exception) { "Sunucuya bağlanılamadı. İnternet bağlantını kontrol et." to "" }
 }
