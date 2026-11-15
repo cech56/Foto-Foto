@@ -172,6 +172,20 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         }
                         Spacer(Modifier.height(12.dp))
                         Text(when (studioMode) { "edit" -> "Videonda ne değişsin?"; "upscale" -> "Videonu hangi kaliteye yükseltelim?"; "character" -> "Karakterine hareket ver"; else -> "Ne hayal ediyorsun?" }, fontSize = 21.sp, fontWeight = FontWeight.Bold)
+                        if (studioMode == "generate" && prompt.isBlank()) {
+                            Text(if (appLanguage == "English") "GET INSPIRED" else if (appLanguage == "العربية") "استلهم فكرة" else "İLHAM AL", color = Color(0xFFB99AFF), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.3.sp)
+                            Spacer(Modifier.height(6.dp))
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                listOf(
+                                    Triple("🌅", if (appLanguage == "English") "Sunset" else if (appLanguage == "العربية") "غروب" else "Gün batımı", if (appLanguage == "English") "A cinematic sunset over the ocean, golden light, slow camera movement" else if (appLanguage == "العربية") "غروب سينمائي فوق المحيط، ضوء ذهبي وحركة كاميرا بطيئة" else "Okyanus üzerinde sinematik gün batımı, altın ışık, yavaş kamera hareketi"),
+                                    Triple("🚀", if (appLanguage == "English") "Space" else if (appLanguage == "العربية") "فضاء" else "Uzay", if (appLanguage == "English") "An astronaut floating in a colorful nebula, cinematic wide shot" else if (appLanguage == "العربية") "رائد فضاء يطفو في سديم ملون، لقطة سينمائية واسعة" else "Renkli bir nebulada süzülen astronot, sinematik geniş çekim"),
+                                    Triple("🏙️", if (appLanguage == "English") "City" else if (appLanguage == "العربية") "مدينة" else "Şehir", if (appLanguage == "English") "A futuristic city at night, neon reflections, dynamic camera movement" else if (appLanguage == "العربية") "مدينة مستقبلية ليلاً وانعكاسات نيون وحركة كاميرا ديناميكية" else "Gece fütüristik şehir, neon yansımalar, dinamik kamera hareketi")
+                                ).forEach { idea ->
+                                    AssistChip(onClick = { prompt = idea.third }, label = { Text(idea.second, fontSize = 9.sp) }, leadingIcon = { Text(idea.first, fontSize = 11.sp) }, colors = AssistChipDefaults.assistChipColors(containerColor = Color(0xFF24213A), labelColor = White), modifier = Modifier.weight(1f))
+                                }
+                            }
+                            Spacer(Modifier.height(8.dp))
+                        }
                         Spacer(Modifier.height(14.dp))
                         OutlinedTextField(
                             value = prompt, onValueChange = { if (it.length <= 1000) prompt = it },
@@ -305,6 +319,15 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         }, enabled = !loading && studioMode == "generate" && prompt.trim().length >= 10, modifier = Modifier.fillMaxWidth().height(54.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Accent, contentColor = Color(0xFF211721)), shape = RoundedCornerShape(13.dp)) {
                             Text(if (loading) "İŞLENİYOR…" else if (studioMode == "generate") "✦  VİDEOMU OLUŞTUR" else "YAKINDA KULLANIMA AÇILACAK", fontWeight = FontWeight.Black)
+                        }
+                        if (loading) {
+                            Spacer(Modifier.height(10.dp))
+                            LinearProgressIndicator(
+                                modifier = Modifier.fillMaxWidth().height(5.dp).clip(RoundedCornerShape(50)),
+                                color = Color(0xFFB99AFF),
+                                trackColor = Color(0xFF34304A)
+                            )
+                            Text(if (appLanguage == "English") "Your creation is being prepared. You can follow the status here." else if (appLanguage == "العربية") "يجري تجهيز الفيديو الخاص بك. يمكنك متابعة الحالة هنا." else "Videon hazırlanıyor. Durumu buradan takip edebilirsin.", color = Muted, fontSize = 10.sp)
                         }
                         Spacer(Modifier.height(12.dp))
                         Text(status, color = Accent, fontSize = 12.sp, lineHeight = 18.sp)
