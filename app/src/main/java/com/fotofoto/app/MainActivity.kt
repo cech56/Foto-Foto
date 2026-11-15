@@ -51,6 +51,9 @@ private val White = Color(0xFFF8F6F2)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.statusBarColor = android.graphics.Color.rgb(33, 24, 42)
+        window.navigationBarColor = android.graphics.Color.rgb(11, 14, 24)
+        window.decorView.systemUiVisibility = 0
         setContent { AuthGate { onSignOut -> FotoFotoApp(onSignOut) } }
     }
 }
@@ -96,7 +99,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                                     if (appLanguage == language) Text("✓", color = Color(0xFF45D6E8), fontWeight = FontWeight.Black)
                                 }
                             }
-                            Text(if (appLanguage == "English") "Your choice is saved on this device. Full interface translations are being added." else if (appLanguage == "العربية") "يتم حفظ اختيارك على هذا الجهاز. تتم إضافة ترجمات الواجهة بالكامل." else "Dil tercihin bu cihaza kaydedilir. Arayüzün tüm bölümlerinin çevirileri aşamalı olarak eklenecek.", color = Muted, fontSize = 11.sp, lineHeight = 16.sp)
+                            Text(if (appLanguage == "English") "Your language preference is saved on this device." else if (appLanguage == "العربية") "يتم حفظ اختيارك على هذا الجهاز." else "Dil tercihin bu cihaza kaydedilir.", color = Muted, fontSize = 11.sp, lineHeight = 16.sp)
                         }
                     },
                     confirmButton = { TextButton(onClick = { settingsOpen = false }) { Text(if (appLanguage == "English") "Done" else if (appLanguage == "العربية") "تم" else "Tamam", color = Accent) } }
@@ -112,14 +115,14 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                     }
                     Spacer(Modifier.width(12.dp))
                     Column {
-                        Text("FOTO FOTO", fontSize = 19.sp, fontWeight = FontWeight.Black, letterSpacing = 1.6.sp)
+                        Text("FOTO FOTO", color = White, fontSize = 19.sp, fontWeight = FontWeight.Black, letterSpacing = 1.6.sp)
                         Text(if (appLanguage == "English") "AI VIDEO STUDIO" else if (appLanguage == "العربية") "استوديو فيديو ذكي" else "AI VIDEO STÜDYOSU", color = Muted, fontSize = 9.sp, letterSpacing = 2.sp)
                     }
                     Spacer(Modifier.weight(1f))
                     IconButton(onClick = { settingsOpen = true }) {
                         Text("⚙", color = White, fontSize = 23.sp)
                     }
-                    TextButton(onClick = onSignOut) { Text("ÇIKIŞ", color = Muted, fontSize = 10.sp) }
+                    TextButton(onClick = onSignOut) { Text(if (appLanguage == "English") "SIGN OUT" else if (appLanguage == "العربية") "خروج" else "ÇIKIŞ", color = Muted, fontSize = 10.sp) }
                 }
                 if (selectedTab == "home") {
                 Spacer(Modifier.height(20.dp))
@@ -380,7 +383,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 Spacer(Modifier.height(28.dp))
                 }
             }
-            Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().background(Color(0xF2171B2C)).padding(horizontal = 5.dp, vertical = 8.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().navigationBarsPadding().background(Color(0xF2171B2C)).padding(horizontal = 5.dp, vertical = 10.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
                 listOf(Triple("home", "⌂", if (appLanguage == "English") "Home" else if (appLanguage == "العربية") "الرئيسية" else "Ana Sayfa"), Triple("projects", "▤", if (appLanguage == "English") "Projects" else if (appLanguage == "العربية") "مشاريعي" else "Projelerim"), Triple("create", "＋", if (appLanguage == "English") "Create" else if (appLanguage == "العربية") "إنشاء" else "Oluştur"), Triple("tools", "✧", if (appLanguage == "English") "Tools" else if (appLanguage == "العربية") "الأدوات" else "Araçlar"), Triple("account", "◉", if (appLanguage == "English") "Account" else if (appLanguage == "العربية") "حسابي" else "Hesabım")).forEach { item ->
                     Column(Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).clickable { selectedTab = item.first }.padding(vertical = 5.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(item.second, color = if (selectedTab == item.first) Color(0xFFFF8B72) else Muted, fontSize = 20.sp, fontWeight = FontWeight.Black)
