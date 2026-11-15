@@ -35,6 +35,15 @@ async function requireUser(req) {
   return response.json();
 }
 
+async function ownsTask(req, taskId) {
+  const auth = req.headers.authorization || "";
+  const url = SUPABASE_URL + "/rest/v1/video_generations?select=id&provider_task_id=eq." + encodeURIComponent(taskId);
+  const response = await fetch(url, { headers: { apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: auth } });
+  if (!response.ok) return false;
+  const rows = await response.json();
+  return Array.isArray(rows) && rows.length > 0;
+}
+
 async function runway(path, options = {}) {
   const response = await fetch(RUNWAY_BASE + path, {
     ...options,
@@ -86,6 +95,7 @@ const server = http.createServer(async (req, res) => {
     if (match) {
       const user = await requireUser(req);
       if (!user?.id) return send(res, 401, { message: "Oturum doğrulanamadı." });
+      if (!(await ownsTask(req, match[1]))) return send(res, 404, { message: "Bu video görevi hesabında bulunamadı." });
       const task = await runway("/v1/tasks/" + encodeURIComponent(match[1]), { method: "GET" });
       return send(res, 200, task);
     }
