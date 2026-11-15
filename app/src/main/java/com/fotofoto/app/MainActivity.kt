@@ -120,24 +120,24 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
             }
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 92.dp)) {
                 Spacer(Modifier.height(10.dp))
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.fillMaxWidth().height(66.dp), verticalAlignment = Alignment.CenterVertically) {
                     Box(Modifier.clip(RoundedCornerShape(24.dp)).border(1.dp, Color(0xFF9B72FF), RoundedCornerShape(24.dp))
-                        .background(Color(0xFF171638).copy(alpha = 0.92f)).clickable { settingsOpen = true }.padding(horizontal = 12.dp, vertical = 9.dp)) {
-                        Text("◎  ${if (appLanguage == "English") "EN" else if (appLanguage == "العربية") "AR" else "TR"}  ▾", color = White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        .background(Color(0xFF171638)).clickable { settingsOpen = true }.padding(horizontal = 12.dp, vertical = 9.dp)) {
+                        Text("◎  TR  ▾", color = White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                     Spacer(Modifier.weight(1f))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.size(42.dp).clip(RoundedCornerShape(14.dp)).background(Brush.linearGradient(listOf(Color(0xFF19D8FF), Color(0xFF833BFF), Color(0xFFFF4FBA)))), contentAlignment = Alignment.Center) {
+                        Box(Modifier.size(42.dp).clip(RoundedCornerShape(13.dp)).background(Brush.linearGradient(listOf(Color(0xFF19D8FF), Color(0xFF833BFF), Color(0xFFFF4FBA)))), contentAlignment = Alignment.Center) {
                             Text("▶", color = White, fontSize = 23.sp, fontWeight = FontWeight.Black)
                         }
                         Spacer(Modifier.width(8.dp))
                         Column {
-                            Text("FOTO FOTO", color = White, fontSize = 19.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
-                            Text("AI VIDEO STÜDYOSU", color = Color(0xFF67D9FF), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.5.sp)
+                            Text("FOTO FOTO", color = White, fontSize = 19.sp, fontWeight = FontWeight.Black, letterSpacing = 0.7.sp)
+                            Text("AI VIDEO STÜDYOSU", color = Color(0xFF67D9FF), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
                         }
                     }
                     Spacer(Modifier.weight(1f))
-                    IconButton(onClick = { settingsOpen = true }) { Text("♧", color = White, fontSize = 23.sp) }
+                    IconButton(onClick = { settingsOpen = true }) { Text("♧", color = White, fontSize = 22.sp) }
                     IconButton(onClick = { settingsOpen = true }) { Text("⚙", color = White, fontSize = 22.sp) }
                 }
                 if (selectedTab == "home") {
@@ -377,14 +377,36 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 Spacer(Modifier.height(28.dp))
                 }
             }
-            Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().navigationBarsPadding().background(Color(0xF2171B2C)).padding(horizontal = 5.dp, vertical = 10.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
-                listOf(Triple("home", "⌂", if (appLanguage == "English") "Home" else if (appLanguage == "العربية") "الرئيسية" else "Ana Sayfa"), Triple("projects", "▤", if (appLanguage == "English") "Projects" else if (appLanguage == "العربية") "مشاريعي" else "Projelerim"), Triple("create", "＋", if (appLanguage == "English") "Create" else if (appLanguage == "العربية") "إنشاء" else "Oluştur"), Triple("tools", "✧", if (appLanguage == "English") "Tools" else if (appLanguage == "العربية") "الأدوات" else "Araçlar"), Triple("account", "◉", if (appLanguage == "English") "Account" else if (appLanguage == "العربية") "حسابي" else "Hesabım")).forEach { item ->
-                    Column(Modifier.weight(1f).padding(horizontal = 2.dp).clip(RoundedCornerShape(15.dp))
-                        .background(if (selectedTab == item.first) Brush.verticalGradient(listOf(Color(0xFF59318A), Color(0xFF302342))) else Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent)))
-                        .border(1.dp, if (selectedTab == item.first) Color(0xFF9B6BCE) else Color.Transparent, RoundedCornerShape(15.dp))
-                        .clickable { selectedTab = item.first }.padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(item.second, color = if (selectedTab == item.first) Color(0xFFFFA17D) else Color(0xFF9AA3B6), fontSize = 22.sp, fontWeight = FontWeight.Black)
-                        Text(item.third, color = if (selectedTab == item.first) White else Color(0xFF9AA3B6), fontSize = 9.sp, fontWeight = if (selectedTab == item.first) FontWeight.ExtraBold else FontWeight.Medium)
+            Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().navigationBarsPadding()
+                .background(Color(0xF2171B2C)).border(1.dp, Color(0xFF33245B), RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+                .padding(horizontal = 7.dp, vertical = 7.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
+                val navItems = listOf(
+                    Triple("home", "⌂", if (appLanguage == "English") "Home" else if (appLanguage == "العربية") "الرئيسية" else "Ana Sayfa"),
+                    Triple("projects", "▤", if (appLanguage == "English") "Projects" else if (appLanguage == "العربية") "مشاريعي" else "Projelerim"),
+                    Triple("create", "＋", if (appLanguage == "English") "Create" else if (appLanguage == "العربية") "إنشاء" else "Oluştur"),
+                    Triple("tools", "✧", if (appLanguage == "English") "Tools" else if (appLanguage == "العربية") "الأدوات" else "Araçlar"),
+                    Triple("account", "♙", if (appLanguage == "English") "Account" else if (appLanguage == "العربية") "حسابي" else "Hesabım")
+                )
+                navItems.forEach { item ->
+                    val selected = selectedTab == item.first
+                    if (item.first == "create") {
+                        Column(Modifier.weight(1f).padding(horizontal = 2.dp).offset(y = (-8).dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(Brush.verticalGradient(listOf(Color(0xFF762BEB), Color(0xFF32136C))))
+                            .border(1.5.dp, Color(0xFFC58BFF), RoundedCornerShape(20.dp))
+                            .clickable { selectedTab = "create"; studioMode = "generate" }.padding(vertical = 9.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("＋", color = White, fontSize = 34.sp, fontWeight = FontWeight.Light)
+                            Text(item.third, color = White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
+                    } else {
+                        Column(Modifier.weight(1f).padding(horizontal = 2.dp).clip(RoundedCornerShape(15.dp))
+                            .background(if (selected) Brush.verticalGradient(listOf(Color(0xFF462078), Color(0xFF24143E))) else Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent)))
+                            .clickable { selectedTab = item.first }.padding(vertical = 9.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(item.second, color = if (selected) Color(0xFFFF6BE8) else White, fontSize = 25.sp, fontWeight = FontWeight.Bold)
+                            Text(item.third, color = if (selected) White else Color(0xFFD1CDDE), fontSize = 10.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium, maxLines = 1)
+                        }
                     }
                 }
             }
@@ -402,68 +424,74 @@ private fun FotoFotoGalaxyHome(
     onCharacter: () -> Unit
 ) {
     val tr = language != "English" && language != "العربية"
-    val transition = rememberInfiniteTransition(label = "foto-galaxy")
-    val floatY by transition.animateFloat(-7f, 7f, infiniteRepeatable(tween(2300, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "float")
-    val glow by transition.animateFloat(0.72f, 1f, infiniteRepeatable(tween(1700), RepeatMode.Reverse), label = "glow")
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(13.dp)) {
-        Box(Modifier.fillMaxWidth().height(390.dp).clip(RoundedCornerShape(28.dp))
-            .border(1.dp, Color(0xFF8D63FF), RoundedCornerShape(28.dp))
-            .background(Brush.verticalGradient(listOf(Color(0xFF11133C), Color(0xFF28145A), Color(0xFF8C3D9D), Color(0xFF18234D))))) {
+    val glow = Color(0xFFB66BFF)
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Box(Modifier.fillMaxWidth().height(286.dp).clip(RoundedCornerShape(27.dp))
+            .border(1.5.dp, Color(0xFF8D63FF), RoundedCornerShape(27.dp))
+            .background(Color(0xFF15133B))) {
             Image(
                 painter = painterResource(id = R.drawable.foto_foto_3d_mascot),
-                contentDescription = "FOTO FOTO 3D robot ve kedi maskotu",
+                contentDescription = "FOTO FOTO robot ve kedi galaksi sahnesi",
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
-            // Gentle loop-like motion: the mascot appears to lift and present its glowing brand sign.
-            Box(Modifier.align(Alignment.Center).offset(y = 112.dp)
-                .graphicsLayer {
-                    translationY = floatY * 0.30f
-                    rotationZ = floatY * 0.055f
-                    alpha = 0.94f + (glow - 0.72f) * 0.18f
-                }
-                .width(158.dp).height(42.dp)
-                .clip(RoundedCornerShape(13.dp))
-                .background(Brush.horizontalGradient(listOf(Color(0xFF5621B8), Color(0xFF9B36FF), Color(0xFF5124B8))))
-                .border(1.5.dp, Color(0xFFB9F5FF).copy(alpha = glow), RoundedCornerShape(13.dp)),
-                contentAlignment = Alignment.Center) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-                    Text("▶", color = Color(0xFF70F1FF), fontSize = 16.sp, fontWeight = FontWeight.Black)
-                    Spacer(Modifier.width(6.dp))
-                    Text("FOTO FOTO", color = White, fontSize = 14.sp, fontWeight = FontWeight.Black, letterSpacing = 0.35.sp)
-                }
+            Column(Modifier.align(Alignment.TopStart).padding(start = 13.dp, top = 14.dp)
+                .clip(RoundedCornerShape(19.dp))
+                .background(Color(0xE9161644))
+                .border(1.dp, Color(0xFF9B7BFF), RoundedCornerShape(19.dp))
+                .padding(horizontal = 14.dp, vertical = 11.dp)) {
+                Text(if (tr) "Merhaba Serdar! 👋" else if (language == "English") "Hello! 👋" else "مرحباً! 👋",
+                    color = White, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
+                Text(if (tr) "Bugün ne tür bir video\noluşturuyoruz?" else if (language == "English") "What video shall we\ncreate today?" else "ما الفيديو الذي\nسننشئه اليوم؟",
+                    color = White, fontSize = 12.sp, lineHeight = 17.sp)
             }
-            Column(Modifier.align(Alignment.TopStart).padding(start = 12.dp, top = 14.dp)
-                .clip(RoundedCornerShape(18.dp)).background(Color(0xE91A1745)).border(1.dp, Color(0xFF9B7BFF), RoundedCornerShape(18.dp)).padding(horizontal = 13.dp, vertical = 10.dp)) {
-                Text(if (tr) "Merhaba! 👋" else if (language == "English") "Hello! 👋" else "مرحباً! 👋", color = White, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
-                Text(if (tr) "Bugün ne tür bir video\noluşturuyoruz?" else if (language == "English") "What video shall we\ncreate today?" else "ما الفيديو الذي\nسننشئه اليوم؟", color = White, fontSize = 12.sp, lineHeight = 17.sp)
-            }
-            Text("✦", Modifier.align(Alignment.CenterStart).padding(start = 25.dp, top = 72.dp).graphicsLayer { alpha = glow }, color = Color(0xFFFFD6FF), fontSize = 27.sp)
-            Text("✧", Modifier.align(Alignment.CenterEnd).padding(end = 72.dp, bottom = 30.dp), color = Color(0xFF70E8FF), fontSize = 28.sp)
         }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-            GalaxyActionCard("▧", if (tr) "Fotoğraftan\nVideo" else if (language == "English") "Photo to\nVideo" else "صورة إلى\nفيديو", Color(0xFFD54BFF), Modifier.weight(1f), onPhotoVideo)
-            GalaxyActionCard("▣", if (tr) "Video\nDüzenleme" else if (language == "English") "Video\nEditing" else "تحرير\nالفيديو", Color(0xFF26CFFF), Modifier.weight(1f), onEdit)
-            GalaxyActionCard("HD", if (tr) "Kalite\nArtırma" else if (language == "English") "Enhance\nQuality" else "تحسين\nالجودة", Color(0xFF21C9FF), Modifier.weight(1f), onUpscale)
-            GalaxyActionCard("♙", if (tr) "Karakter\nAnimasyonu" else if (language == "English") "Character\nAnimation" else "تحريك\nالشخصية", Color(0xFFFF9B47), Modifier.weight(1f), onCharacter)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FotoHomeMenuCard("▧", if (tr) "Fotoğraftan\nVideo" else if (language == "English") "Photo to\nVideo" else "صورة إلى\nفيديو",
+                Color(0xFFE34DFF), Modifier.weight(1f), onPhotoVideo)
+            FotoHomeMenuCard("▣", if (tr) "Video\nDüzenleme" else if (language == "English") "Video\nEditing" else "تحرير\nالفيديو",
+                Color(0xFF19CFFF), Modifier.weight(1f), onEdit)
+            FotoHomeMenuCard("HD", if (tr) "Kalite\nArtırma" else if (language == "English") "Enhance\nQuality" else "تحسين\nالجودة",
+                Color(0xFF18CFFF), Modifier.weight(1f), onUpscale)
+            FotoHomeMenuCard("♙", if (tr) "Karakter\nAnimasyonu" else if (language == "English") "Character\nAnimation" else "تحريك\nالشخصية",
+                Color(0xFFFFA13D), Modifier.weight(1f), onCharacter)
         }
-        Box(Modifier.fillMaxWidth().height(104.dp).clip(RoundedCornerShape(23.dp))
-            .border(1.dp, Color(0xFF8D62FF), RoundedCornerShape(23.dp))
-            .background(Brush.horizontalGradient(listOf(Color(0xFF21145B), Color(0xFF642B9C), Color(0xFF26134E))))) {
-            Text("🤖", Modifier.align(Alignment.CenterStart).padding(start = 12.dp), fontSize = 55.sp)
-            Column(Modifier.align(Alignment.Center).padding(start = 76.dp, end = 55.dp)) {
-                Text(if (tr) "Yapay Zekâ ile" else if (language == "English") "With Artificial Intelligence" else "بالذكاء الاصطناعي", color = White, fontSize = 13.sp, fontWeight = FontWeight.Black)
-                Text(if (tr) "Sıradan Görselleri Etkileyici Videolara Dönüştür! 🚀" else if (language == "English") "Turn ordinary images into amazing videos! 🚀" else "حوّل الصور العادية إلى فيديوهات مذهلة! 🚀", color = White, fontSize = 13.sp, fontWeight = FontWeight.Bold, lineHeight = 17.sp)
+        Box(Modifier.fillMaxWidth().height(91.dp).clip(RoundedCornerShape(21.dp))
+            .background(Brush.horizontalGradient(listOf(Color(0xFF241052), Color(0xFF6122A1), Color(0xFF26104E))))
+            .border(1.dp, Color(0xFF8659FF), RoundedCornerShape(21.dp))) {
+            Text("🤖", Modifier.align(Alignment.CenterStart).padding(start = 12.dp), fontSize = 47.sp)
+            Column(Modifier.align(Alignment.Center).padding(start = 76.dp, end = 65.dp)) {
+                Text(if (tr) "Yapay Zekâ ile" else if (language == "English") "With AI" else "بالذكاء الاصطناعي",
+                    color = White, fontSize = 13.sp, fontWeight = FontWeight.ExtraBold)
+                Text(if (tr) "Sıradan Görselleri\nEtkileyici Videolara Dönüştür! 🚀" else if (language == "English") "Turn ordinary images into amazing videos! 🚀" else "حوّل الصور العادية إلى فيديوهات مذهلة! 🚀",
+                    color = White, fontSize = 12.sp, fontWeight = FontWeight.Bold, lineHeight = 16.sp)
             }
-            Text("🎞️", Modifier.align(Alignment.CenterEnd).padding(end = 8.dp), fontSize = 38.sp)
+            Text("🎞", Modifier.align(Alignment.CenterEnd).padding(end = 10.dp), color = Color(0xFFFFD66B), fontSize = 35.sp)
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            repeat(4) { i -> Box(Modifier.padding(horizontal = 4.dp).size(if (i == 0) 8.dp else 7.dp)
-                .background(if (i == 0) Color.White else Color(0xFF6A4A9D), RoundedCornerShape(50))) }
+            repeat(4) { index ->
+                Box(Modifier.padding(horizontal = 4.dp).size(if (index == 0) 9.dp else 8.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(if (index == 0) White else Color(0xFF70449A)))
+            }
         }
+        Spacer(Modifier.height(7.dp))
     }
 }
 
+@Composable
+private fun FotoHomeMenuCard(icon: String, label: String, tint: Color, modifier: Modifier, onClick: () -> Unit) {
+    Column(modifier.height(116.dp).clip(RoundedCornerShape(23.dp))
+        .background(Brush.verticalGradient(listOf(tint.copy(alpha = 0.26f), Color(0xFF17132F))))
+        .border(1.5.dp, tint, RoundedCornerShape(23.dp))
+        .clickable(onClick = onClick).padding(horizontal = 3.dp, vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Text(icon, color = tint, fontSize = 31.sp, fontWeight = FontWeight.Black)
+        Spacer(Modifier.height(8.dp))
+        Text(label, color = White, fontSize = 10.sp, fontWeight = FontWeight.ExtraBold,
+            lineHeight = 12.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+    }
+}
 
 @Composable
 private fun FotoRobotMascot(modifier: Modifier = Modifier) {
