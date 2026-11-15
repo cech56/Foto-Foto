@@ -101,6 +101,13 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                             ChoiceButton("KALİTE", studioMode == "upscale") { studioMode = "upscale" }
                             ChoiceButton("KARAKTER", studioMode == "character") { studioMode = "character" }
                         }
+                        if (studioMode != "generate") {
+                            Spacer(Modifier.height(10.dp))
+                            Text(
+                                "Bu özellik şu anda hazırlık aşamasında. Güvenli kredi tarifesi ve dosya yükleme tamamlandığında açılacak. Şimdilik Runway Gen-4.5 ile video oluşturabilirsin.",
+                                color = Accent, fontSize = 11.sp, lineHeight = 16.sp
+                            )
+                        }
                         Spacer(Modifier.height(12.dp))
                         Text(when (studioMode) { "edit" -> "Videonda ne değişsin?"; "upscale" -> "Videonu hangi kaliteye yükseltelim?"; "character" -> "Karakterine hareket ver"; else -> "Ne hayal ediyorsun?" }, fontSize = 21.sp, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.height(14.dp))
@@ -173,13 +180,15 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                             ChoiceButton("5 saniye", duration == 5) { duration = 5 }
                             ChoiceButton("10 saniye", duration == 10) { duration = 10 }
                         }
-                        Text(
-                            if (duration == 5) "Bu üretimin ücreti: 59 FOTO FOTO kredisi (59 TL)"
-                            else "Bu üretimin ücreti: 119 FOTO FOTO kredisi (119 TL)",
-                            color = Accent, fontSize = 12.sp, fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(top = 9.dp)
-                        )
-                        Text("Üretim başarısız olursa ayrılan krediler iade edilir.", color = Muted, fontSize = 10.sp)
+                        if (studioMode == "generate") {
+                            Text(
+                                if (duration == 5) "Bu üretimin ücreti: 59 FOTO FOTO kredisi (59 TL)"
+                                else "Bu üretimin ücreti: 119 FOTO FOTO kredisi (119 TL)",
+                                color = Accent, fontSize = 12.sp, fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(top = 9.dp)
+                            )
+                            Text("Üretim başarısız olursa ayrılan krediler iade edilir.", color = Muted, fontSize = 10.sp)
+                        }
                         Spacer(Modifier.height(15.dp))
                         Text("VİDEO FORMATI", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
@@ -231,9 +240,9 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                                 if (loading && taskId.isNotBlank() && videoUrl.isBlank() && status.contains("kontrol")) status = "Üretim takibi zaman aşımına uğradı. Daha sonra tekrar kontrol edebilirsin."
                                 loading = false
                             }
-                        }, enabled = !loading && when (studioMode) { "edit" -> prompt.trim().length >= 1 && selectedVideoUri != null; "upscale" -> selectedVideoUri != null; "character" -> selectedImageUri != null && selectedVideoUri != null; else -> prompt.trim().length >= 10 }, modifier = Modifier.fillMaxWidth().height(54.dp),
+                        }, enabled = !loading && studioMode == "generate" && prompt.trim().length >= 10, modifier = Modifier.fillMaxWidth().height(54.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Accent, contentColor = Color(0xFF211721)), shape = RoundedCornerShape(13.dp)) {
-                            Text(if (loading) "İŞLENİYOR…" else when (studioMode) { "edit" -> "✦  VİDEOMU DÜZENLE"; "upscale" -> "✦  KALİTEYİ YÜKSELT"; "character" -> "✦  KARAKTERİ CANLANDIR"; else -> "✦  VİDEOMU OLUŞTUR" }, fontWeight = FontWeight.Black)
+                            Text(if (loading) "İŞLENİYOR…" else if (studioMode == "generate") "✦  VİDEOMU OLUŞTUR" else "YAKINDA KULLANIMA AÇILACAK", fontWeight = FontWeight.Black)
                         }
                         Spacer(Modifier.height(12.dp))
                         Text(status, color = Accent, fontSize = 12.sp, lineHeight = 18.sp)
