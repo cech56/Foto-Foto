@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -50,6 +51,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
     var loading by remember { mutableStateOf(false) }
     var taskId by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     MaterialTheme(colorScheme = darkColorScheme(primary = Accent, background = Bg, surface = Panel, onPrimary = Color(0xFF211721), onBackground = White, onSurface = White)) {
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFF21182A), Bg, Bg)))) {
@@ -108,14 +110,14 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         Button(onClick = {
                             scope.launch {
                                 loading = true; status = "İstek gönderiliyor…"; taskId = ""
-                                val result = submitGeneration(prompt, duration, ratio)
+                                val result = submitGeneration(context, prompt, duration, ratio)
                                 status = result.first
                                 taskId = result.second
                                 if (taskId.isNotBlank()) {
                                     status = "Video kuyruğa alındı. Üretim durumu kontrol ediliyor…"
                                     for (attempt in 0 until 120) {
                                         delay(5000)
-                                        val task = checkGeneration(taskId)
+                                        val task = checkGeneration(context, taskId)
                                         status = task.message
                                         if (task.finished) break
                                     }
@@ -166,10 +168,12 @@ private fun RowScope.ChoiceButton(label: String, selected: Boolean, onClick: () 
 
 private data class TaskCheck(val message: String, val finished: Boolean)
 
-private suspend fun checkGeneration(taskId: String): TaskCheck = withContext(Dispatchers.IO) {
+private suspend fun checkGeneration(context: android.content.Context, taskId: String): TaskCheck = withContext(Dispatchers.IO) {
     try {
+        val token = SessionStore.read(context)?.optString("access_token").orEmpty()
         val request = Request.Builder()
             .url(BuildConfig.API_BASE_URL.trimEnd('/') + "/api/tasks/" + taskId)
+            .header("Authorization", "Bearer $token")
             .get().build()
         OkHttpClient().newCall(request).execute().use { response ->
             val data = JSONObject(response.body?.string().orEmpty())
@@ -189,12 +193,14 @@ private suspend fun checkGeneration(taskId: String): TaskCheck = withContext(Dis
     } catch (_: Exception) { TaskCheck("Görev durumu kontrol edilemedi. Bağlantı yeniden denenecek.", false) }
 }
 
-private suspend fun submitGeneration(prompt: String, duration: Int, ratio: String): Pair<String, String> = withContext(Dispatchers.IO) {
+private suspend fun submitGeneration(context: android.content.Context, prompt: String, duration: Int, ratio: String): Pair<String, String> = withContext(Dispatchers.IO) {
     if (BuildConfig.API_BASE_URL.contains("YOUR-BACKEND-DOMAIN")) return@withContext "Video sunucusu henüz bağlanmadı." to ""
     try {
         val json = JSONObject().put("prompt", prompt).put("model", "gen4.5").put("duration", duration).put("ratio", ratio)
         val body = json.toString().toRequestBody("application/json".toMediaType())
-        val request = Request.Builder().url(BuildConfig.API_BASE_URL.trimEnd('/') + "/api/generate").post(body).build()
+        val token = SessionStore.read(context)?.optString("access_token").orEmpty()
+        val request = Request.Builder().url(BuildConfig.API_BASE_URL.trimEnd('/') + "/api/generate")
+            .header("Authorization", "Bearer $token").post(body).build()
         OkHttpClient().newCall(request).execute().use { response ->
             val data = JSONObject(response.body?.string().orEmpty())
             if (!response.isSuccessful) return@withContext data.optString("message", "Üretim başlatılamadı.") to ""
