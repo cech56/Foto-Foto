@@ -137,8 +137,6 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         }
                     }
                     Spacer(Modifier.weight(1f))
-                    IconButton(onClick = { settingsOpen = true }) { Text("♧", color = White, fontSize = 22.sp) }
-                    IconButton(onClick = { settingsOpen = true }) { Text("⚙", color = White, fontSize = 22.sp) }
                 }
                 if (selectedTab == "home") {
                     FotoFotoGalaxyHome(
@@ -371,7 +369,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                     }
                 }
             }
-            Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().navigationBarsPadding()
+            Row(Modifier.align(Alignment.BottomCenter).offset(y = if (selectedTab == "home") (-58).dp else 0.dp).fillMaxWidth().navigationBarsPadding()
                 .background(Color(0xF2171B2C)).border(1.dp, Color(0xFF33245B), RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
                 .padding(horizontal = 12.dp, vertical = 5.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
                 val navItems = listOf(
@@ -429,15 +427,16 @@ private fun FotoFotoGalaxyHome(
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
-            Column(Modifier.align(Alignment.TopStart).padding(start = 13.dp, top = 14.dp)
-                .clip(RoundedCornerShape(19.dp))
+            Column(Modifier.align(Alignment.TopStart).padding(start = 12.dp, top = 12.dp)
+                .widthIn(max = 176.dp)
+                .clip(RoundedCornerShape(17.dp))
                 .background(Color(0xE9161644))
-                .border(1.dp, Color(0xFF9B7BFF), RoundedCornerShape(19.dp))
-                .padding(horizontal = 14.dp, vertical = 11.dp)) {
+                .border(1.dp, Color(0xFF9B7BFF), RoundedCornerShape(17.dp))
+                .padding(horizontal = 11.dp, vertical = 8.dp)) {
                 Text(if (tr) "Merhaba Serdar! 👋" else if (language == "English") "Hello! 👋" else "مرحباً! 👋",
-                    color = White, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
-                Text(if (tr) "Bugün ne tür bir video\noluşturuyoruz?" else if (language == "English") "What video shall we\ncreate today?" else "ما الفيديو الذي\nسننشئه اليوم؟",
-                    color = White, fontSize = 12.sp, lineHeight = 17.sp)
+                    color = White, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp, maxLines = 1)
+                Text(if (tr) "Bugün ne oluşturalım?" else if (language == "English") "What shall we create today?" else "ماذا سننشئ اليوم؟",
+                    color = White, fontSize = 10.sp, lineHeight = 14.sp)
             }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -453,14 +452,20 @@ private fun FotoFotoGalaxyHome(
         Box(Modifier.fillMaxWidth().height(78.dp).clip(RoundedCornerShape(19.dp))
             .background(Brush.horizontalGradient(listOf(Color(0xFF241052), Color(0xFF6122A1), Color(0xFF26104E))))
             .border(1.dp, Color(0xFF8659FF), RoundedCornerShape(21.dp))) {
-            Text("🤖", Modifier.align(Alignment.CenterStart).padding(start = 12.dp), fontSize = 38.sp)
-            Column(Modifier.align(Alignment.Center).padding(start = 76.dp, end = 65.dp)) {
-                Text(if (tr) "Yapay Zekâ ile" else if (language == "English") "With AI" else "بالذكاء الاصطناعي",
+            Box(Modifier.align(Alignment.CenterStart).padding(start = 12.dp).size(42.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(Brush.linearGradient(listOf(Color(0xFF23D8FF), Color(0xFF783BFF))))
+                .border(1.dp, Color(0xFFB8A0FF), RoundedCornerShape(14.dp)),
+                contentAlignment = Alignment.Center) {
+                Text("✦", color = White, fontSize = 27.sp, fontWeight = FontWeight.Black)
+            }
+            Column(Modifier.align(Alignment.Center).padding(start = 64.dp, end = 57.dp)) {
+                Text(if (tr) "Yapay Zekâ ile" else if (language == "English") "Powered by AI" else "بالذكاء الاصطناعي",
                     color = White, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold)
-                Text(if (tr) "Sıradan Görselleri\nEtkileyici Videolara Dönüştür! 🚀" else if (language == "English") "Turn ordinary images into amazing videos! 🚀" else "حوّل الصور العادية إلى فيديوهات مذهلة! 🚀",
+                Text(if (tr) "Görsellerini etkileyici\nvideolara dönüştür!" else if (language == "English") "Turn your images into\nstunning videos!" else "حوّل صورك إلى\nفيديوهات مذهلة!",
                     color = White, fontSize = 11.sp, fontWeight = FontWeight.Bold, lineHeight = 14.sp)
             }
-            Text("🎞", Modifier.align(Alignment.CenterEnd).padding(end = 10.dp), color = Color(0xFFFFD66B), fontSize = 35.sp)
+            Text("▤", Modifier.align(Alignment.CenterEnd).padding(end = 12.dp), color = Color(0xFFFFD66B), fontSize = 31.sp, fontWeight = FontWeight.Bold)
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             repeat(4) { index ->
