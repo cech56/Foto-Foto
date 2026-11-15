@@ -152,9 +152,9 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 }
                 Spacer(Modifier.height(18.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                    QuickStatCard("01", "Yarat", tr("Fikrini yaz", "Write your idea", "اكتب فكرتك"), Modifier.weight(1f), listOf(Color(0xFF4732A8), Color(0xFF8B43D8)))
-                    QuickStatCard("02", "Canlandır", tr("Fotoğraf ekle", "Add a photo", "أضف صورة"), Modifier.weight(1f), listOf(Color(0xFFB64A73), Color(0xFFEE8758)))
-                    QuickStatCard("03", "İndir", tr("Videonu al", "Get your video", "احصل على الفيديو"), Modifier.weight(1f), listOf(Color(0xFF176E9B), Color(0xFF3A9FBE)))
+                    QuickStatCard("01", tr("Yarat", "Create", "إنشاء"), tr("Fikrini yaz", "Write your idea", "اكتب فكرتك"), Modifier.weight(1f), listOf(Color(0xFF4732A8), Color(0xFF8B43D8)))
+                    QuickStatCard("02", tr("Canlandır", "Animate", "تحريك"), tr("Fotoğraf ekle", "Add a photo", "أضف صورة"), Modifier.weight(1f), listOf(Color(0xFFB64A73), Color(0xFFEE8758)))
+                    QuickStatCard("03", tr("İndir", "Download", "تنزيل"), tr("Videonu al", "Get your video", "احصل على الفيديو"), Modifier.weight(1f), listOf(Color(0xFF176E9B), Color(0xFF3A9FBE)))
                 }
                 Spacer(Modifier.height(16.dp))
                 Card(Modifier.fillMaxWidth().border(1.dp, Color(0xFF3D365C), RoundedCornerShape(20.dp)), colors = CardDefaults.cardColors(containerColor = Color(0xFF171D30)), shape = RoundedCornerShape(20.dp)) {
