@@ -152,9 +152,9 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 }
                 Spacer(Modifier.height(18.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                    QuickStatCard("01", "Yarat", "Fikrini yaz", Modifier.weight(1f), listOf(Color(0xFF4732A8), Color(0xFF8B43D8)))
-                    QuickStatCard("02", "Canlandır", "Fotoğraf ekle", Modifier.weight(1f), listOf(Color(0xFFB64A73), Color(0xFFEE8758)))
-                    QuickStatCard("03", "İndir", "Videonu al", Modifier.weight(1f), listOf(Color(0xFF176E9B), Color(0xFF3A9FBE)))
+                    QuickStatCard("01", "Yarat", tr("Fikrini yaz", "Write your idea", "اكتب فكرتك"), Modifier.weight(1f), listOf(Color(0xFF4732A8), Color(0xFF8B43D8)))
+                    QuickStatCard("02", "Canlandır", tr("Fotoğraf ekle", "Add a photo", "أضف صورة"), Modifier.weight(1f), listOf(Color(0xFFB64A73), Color(0xFFEE8758)))
+                    QuickStatCard("03", "İndir", tr("Videonu al", "Get your video", "احصل على الفيديو"), Modifier.weight(1f), listOf(Color(0xFF176E9B), Color(0xFF3A9FBE)))
                 }
                 Spacer(Modifier.height(20.dp))
                 }
@@ -172,12 +172,12 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         if (studioMode != "generate") {
                             Spacer(Modifier.height(10.dp))
                             Text(
-                                "Bu özellik şu anda hazırlık aşamasında. Güvenli kredi tarifesi ve dosya yükleme tamamlandığında açılacak. Şimdilik Runway Gen-4.5 ile video oluşturabilirsin.",
+                                tr("Bu özellik şu anda hazırlık aşamasında. Güvenli kredi tarifesi ve dosya yükleme tamamlandığında açılacak. Şimdilik Runway Gen-4.5 ile video oluşturabilirsin.", "This feature is being prepared. It will open after secure pricing and file uploads are ready. For now, create videos with Runway Gen-4.5.", "هذه الميزة قيد الإعداد. ستتوفر بعد تجهيز الأسعار الآمنة ورفع الملفات. يمكنك حالياً إنشاء الفيديو باستخدام Runway Gen-4.5."),
                                 color = Accent, fontSize = 11.sp, lineHeight = 16.sp
                             )
                         }
                         Spacer(Modifier.height(12.dp))
-                        Text(when (studioMode) { "edit" -> "Videonda ne değişsin?"; "upscale" -> "Videonu hangi kaliteye yükseltelim?"; "character" -> "Karakterine hareket ver"; else -> "Ne hayal ediyorsun?" }, color = White, fontSize = 21.sp, fontWeight = FontWeight.ExtraBold)
+                        Text(when (studioMode) { "edit" -> tr("Videonda ne değişsin?", "What would you like to change?", "ما الذي تريد تغييره؟"); "upscale" -> tr("Videonu hangi kaliteye yükseltelim?", "Choose your video quality", "اختر جودة الفيديو"); "character" -> tr("Karakterine hareket ver", "Bring your character to life", "امنح شخصيتك الحركة"); else -> tr("Ne hayal ediyorsun?", "What do you imagine?", "ماذا تتخيل؟") }, color = White, fontSize = 21.sp, fontWeight = FontWeight.ExtraBold)
                         if (studioMode == "generate" && prompt.isBlank()) {
                             Text(if (appLanguage == "English") "GET INSPIRED" else if (appLanguage == "العربية") "استلهم فكرة" else "İLHAM AL", color = Color(0xFFB99AFF), fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.3.sp)
                             Spacer(Modifier.height(6.dp))
@@ -203,7 +203,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         Text("${prompt.length} / 1000", color = Muted, fontSize = 10.sp, modifier = Modifier.align(Alignment.End).padding(top = 5.dp))
                         Spacer(Modifier.height(14.dp))
                         if (studioMode == "generate") {
-                            Text(tr("REFERANS FOTOĞRAFI", "REFERENCE IMAGE", "الصورة المرجعية"), color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            Text(tr(tr("REFERANS FOTOĞRAFI", "REFERENCE PHOTO", "الصورة المرجعية"), "REFERENCE IMAGE", "الصورة المرجعية"), color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                             Spacer(Modifier.height(8.dp))
                             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                                 Button(onClick = { imagePicker.launch("image/*") }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF242D40))) { Text(if (selectedImageUri == null) tr("＋ FOTOĞRAF EKLE", "＋ ADD PHOTO", "＋ أضف صورة") else tr("FOTOĞRAFI DEĞİŞTİR", "CHANGE PHOTO", "تغيير الصورة"), color = White) }
@@ -219,7 +219,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                             } else Text(tr("Kendi fotoğrafını veya canlandırmak istediğin görseli ekle.", "Add your photo or the image you want to animate.", "أضف صورتك أو الصورة التي تريد تحريكها."), color = Muted, fontSize = 10.sp)
                         } else {
                             if (studioMode == "character") {
-                                Text("KARAKTER FOTOĞRAFI", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                Text(tr("KARAKTER FOTOĞRAFI", "CHARACTER PHOTO", "صورة الشخصية"), color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                                 Spacer(Modifier.height(7.dp))
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Button(onClick = { imagePicker.launch("image/*") }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF242D40))) {
@@ -233,14 +233,14 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                             Spacer(Modifier.height(8.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Button(onClick = { videoPicker.launch("video/*") }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF242D40))) {
-                                    Text(if (selectedVideoUri == null) "＋ VİDEO SEÇ" else "VİDEOYU DEĞİŞTİR", color = White)
+                                    Text(if (selectedVideoUri == null) tr("＋ VİDEO SEÇ", "＋ SELECT VIDEO", "＋ اختر فيديو") else tr("VİDEOYU DEĞİŞTİR", "CHANGE VIDEO", "تغيير الفيديو"), color = White)
                                 }
                                 if (selectedVideoUri != null) TextButton(onClick = { selectedVideoUri = null }) { Text("KALDIR", color = Accent) }
                             }
                             Text(when (studioMode) { "edit" -> "Runway Aleph 2 · En fazla 30 saniye · İlk sürümde dosya boyutu 3,5 MB."; "character" -> "Act-Two · 3–30 saniyelik performans videosu · Tek kişi, yüz görünür olmalı."; else -> "Magnific Video Upscaler · 720p, 1K, 2K veya 4K · En fazla 30 saniye." }, color = Muted, fontSize = 10.sp)
                             if (studioMode == "upscale") {
                                 Spacer(Modifier.height(10.dp))
-                                Text("HEDEF ÇÖZÜNÜRLÜK", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                Text(tr("HEDEF ÇÖZÜNÜRLÜK", "TARGET RESOLUTION", "الدقة المستهدفة"), color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(top = 6.dp)) {
                                     listOf("720p", "1k", "2k", "4k").forEach { value ->
                                         ChoiceButton(value.uppercase(), upscaleResolution == value) { upscaleResolution = value }
@@ -269,7 +269,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                                 color = Accent, fontSize = 12.sp, fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(top = 9.dp)
                             )
-                            Text("Üretim başarısız olursa ayrılan krediler iade edilir.", color = Muted, fontSize = 10.sp)
+                            Text(tr("Üretim başarısız olursa ayrılan krediler iade edilir.", "Reserved credits are refunded if generation fails.", "تُعاد الأرصدة المحجوزة إذا فشل الإنشاء."), color = Muted, fontSize = 10.sp)
                         }
                         Spacer(Modifier.height(15.dp))
                         Text(tr("VİDEO FORMATI", "VIDEO FORMAT", "تنسيق الفيديو"), color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
