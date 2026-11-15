@@ -415,6 +415,24 @@ private fun FotoFotoGalaxyHome(
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
+            // Gentle loop-like motion: the mascot appears to lift and present its glowing brand sign.
+            Box(Modifier.align(Alignment.Center).offset(y = 112.dp)
+                .graphicsLayer {
+                    translationY = floatY * 0.30f
+                    rotationZ = floatY * 0.055f
+                    alpha = 0.94f + (glow - 0.72f) * 0.18f
+                }
+                .width(158.dp).height(42.dp)
+                .clip(RoundedCornerShape(13.dp))
+                .background(Brush.horizontalGradient(listOf(Color(0xFF5621B8), Color(0xFF9B36FF), Color(0xFF5124B8))))
+                .border(1.5.dp, Color(0xFFB9F5FF).copy(alpha = glow), RoundedCornerShape(13.dp)),
+                contentAlignment = Alignment.Center) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                    Text("▶", color = Color(0xFF70F1FF), fontSize = 16.sp, fontWeight = FontWeight.Black)
+                    Spacer(Modifier.width(6.dp))
+                    Text("FOTO FOTO", color = White, fontSize = 14.sp, fontWeight = FontWeight.Black, letterSpacing = 0.35.sp)
+                }
+            }
             Column(Modifier.align(Alignment.TopStart).padding(start = 12.dp, top = 14.dp)
                 .clip(RoundedCornerShape(18.dp)).background(Color(0xE91A1745)).border(1.dp, Color(0xFF9B7BFF), RoundedCornerShape(18.dp)).padding(horizontal = 13.dp, vertical = 10.dp)) {
                 Text(if (tr) "Merhaba! 👋" else if (language == "English") "Hello! 👋" else "مرحباً! 👋", color = White, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
