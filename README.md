@@ -8,15 +8,25 @@ FOTO FOTO is an Android-only AI video creation app, independent from Zubih. Ther
 - Video generation first; image generation may follow later
 - Runway is the first planned provider. Kling and Veo remain disabled until their API integrations are verified.
 - Provider API secrets stay on the separate `backend/` service, never inside the Android app.
-- The backend currently exposes a Runway generation endpoint and a task-status proxy. It is an initial scaffold, not production-ready.
 
-## Open and build
-Open this repository in Android Studio, sync Gradle, and build the app module. The backend URL must be configured in `app/build.gradle.kts` before video generation can work. Backend setup instructions are in `backend/README.md`.
-
-## Not yet complete
-The current commit is an initial Android foundation. Supabase email registration/login, password reset request, encrypted Android Keystore session storage, refresh-token restoration, and sign-out are implemented in source. Automated Android build validation has been added with GitHub Actions. Credit wallet, payments, production backend hardening, reliable in-app task polling and playback/download/history, app icon, release signing, Play Console setup, and end-to-end testing remain to be completed. The build workflow must pass before calling the app build-verified. No APK/AAB has been built or published yet.
+## Current app foundation
+- Supabase email registration, login, password-reset email request, encrypted Android Keystore session storage, refresh-token restoration, and sign-out.
+- Per-user wallet balance display with manual refresh. Credit top-ups and mutations are not enabled yet.
+- Video prompt, duration and aspect-ratio selection.
+- Runway task polling and an external open-video action when a provider URL is returned.
+- Per-user video history table and history screen.
+- GitHub Actions builds a debug APK on pushes and pull requests.
 
 ## Supabase setup
-- Project URL and the public publishable key are configured in the Android Gradle BuildConfig. The publishable key is intended for mobile clients; never add a Supabase secret/service-role key to the app.
-- Run `supabase/migrations/0001_profiles.sql` in the new FOTO FOTO project's SQL Editor.
-- Email confirmation settings are controlled in Supabase Authentication. If confirmation is enabled, users must verify their email before signing in.
+Use the SQL Editor in the separate FOTO FOTO Supabase project and run migrations in this order:
+1. `supabase/migrations/0001_profiles.sql`
+2. `supabase/migrations/0002_wallet.sql`
+3. `supabase/migrations/0003_video_history.sql`
+
+The mobile app uses only the public publishable key. Never put a Supabase secret/service-role key or the Runway API key in the Android app or Git repository.
+
+## Build and release
+Open this repository in Android Studio, sync Gradle, and build the app module. GitHub Actions produces a debug APK artifact; that is not a signed Google Play release. A production backend URL, secure hosting secrets, billing/credit accounting, release signing, Play Console setup, and real-device end-to-end tests are still required before public launch.
+
+## Backend
+The separate Node.js API is in `backend/`. It verifies FOTO FOTO sessions and restricts task status lookup to task IDs recorded in the signed-in user's history. It still requires production hardening, rate limits, credit reservation/refunds, payment processing, and a deployed HTTPS URL before public exposure.
