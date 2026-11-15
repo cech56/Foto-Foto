@@ -115,6 +115,40 @@ const server = http.createServer(async (req, res) => {
       return send(res, 202, { taskId: task.id || task.taskId, status: task.status || "PENDING" });
     }
 
+    if (req.method === "POST" && req.url === "/api/animate-character") {
+      const user = await requireUser(req);
+      if (!user?.id) return send(res, 401, { message: "FOTO FOTO hesabına giriş yapmalısın." });
+      const input = await readJson(req);
+      const characterUri = typeof input.characterUri === "string" ? input.characterUri : "";
+      const referenceUri = typeof input.referenceUri === "string" ? input.referenceUri : "";
+      const ratio = input.ratio || "1280:720";
+      const intensity = Number.isInteger(input.expressionIntensity) ? input.expressionIntensity : 3;
+      if (!characterUri.startsWith("data:image/") || characterUri.length > 4_800_000) {
+        return send(res, 400, { message: "Karakter fotoğrafı geçersiz veya dosya çok büyük." });
+      }
+      if (!referenceUri.startsWith("data:video/") || referenceUri.length > 4_800_000) {
+        return send(res, 400, { message: "Hareket videosu geçersiz veya dosya çok büyük." });
+      }
+      if (!["1280:720", "720:1280", "960:960", "1104:832", "832:1104", "1584:672"].includes(ratio)) {
+        return send(res, 400, { message: "Desteklenmeyen video formatı." });
+      }
+      if (intensity < 1 || intensity > 5) {
+        return send(res, 400, { message: "İfade yoğunluğu 1–5 arasında olmalı." });
+      }
+      const task = await runway("/v1/character_performance", {
+        method: "POST",
+        body: JSON.stringify({
+          model: "act_two",
+          character: { type: "image", uri: characterUri },
+          reference: { type: "video", uri: referenceUri },
+          ratio,
+          bodyControl: true,
+          expressionIntensity: intensity
+        })
+      });
+      return send(res, 202, { taskId: task.id || task.taskId, status: task.status || "PENDING" });
+    }
+
     if (req.method === "POST" && req.url === "/api/upscale-video") {
       const user = await requireUser(req);
       if (!user?.id) return send(res, 401, { message: "FOTO FOTO hesabına giriş yapmalısın." });
