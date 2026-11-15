@@ -423,7 +423,7 @@ private fun FotoFotoGalaxyHome(
                 .background(Brush.verticalGradient(listOf(Color.Transparent, Color(0xFF21164D), Color(0xFF101632)))))
             Text("🪨  ✨  🪨", Modifier.align(Alignment.BottomCenter).padding(bottom = 6.dp), fontSize = 34.sp)
             // Character and companion
-            Text("🤖", Modifier.align(Alignment.Center).offset(y = 38.dp).graphicsLayer { translationY = floatY }, fontSize = 112.sp)
+            FotoRobotMascot(Modifier.align(Alignment.Center).offset(y = 42.dp).graphicsLayer { translationY = floatY }.size(width = 204.dp, height = 226.dp))
             Text("🐱", Modifier.align(Alignment.BottomCenter).padding(bottom = 36.dp, end = 116.dp), fontSize = 49.sp)
             Text("🎬", Modifier.align(Alignment.CenterEnd).padding(top = 90.dp, end = 18.dp).graphicsLayer { rotationZ = floatY }, fontSize = 39.sp)
             Text("🎞️", Modifier.align(Alignment.BottomEnd).padding(end = 23.dp, bottom = 58.dp), fontSize = 30.sp)
@@ -455,6 +455,60 @@ private fun FotoFotoGalaxyHome(
             repeat(4) { i -> Box(Modifier.padding(horizontal = 4.dp).size(if (i == 0) 8.dp else 7.dp)
                 .background(if (i == 0) Color.White else Color(0xFF6A4A9D), RoundedCornerShape(50))) }
         }
+    }
+}
+
+
+@Composable
+private fun FotoRobotMascot(modifier: Modifier = Modifier) {
+    Canvas(modifier) {
+        val sx = size.width / 204f
+        val sy = size.height / 226f
+        fun p(x: Float, y: Float) = Offset(x * sx, y * sy)
+        fun rect(x: Float, y: Float, w: Float, h: Float) = Size(w * sx, h * sy)
+        // Soft neon aura behind the mascot
+        drawCircle(Brush.radialGradient(listOf(Color(0x886A5CFF), Color(0x3326DFFF), Color.Transparent), center = p(102f, 116f), radius = 112f * sx), radius = 112f * sx, center = p(102f, 116f))
+        // Legs and rounded boots
+        drawRoundRect(Brush.linearGradient(listOf(Color(0xFFEAF7FF), Color(0xFF8DA8D8), Color(0xFFF9FCFF)), p(70f, 166f), p(135f, 222f)), p(65f, 165f), rect(43f, 53f), CornerRadius(17f * sx))
+        drawRoundRect(Brush.linearGradient(listOf(Color(0xFFEAF7FF), Color(0xFF829BCB), Color(0xFFF7FBFF)), p(111f, 165f), p(175f, 222f)), p(108f, 165f), rect(43f, 53f), CornerRadius(17f * sx))
+        drawRoundRect(Color(0xFF263A68), p(69f, 203f), rect(42f, 13f), CornerRadius(7f * sx))
+        drawRoundRect(Color(0xFF263A68), p(111f, 203f), rect(42f, 13f), CornerRadius(7f * sx))
+        // Body shell
+        drawRoundRect(Brush.linearGradient(listOf(Color(0xFFFFFFFF), Color(0xFFB8D8F5), Color(0xFFF9FCFF)), p(53f, 119f), p(154f, 204f)), p(51f, 112f), rect(102f, 83f), CornerRadius(31f * sx))
+        drawRoundRect(Color(0xFF506B9A), p(57f, 119f), rect(94f, 6f), CornerRadius(3f * sx))
+        // Left waving arm and hand
+        drawLine(Color(0xFF8CA8D7), p(55f, 144f), p(26f, 112f), strokeWidth = 18f * sx, cap = StrokeCap.Round)
+        drawLine(Color(0xFFEAF7FF), p(53f, 141f), p(25f, 109f), strokeWidth = 12f * sx, cap = StrokeCap.Round)
+        drawCircle(Color(0xFF182B54), 13f * sx, p(19f, 100f))
+        drawCircle(Brush.linearGradient(listOf(Color.White, Color(0xFF9DB9E8)), p(12f, 88f), p(28f, 112f)), 10f * sx, p(19f, 100f))
+        // Right arm
+        drawLine(Color(0xFF8CA8D7), p(149f, 145f), p(177f, 164f), strokeWidth = 17f * sx, cap = StrokeCap.Round)
+        drawLine(Color(0xFFF7FCFF), p(149f, 143f), p(177f, 162f), strokeWidth = 11f * sx, cap = StrokeCap.Round)
+        drawCircle(Color(0xFFB8D7F5), 9f * sx, p(179f, 164f))
+        // Neck
+        drawRoundRect(Color(0xFF718DBB), p(87f, 103f), rect(30f, 19f), CornerRadius(8f * sx))
+        // Head and polished shell
+        drawRoundRect(Color(0xFF253D72), p(29f, 26f), rect(146f, 102f), CornerRadius(38f * sx))
+        drawRoundRect(Brush.linearGradient(listOf(Color(0xFFFFFFFF), Color(0xFFB8D8F5), Color(0xFFFDFEFF)), p(31f, 23f), p(171f, 122f)), p(34f, 23f), rect(136f, 100f), CornerRadius(35f * sx))
+        // Headphones
+        drawRoundRect(Brush.linearGradient(listOf(Color(0xFFFF6FE7), Color(0xFF7756FF), Color(0xFF2BDFFF)), p(20f, 49f), p(43f, 100f)), p(20f, 48f), rect(22f, 48f), CornerRadius(11f * sx))
+        drawRoundRect(Brush.linearGradient(listOf(Color(0xFF32DFFF), Color(0xFF6E48FF), Color(0xFFFF69E7)), p(162f, 48f), p(184f, 100f)), p(162f, 48f), rect(22f, 48f), CornerRadius(11f * sx))
+        // Dark glass face
+        drawRoundRect(Brush.linearGradient(listOf(Color(0xFF071329), Color(0xFF101A3B), Color(0xFF020817)), p(45f, 43f), p(159f, 106f)), p(45f, 42f), rect(114f, 65f), CornerRadius(26f * sx))
+        // Happy cyan eyes and tiny smile
+        drawCircle(Color(0xFF20DFFF), 5.5f * sx, p(77f, 74f))
+        drawCircle(Color(0xFF20DFFF), 5.5f * sx, p(126f, 74f))
+        drawLine(Color(0xFF20DFFF), p(68f, 72f), p(84f, 72f), strokeWidth = 5f * sx, cap = StrokeCap.Round)
+        drawLine(Color(0xFF20DFFF), p(117f, 72f), p(133f, 72f), strokeWidth = 5f * sx, cap = StrokeCap.Round)
+        drawArc(Color(0xFF55E9FF), 15f, 150f, false, p(87f, 78f), rect(30f, 16f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.5f * sx, cap = StrokeCap.Round))
+        // Chest play emblem
+        drawCircle(Color(0xFF713DDA), 18f * sx, p(102f, 151f))
+        drawCircle(Color(0xFF25DFFF), 18f * sx, p(102f, 151f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f * sx))
+        val play = Path().apply { moveTo(98f * sx, 142f * sy); lineTo(111f * sx, 151f * sy); lineTo(98f * sx, 160f * sy); close() }
+        drawPath(play, Color.White)
+        // Shell highlights
+        drawLine(Color.White.copy(alpha = 0.8f), p(58f, 36f), p(82f, 29f), strokeWidth = 3f * sx, cap = StrokeCap.Round)
+        drawCircle(Color(0xFF64E8FF), 2.5f * sx, p(153f, 116f))
     }
 }
 
