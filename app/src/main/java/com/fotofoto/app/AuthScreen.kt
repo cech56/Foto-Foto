@@ -53,6 +53,8 @@ private fun AuthScreen(onSignedIn: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var displayName by remember { mutableStateOf("") }
+    var otp by remember { mutableStateOf("") }
+    var pendingVerification by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf("FOTO FOTO hesabınla giriş yap veya ücretsiz hesap oluştur.") }
     val scope = rememberCoroutineScope()
@@ -66,15 +68,20 @@ private fun AuthScreen(onSignedIn: () -> Unit) {
                 Spacer(Modifier.height(25.dp))
                 Card(colors = CardDefaults.cardColors(containerColor = AuthPanel), shape = RoundedCornerShape(22.dp)) {
                     Column(Modifier.padding(20.dp)) {
-                        Text(when(mode) { "register" -> "Hesap oluştur"; "reset" -> "Şifremi yenile"; else -> "Giriş yap" },
+                        Text(when { pendingVerification -> "E-posta doğrulama"; mode == "register" -> "Hesap oluştur"; mode == "reset" -> "Şifremi yenile"; else -> "Giriş yap" },
                             color = Color.White, fontSize = 23.sp, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.height(16.dp))
-                        if (mode == "register") {
+                        if (pendingVerification) {
+                            Text("E-posta adresine gelen kodu gir. Bağlantıya tıklamana gerek yok.", color = Color.LightGray, fontSize = 12.sp)
+                            Spacer(Modifier.height(10.dp))
+                            OutlinedTextField(value = otp, onValueChange = { otp = it.filter(Char::isDigit).take(8) }, label = { Text("E-posta kodu") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                        }
+                        if (mode == "register" && !pendingVerification) {
                             OutlinedTextField(value = displayName, onValueChange = { displayName = it }, label = { Text("Adın") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                             Spacer(Modifier.height(10.dp))
                         }
-                        OutlinedTextField(value = email, onValueChange = { email = it.trim() }, label = { Text("E-posta") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                        if (mode != "reset") {
+                        if (!pendingVerification) OutlinedTextField(value = email, onValueChange = { email = it.trim() }, label = { Text("E-posta") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                        if (mode != "reset" && !pendingVerification) {
                             Spacer(Modifier.height(10.dp))
                             OutlinedTextField(value = password, onValueChange = { password = it }, label = { Text("Şifre (en az 8 karakter)") },
                                 visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth(), singleLine = true)
@@ -84,21 +91,25 @@ private fun AuthScreen(onSignedIn: () -> Unit) {
                             onClick = {
                                 scope.launch {
                                     busy = true
-                                    message = when(mode) {
-                                        "register" -> registerFoto(context, email, password, displayName)
-                                        "reset" -> resetFotoPassword(email)
+                                    message = when {
+                                        pendingVerification -> verifySignupOtp(context, email, otp)
+                                        mode == "register" -> registerFoto(context, email, password, displayName).also {
+                                            if (it == "OTP_SENT") { pendingVerification = true; otp = "" }
+                                        }
+                                        mode == "reset" -> resetFotoPassword(email)
                                         else -> loginFoto(context, email, password)
                                     }
                                     if (message == "Giriş başarılı.") onSignedIn()
+                                    if (message == "OTP_SENT") message = "Doğrulama kodu e-posta adresine gönderildi. Kodu uygulamaya gir."
                                     busy = false
                                 }
                             },
-                            enabled = !busy && email.contains("@") &&
-                                (mode == "reset" || (password.length >= 8 && (mode != "register" || displayName.isNotBlank()))),
+                            enabled = !busy && (if (pendingVerification) otp.length in 6..8 else email.contains("@") &&
+                                (mode == "reset" || (password.length >= 8 && (mode != "register" || displayName.isNotBlank())))),
                             modifier = Modifier.fillMaxWidth().height(52.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = AuthAccent, contentColor = Color(0xFF211721))
                         ) {
-                            Text(if (busy) "İŞLENİYOR…" else when(mode) {
+                            Text(if (busy) "İŞLENİYOR…" else if (pendingVerification) "KODU DOĞRULA" else when(mode) {
                                 "register" -> "ÜCRETSİZ HESAP OLUŞTUR"
                                 "reset" -> "YENİLEME E-POSTASI GÖNDER"
                                 else -> "GİRİŞ YAP"
@@ -109,7 +120,9 @@ private fun AuthScreen(onSignedIn: () -> Unit) {
                                 Text("Şifremi unuttum", color = AuthAccent)
                             }
                         }
+                        if (pendingVerification) TextButton(onClick = { scope.launch { busy = true; message = resendSignupOtp(email); busy = false } }, modifier = Modifier.fillMaxWidth()) { Text("KODU TEKRAR GÖNDER", color = AuthAccent) }
                         TextButton(onClick = {
+                            pendingVerification = false
                             mode = if (mode == "login") "register" else "login"
                             message = if (mode == "register") "Hesap oluşturabilirsin." else "FOTO FOTO hesabına giriş yap."
                         }, modifier = Modifier.fillMaxWidth()) {
@@ -147,8 +160,34 @@ private suspend fun registerFoto(context: Context, email: String, password: Stri
                 SessionStore.save(context, access, refresh)
                 "Giriş başarılı."
             } else {
-                "Hesabın oluşturuldu. E-posta doğrulama bağlantısını kontrol et, ardından giriş yap."
+                "OTP_SENT"
             }
+        }
+    } catch (_: Exception) { "Sunucuya bağlanılamadı. İnternet bağlantını kontrol et." }
+}
+
+
+private suspend fun verifySignupOtp(context: Context, email: String, token: String): String = withContext(Dispatchers.IO) {
+    try {
+        val body = JSONObject().put("email", email).put("token", token).put("type", "signup")
+        authClient.newCall(authRequest("/auth/v1/verify", body)).execute().use { response ->
+            val data = JSONObject(response.body?.string().orEmpty())
+            if (!response.isSuccessful) return@withContext authError(data, "Kod doğrulanamadı. Kodu kontrol edip tekrar dene.")
+            val access = data.optString("access_token")
+            val refresh = data.optString("refresh_token")
+            if (access.isBlank() || refresh.isBlank()) return@withContext "Oturum bilgisi alınamadı. Tekrar giriş yap."
+            SessionStore.save(context, access, refresh)
+            "Giriş başarılı."
+        }
+    } catch (_: Exception) { "Sunucuya bağlanılamadı. İnternet bağlantını kontrol et." }
+}
+
+private suspend fun resendSignupOtp(email: String): String = withContext(Dispatchers.IO) {
+    try {
+        val body = JSONObject().put("type", "signup").put("email", email)
+        authClient.newCall(authRequest("/auth/v1/resend", body)).execute().use { response ->
+            if (response.isSuccessful) "Yeni doğrulama kodu gönderildi."
+            else authError(JSONObject(response.body?.string().orEmpty()), "Kod gönderilemedi.")
         }
     } catch (_: Exception) { "Sunucuya bağlanılamadı. İnternet bağlantını kontrol et." }
 }
