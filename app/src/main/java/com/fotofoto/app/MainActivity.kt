@@ -143,10 +143,10 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         Spacer(Modifier.height(15.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(Modifier.background(Color.White.copy(alpha = 0.20f), RoundedCornerShape(50)).padding(horizontal = 13.dp, vertical = 8.dp)) {
-                                Text("✦  GEN-4.5 STÜDYOSU", color = White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                Text(tr("✦  GEN-4.5 STÜDYOSU", "✦  GEN-4.5 STUDIO", "✦  استوديو GEN-4.5"), color = White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                             }
                             Spacer(Modifier.weight(1f))
-                            Text("● CANLI MOTOR", color = White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                            Text(tr("● CANLI MOTOR", "● LIVE ENGINE", "● المحرك مباشر"), color = White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -196,7 +196,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                         OutlinedTextField(
                             value = prompt, onValueChange = { if (it.length <= 1000) prompt = it },
                             modifier = Modifier.fillMaxWidth().heightIn(min = 150.dp),
-                            placeholder = { Text(when (studioMode) { "edit" -> "Örnek: Arka planı gün batımı sahiline dönüştür, kişiyi ve kamera hareketini koru…"; "upscale" -> "İsteğe bağlı: Doğal detayları koru, görüntüyü netleştir…"; "character" -> "Karakterinin nasıl hareket etmesini istediğini açıkla (isteğe bağlı)…"; else -> "Örnek: Gün batımında deniz kenarında ilerleyen kırmızı klasik bir araba, sinematik kamera hareketi…" }, color = Muted) },
+                            placeholder = { Text(when (studioMode) { "edit" -> tr("Örnek: Arka planı gün batımı sahiline dönüştür, kişiyi ve kamera hareketini koru…", "Example: Change the background to a sunset beach while keeping the person and camera movement…", "مثال: حوّل الخلفية إلى شاطئ عند الغروب مع الحفاظ على الشخص وحركة الكاميرا…"); "upscale" -> tr("İsteğe bağlı: Doğal detayları koru, görüntüyü netleştir…", "Optional: Preserve natural details and sharpen the image…", "اختياري: حافظ على التفاصيل الطبيعية وحسّن وضوح الصورة…"); "character" -> tr("Karakterinin nasıl hareket etmesini istediğini açıkla (isteğe bağlı)…", "Describe how your character should move (optional)…", "اشرح كيف تريد أن تتحرك الشخصية (اختياري)…"); else -> tr("Örnek: Gün batımında deniz kenarında ilerleyen kırmızı klasik bir araba, sinematik kamera hareketi…", "Example: A red classic car driving by the sea at sunset, cinematic camera movement…", "مثال: سيارة كلاسيكية حمراء تسير بجانب البحر عند الغروب، حركة كاميرا سينمائية…") }, color = Muted) },
                             minLines = 5, maxLines = 8,
                             colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Accent, unfocusedBorderColor = Color(0xFF343B4D), focusedTextColor = White, unfocusedTextColor = White)
                         )
@@ -215,7 +215,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                             if (selectedImageUri != null) {
                                 val previewBitmap = remember(selectedImageUri) { try { context.contentResolver.openInputStream(selectedImageUri!!)?.use { BitmapFactory.decodeStream(it) } } catch (_: Exception) { null } }
                                 previewBitmap?.let { Image(bitmap = it.asImageBitmap(), contentDescription = "Referans fotoğrafı", modifier = Modifier.fillMaxWidth().heightIn(max = 190.dp)) }
-                                Text("Fotoğraf videonun ilk karesi olarak kullanılacak.", color = Muted, fontSize = 10.sp)
+                                Text(tr("Fotoğraf videonun ilk karesi olarak kullanılacak.", "Your photo will be used as the first frame of the video.", "سيتم استخدام صورتك كالإطار الأول للفيديو."), color = Muted, fontSize = 10.sp)
                             } else Text(tr("Kendi fotoğrafını veya canlandırmak istediğin görseli ekle.", "Add your photo or the image you want to animate.", "أضف صورتك أو الصورة التي تريد تحريكها."), color = Muted, fontSize = 10.sp)
                         } else {
                             if (studioMode == "character") {
@@ -227,7 +227,7 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                                     }
                                     if (selectedImageUri != null) TextButton(onClick = { selectedImageUri = null }) { Text("KALDIR", color = Accent) }
                                 }
-                                Text("Hareket videosunda yüzü net görünen tek kişi olmalı.", color = Muted, fontSize = 10.sp)
+                                Text(tr("Hareket videosunda yüzü net görünen tek kişi olmalı.", "The motion video should show one person with a clearly visible face.", "يجب أن يظهر في فيديو الحركة شخص واحد بوجه واضح."), color = Muted, fontSize = 10.sp)
                             }
                             Text(if (studioMode == "edit") "DÜZENLENECEK VİDEO" else if (studioMode == "character") "HAREKET / PERFORMANS VİDEOSU" else "KALİTESİ YÜKSELTİLECEK VİDEO", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                             Spacer(Modifier.height(8.dp))
@@ -345,11 +345,11 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(videoUrl))
                                     context.startActivity(intent)
                                 }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF242D40))) {
-                                    Text("VİDEOYU AÇ", color = White, fontWeight = FontWeight.Bold)
+                                    Text(tr("VİDEOYU AÇ", "OPEN VIDEO", "افتح الفيديو"), color = White, fontWeight = FontWeight.Bold)
                                 }
                                 Button(onClick = { downloadFotoVideo(context, videoUrl, taskId) }, modifier = Modifier.weight(1f),
                                     colors = ButtonDefaults.buttonColors(containerColor = Accent)) {
-                                    Text("İNDİR", color = Color(0xFF211721), fontWeight = FontWeight.Bold)
+                                    Text(tr("İNDİR", "DOWNLOAD", "تنزيل"), color = Color(0xFF211721), fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
