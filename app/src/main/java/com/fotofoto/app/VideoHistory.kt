@@ -6,6 +6,7 @@ import android.app.DownloadManager
 import android.os.Environment
 import android.net.Uri
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -159,47 +160,63 @@ fun VideoHistoryCard(refreshKey: Int) {
                 loading -> Text("Geçmiş yükleniyor…", color = Color(0xFF9AA3B6), fontSize = 12.sp)
                 items.isEmpty() -> Text("Henüz oluşturulmuş video yok.", color = Color(0xFF9AA3B6), fontSize = 12.sp)
                 else -> items.forEachIndexed { index, item ->
-                    if (index > 0) HorizontalDivider(color = Color(0xFF30384A))
-                    Column(Modifier.fillMaxWidth().padding(vertical = 9.dp)) {
-                        Text(item.prompt, color = Color.White, fontSize = 12.sp, maxLines = 2)
-                        Spacer(Modifier.height(4.dp))
-                        Text(item.status, color = Color(0xFFFF795E), fontSize = 10.sp)
-                        if (item.status.uppercase() !in listOf("SUCCEEDED", "FAILED", "CANCELED", "CANCELLED")) {
-                            TextButton(
-                                onClick = {
-                                    checkingTask = item.taskId
-                                    feedback = ""
-                                    scope.launch {
-                                        feedback = refreshVideoHistoryItem(context, item.taskId)
-                                        checkingTask = ""
-                                        reloadHistory()
-                                    }
-                                },
-                                enabled = checkingTask.isBlank(),
-                                contentPadding = PaddingValues(0.dp)
-                            ) {
-                                Text(if (checkingTask == item.taskId) "KONTROL EDİLİYOR…" else "DURUMU KONTROL ET", color = Color(0xFFFF795E), fontSize = 10.sp)
-                            }
-                        }
-                        if (item.videoUrl.startsWith("https://")) {
-                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                TextButton(onClick = {
-                                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(item.videoUrl)))
-                                }, contentPadding = PaddingValues(0.dp)) {
-                                    Text("VİDEOYU AÇ", color = Color(0xFFFF795E), fontSize = 10.sp)
+                    val state = item.status.uppercase()
+                    val done = state == "SUCCEEDED"
+                    val failed = state in listOf("FAILED", "CANCELED", "CANCELLED")
+                    val stateColor = if (done) Color(0xFF55D6A2) else if (failed) Color(0xFFFF718B) else Color(0xFFFFC46B)
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(top = if (index == 0) 2.dp else 9.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF101726)),
+                        shape = RoundedCornerShape(15.dp)
+                    ) {
+                        Column(Modifier.fillMaxWidth().padding(13.dp)) {
+                            Row(Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                                Box(Modifier.size(38.dp).background(Color(0xFF30204A), RoundedCornerShape(11.dp)), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                                    Text("▶", color = Color(0xFFB99AFF), fontSize = 17.sp, fontWeight = FontWeight.Black)
                                 }
-                                TextButton(onClick = {
-                                    val safeId = item.taskId.take(12).replace(Regex("[^A-Za-z0-9_-]"), "")
-                                    val request = DownloadManager.Request(Uri.parse(item.videoUrl))
-                                        .setTitle("FOTO FOTO videon")
-                                        .setDescription("Video indiriliyor…")
-                                        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                                        .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "foto-foto-$safeId.mp4")
-                                        .setMimeType("video/mp4")
-                                    val manager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-                                    manager.enqueue(request)
-                                }, contentPadding = PaddingValues(0.dp)) {
-                                    Text("İNDİR", color = Color(0xFFFF795E), fontSize = 10.sp)
+                                Spacer(Modifier.width(10.dp))
+                                Column(Modifier.weight(1f)) {
+                                    Text("FOTO FOTO PROJESİ", color = Color(0xFF9AA3B6), fontSize = 8.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                                    Text(item.prompt.ifBlank { "İsimsiz video projesi" }, color = Color.White, fontSize = 12.sp, maxLines = 2)
+                                }
+                                Box(Modifier.background(stateColor.copy(alpha = 0.14f), RoundedCornerShape(50)).padding(horizontal = 9.dp, vertical = 5.dp)) {
+                                    Text(when { done -> "HAZIR"; failed -> "BAŞARISIZ"; state == "PENDING" || state == "THROTTLED" -> "SIRADA"; else -> "ÜRETİLİYOR" }, color = stateColor, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                            Spacer(Modifier.height(7.dp))
+                            if (!done && !failed) {
+                                TextButton(
+                                    onClick = {
+                                        checkingTask = item.taskId
+                                        feedback = ""
+                                        scope.launch {
+                                            feedback = refreshVideoHistoryItem(context, item.taskId)
+                                            checkingTask = ""
+                                            reloadHistory()
+                                        }
+                                    },
+                                    enabled = checkingTask.isBlank(),
+                                    contentPadding = PaddingValues(0.dp)
+                                ) {
+                                    Text(if (checkingTask == item.taskId) "KONTROL EDİLİYOR…" else "↻  DURUMU KONTROL ET", color = Color(0xFFFFB36B), fontSize = 10.sp)
+                                }
+                            }
+                            if (item.videoUrl.startsWith("https://")) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                    TextButton(onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(item.videoUrl))) }, contentPadding = PaddingValues(0.dp)) {
+                                        Text("▶  VİDEOYU AÇ", color = Color(0xFF55D6D0), fontSize = 10.sp)
+                                    }
+                                    TextButton(onClick = {
+                                        val safeId = item.taskId.take(12).replace(Regex("[^A-Za-z0-9_-]"), "")
+                                        val request = DownloadManager.Request(Uri.parse(item.videoUrl))
+                                            .setTitle("FOTO FOTO videon").setDescription("Video indiriliyor…")
+                                            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                                            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "foto-foto-$safeId.mp4")
+                                            .setMimeType("video/mp4")
+                                        (context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
+                                    }, contentPadding = PaddingValues(0.dp)) {
+                                        Text("↓  İNDİR", color = Color(0xFFFFB36B), fontSize = 10.sp)
+                                    }
                                 }
                             }
                         }
