@@ -2,6 +2,9 @@ package com.fotofoto.app
 
 import android.content.Context
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -49,22 +52,41 @@ fun AuthGate(content: @Composable (onSignOut: () -> Unit) -> Unit) {
 @Composable
 private fun AuthScreen(onSignedIn: () -> Unit) {
     val context = LocalContext.current
-    var mode by remember { mutableStateOf("register") }
+    var mode by remember { mutableStateOf("login") }
+    var language by remember { mutableStateOf(context.getSharedPreferences("foto_foto_settings", Context.MODE_PRIVATE).getString("language", "Türkçe") ?: "Türkçe") }
+    val en = language == "English"
+    val ar = language == "العربية"
+    fun tr(t: String, e: String, a: String) = if (en) e else if (ar) a else t
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var displayName by remember { mutableStateOf("") }
     var otp by remember { mutableStateOf("") }
     var pendingVerification by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
-    var message by remember { mutableStateOf("FOTO FOTO hesabınla giriş yap veya ücretsiz hesap oluştur.") }
+    var message by remember { mutableStateOf("FOTO FOTO hesabına giriş yap.") }
     val scope = rememberCoroutineScope()
 
     MaterialTheme(colorScheme = darkColorScheme(primary = AuthAccent, background = AuthBg, surface = AuthPanel)) {
-        Box(Modifier.fillMaxSize().background(AuthBg).padding(22.dp), contentAlignment = Alignment.Center) {
+        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFF241A35), AuthBg, Color(0xFF090C15)))).padding(22.dp), contentAlignment = Alignment.Center) {
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    listOf("Türkçe", "English", "العربية").forEach { lang ->
+                        val short = if (lang == "Türkçe") "TR" else if (lang == "English") "EN" else "ع"
+                        Text(short, modifier = Modifier.padding(start = 5.dp).clip(RoundedCornerShape(10.dp))
+                            .background(if (language == lang) Color(0xFF603A9B) else Color(0xFF171D30))
+                            .border(1.dp, if (language == lang) Color(0xFFC49AFF) else Color(0xFF343B50), RoundedCornerShape(10.dp))
+                            .clickable { language = lang; context.getSharedPreferences("foto_foto_settings", Context.MODE_PRIVATE).edit().putString("language", lang).apply() }
+                            .padding(horizontal = 13.dp, vertical = 9.dp), color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+                Spacer(Modifier.height(28.dp))
+                Box(Modifier.size(66.dp).background(Brush.linearGradient(listOf(Color(0xFF12D8FA), Color(0xFF8B35FF), Color(0xFFFF5AA8))), RoundedCornerShape(22.dp)), contentAlignment = Alignment.Center) {
+                    Text("▶", color = Color.White, fontSize = 31.sp, fontWeight = FontWeight.Black)
+                }
+                Spacer(Modifier.height(12.dp))
                 Text("FOTO FOTO", color = Color.White, fontSize = 29.sp, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
-                Spacer(Modifier.height(8.dp))
-                Text("Hayallerini videoya dönüştür.", color = Color.LightGray)
+                Spacer(Modifier.height(7.dp))
+                Text(tr("Hayallerini videoya dönüştür.", "Turn your imagination into video.", "حوّل خيالك إلى فيديو."), color = Color.LightGray, fontSize = 13.sp)
                 Spacer(Modifier.height(25.dp))
                 Card(colors = CardDefaults.cardColors(containerColor = AuthPanel), shape = RoundedCornerShape(22.dp)) {
                     Column(Modifier.padding(20.dp)) {
