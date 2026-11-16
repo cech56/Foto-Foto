@@ -1,5 +1,5 @@
 import http from "node:http";
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHmac, timingSafeEqual } from "node:crypto";
 
 const PORT = Number(process.env.PORT || 8080);
 const RUNWAY_API_KEY = process.env.RUNWAY_API_KEY;
@@ -8,6 +8,12 @@ const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const RUNWAY_BASE = "https://api.dev.runwayml.com";
 const RUNWAY_VERSION = "2024-11-06";
+const PAYTR_MERCHANT_ID = process.env.PAYTR_MERCHANT_ID;
+const PAYTR_MERCHANT_KEY = process.env.PAYTR_MERCHANT_KEY;
+const PAYTR_MERCHANT_SALT = process.env.PAYTR_MERCHANT_SALT;
+const PAYTR_OK_URL = process.env.PAYTR_OK_URL;
+const PAYTR_FAIL_URL = process.env.PAYTR_FAIL_URL;
+const PAYTR_TEST_MODE = process.env.PAYTR_TEST_MODE === "1" ? "1" : "0";
 
 function send(res, status, data) {
   res.writeHead(status, {
@@ -27,6 +33,39 @@ async function readJson(req) {
     if (raw.length > 6_500_000) throw new Error("Fotoğraf dosyası çok büyük. Daha küçük bir görsel seç.");
   }
   return JSON.parse(raw || "{}");
+}
+
+async function readForm(req) {
+  let raw = "";
+  for await (const chunk of req) { raw += chunk; if (raw.length > 100_000) throw new Error("Ödeme bildirimi çok büyük."); }
+  return new URLSearchParams(raw);
+}
+
+function sendText(res, status, value) {
+  res.writeHead(status, { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" });
+  res.end(value);
+}
+
+function paytrConfigured() {
+  return Boolean(PAYTR_MERCHANT_ID && PAYTR_MERCHANT_KEY && PAYTR_MERCHANT_SALT && PAYTR_OK_URL && PAYTR_FAIL_URL);
+}
+
+async function adminRest(path, options = {}) {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error("Ödeme veritabanı yapılandırılmamış.");
+  const response = await fetch(SUPABASE_URL + "/rest/v1/" + path, { ...options, headers: { apikey: SUPABASE_SERVICE_ROLE_KEY, Authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY, "Content-Type": "application/json", ...(options.headers || {}) } });
+  const raw = await response.text(); let data = null;
+  if (raw) { try { data = JSON.parse(raw); } catch { data = raw; } }
+  if (!response.ok) throw new Error((data && data.message) || "Ödeme veritabanı işlemi başarısız.");
+  return data;
+}
+
+function safeHashEqual(a, b) {
+  const left = Buffer.from(String(a || "")); const right = Buffer.from(String(b || ""));
+  return left.length === right.length && timingSafeEqual(left, right);
+}
+
+function paytrCallbackHash(merchantOid, status, totalAmount) {
+  return createHmac("sha256", PAYTR_MERCHANT_KEY).update(merchantOid + PAYTR_MERCHANT_SALT + status + totalAmount).digest("base64");
 }
 
 async function requireUser(req) {
@@ -124,7 +163,8 @@ const server = http.createServer(async (req, res) => {
       supabaseUrl: Boolean(SUPABASE_URL),
       supabasePublishableKey: Boolean(SUPABASE_PUBLISHABLE_KEY),
       walletServiceKey: Boolean(SUPABASE_SERVICE_ROLE_KEY),
-      runwayApiKey: Boolean(RUNWAY_API_KEY)
+      runwayApiKey: Boolean(RUNWAY_API_KEY),
+      paytrCredentials: paytrConfigured()
     };
     return send(res, 200, {
       ok: true,
@@ -151,6 +191,58 @@ const server = http.createServer(async (req, res) => {
         return send(res, 502, { message: detail?.message || "Hesap silinemedi. Daha sonra tekrar dene." });
       }
       return send(res, 200, { ok: true, message: "FOTO FOTO hesabın ve hesaba bağlı veriler silindi." });
+    }
+
+    const pathname = new URL(req.url, "http://localhost").pathname;
+
+    if (req.method === "POST" && pathname === "/api/webhooks/paytr") {
+      if (!PAYTR_MERCHANT_KEY || !PAYTR_MERCHANT_SALT || !SUPABASE_SERVICE_ROLE_KEY) return sendText(res, 503, "PAYTR callback is not configured");
+      const form = await readForm(req);
+      const merchantOid = form.get("merchant_oid") || ""; const status = form.get("status") || ""; const totalAmount = form.get("total_amount") || ""; const receivedHash = form.get("hash") || "";
+      if (!merchantOid || !["success", "failed"].includes(status) || !/^\d+$/.test(totalAmount)) return sendText(res, 400, "Invalid callback");
+      if (!safeHashEqual(paytrCallbackHash(merchantOid, status, totalAmount), receivedHash)) return sendText(res, 400, "PAYTR notification failed: bad hash");
+      await adminRpc("settle_paytr_order", { p_merchant_oid: merchantOid, p_status: status, p_total_amount: Number(totalAmount), p_payment_type: form.get("payment_type") || "", p_failure_code: form.get("failed_reason_code") || "", p_failure_message: form.get("failed_reason_msg") || "" });
+      return sendText(res, 200, "OK");
+    }
+
+    if (req.method === "GET" && pathname === "/api/catalog") {
+      const user = await requireUser(req);
+      if (!user || !user.id) return send(res, 401, { message: "Paketleri görmek için giriş yapmalısın." });
+      const products = await adminRest("billing_products?select=product_id,product_type,title,description,price_minor,currency,credits&channel=eq.paytr_web&region=eq.TR&active=eq.true&order=price_minor.asc");
+      return send(res, 200, { products });
+    }
+
+    if (req.method === "POST" && pathname === "/api/payments/paytr/create") {
+      const user = await requireUser(req);
+      if (!user || !user.id) return send(res, 401, { message: "Ödeme başlatmak için FOTO FOTO hesabına giriş yapmalısın." });
+      if (!paytrConfigured()) return send(res, 503, { message: "PayTR mağaza hesabı açılmadı veya sunucu bilgileri eklenmedi. Şimdilik ödeme alınamaz." });
+      const input = await readJson(req); const productId = typeof input.productId === "string" ? input.productId.trim() : "";
+      if (!/^[a-zA-Z0-9_-]{2,60}$/.test(productId)) return send(res, 400, { message: "Geçersiz paket seçimi." });
+      const products = await adminRest("billing_products?select=product_id,title,price_minor,currency,credits&product_id=eq." + encodeURIComponent(productId) + "&channel=eq.paytr_web&region=eq.TR&active=eq.true&limit=1");
+      const product = Array.isArray(products) ? products[0] : null;
+      if (!product) return send(res, 404, { message: "Bu kredi paketi henüz satışa açık değil." });
+      const amountMinor = Number(product.price_minor); const credits = Number(product.credits);
+      if (product.currency !== "TRY" || !Number.isSafeInteger(amountMinor) || amountMinor < 1 || !Number.isSafeInteger(credits) || credits < 1) return send(res, 400, { message: "Paket fiyatı veya kredi miktarı geçersiz." });
+      const email = String(user.email || "").trim();
+      if (!email || email.length > 100 || /[^\x20-\x7E]/.test(email)) return send(res, 400, { message: "PayTR için hesabında geçerli bir e-posta adresi bulunmalı." });
+      const merchantOid = "FF" + randomUUID().replaceAll("-", "");
+      const forwarded = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim(); const userIp = forwarded || req.socket.remoteAddress || "127.0.0.1";
+      const basket = Buffer.from(JSON.stringify([[product.title, (amountMinor / 100).toFixed(2), 1]])).toString("base64");
+      const noInstallment = "1"; const maxInstallment = "0"; const currency = "TL";
+      const hashText = PAYTR_MERCHANT_ID + userIp + merchantOid + email + amountMinor + basket + noInstallment + maxInstallment + currency + PAYTR_TEST_MODE;
+      const paytrToken = createHmac("sha256", PAYTR_MERCHANT_KEY).update(hashText + PAYTR_MERCHANT_SALT).digest("base64");
+      await adminRest("payment_orders", { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ merchant_oid: merchantOid, user_id: user.id, product_id: product.product_id, amount_minor: amountMinor, currency: "TRY", credits_to_grant: credits, status: "pending" }) });
+      const params = new URLSearchParams({ merchant_id: PAYTR_MERCHANT_ID, user_ip: userIp, merchant_oid: merchantOid, email: email, payment_amount: String(amountMinor), paytr_token: paytrToken, user_basket: basket, no_installment: noInstallment, max_installment: maxInstallment, currency: currency, test_mode: PAYTR_TEST_MODE, debug_on: PAYTR_TEST_MODE === "1" ? "1" : "0", timeout_limit: "30", lang: "tr", merchant_ok_url: PAYTR_OK_URL, merchant_fail_url: PAYTR_FAIL_URL, user_name: String((user.user_metadata && user.user_metadata.display_name) || "FOTO FOTO kullanıcısı").slice(0, 60), user_address: "Türkiye", user_phone: "" });
+      let tokenResponse;
+      try {
+        const response = await fetch("https://www.paytr.com/odeme/api/get-token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: params });
+        tokenResponse = await response.json().catch(() => ({}));
+        if (!response.ok || tokenResponse.status !== "success" || !tokenResponse.token) throw new Error(tokenResponse.reason || "PayTR ödeme formu oluşturulamadı.");
+      } catch (error) {
+        await adminRest("payment_orders?merchant_oid=eq." + merchantOid, { method: "PATCH", body: JSON.stringify({ status: "failed", failure_message: String(error.message || "PayTR token error").slice(0, 500) }) }).catch(() => {});
+        throw error;
+      }
+      return send(res, 200, { merchantOid: merchantOid, iframeUrl: "https://www.paytr.com/odeme/guvenli/" + encodeURIComponent(tokenResponse.token) });
     }
 
     if (!RUNWAY_API_KEY) return send(res, 503, { message: "Video üretim servisi henüz yapılandırılmamış." });
