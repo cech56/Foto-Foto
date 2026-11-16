@@ -11,7 +11,8 @@ FOTO FOTO is an Android-only AI video creation app, independent from Zubih. Ther
 
 ## Current app foundation
 - Supabase email registration, login, password-reset email request, encrypted Android Keystore session storage, refresh-token restoration, and sign-out.
-- Per-user wallet balance display with manual refresh. Credit top-ups and mutations are not enabled yet.
+- Per-user wallet balance and recent ledger display with manual refresh. Server-side credit reservation, settlement, and refund RPCs are implemented; paid credit top-ups are not enabled yet.
+- In-app permanent account deletion UI and authenticated backend deletion endpoint are implemented; production cascade behavior still requires end-to-end verification.
 - Video prompt, duration and aspect-ratio selection.
 - Runway task polling and an external open-video action when a provider URL is returned.
 - Per-user video history table and history screen.
@@ -36,14 +37,23 @@ The separate Node.js API is in `backend/`. It verifies FOTO FOTO sessions, reser
 
 Runway Gen-4.5 is the only enabled generation mode. Aleph 2 editing, Act-Two character animation, and video upscaling remain deliberately disabled until secure file uploads, server-verified media metadata, and exact credit calculations are implemented. Kling and Veo are not connected.
 
+## Current release status
+
+- Android debug build: passing in GitHub Actions; latest run `43861973769` uploaded `foto-foto-debug-apk` (debug-only, not Play Store signed).
+- Account deletion: client confirmation UI and authenticated backend endpoint exist; verify against the live Supabase project before release.
+- Advanced modes: video editing, character animation, and upscaling are deliberately gated with HTTP 503 until secure upload and exact server-side pricing are implemented.
+- Wallet top-ups/payment checkout: not implemented. Do not sell or advertise credit packages until a verified payment and webhook flow is deployed.
+- Production runtime: Render is configured on the free plan; cold starts and production reliability must be evaluated before launch.
+
 ## Pre-payment / pre-release completion checklist
 - [ ] Run all six Supabase migrations in order in the FOTO FOTO project.
 - [ ] Configure `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` as private backend environment variables.
 - [ ] Confirm the Render health endpoint reports the expected safe configuration checks.
 - [ ] Configure Runway API credentials only when provider access/credits are available.
-- [ ] Add account deletion and associated-data deletion flow, privacy policy, terms, support contact, and data-retention disclosures before public release.
+- [ ] Verify the existing account-deletion UI/API end to end, including cascading deletion of profile, wallet, ledger, reservations, and video-history data.
+- [ ] Publish a legally reviewed privacy policy, terms of service, support contact, and data-retention disclosures before public release.
 - [ ] Add a production-grade upload flow for large video files and validate duration/frames server-side before enabling advanced tools.
-- [ ] Add background reconciliation for stale reservations and provider tasks, plus abuse controls and request limits.
+- [ ] Add background reconciliation for stale reservations and provider tasks, plus server-side abuse controls and request limits.
 - [ ] Complete signed release configuration, Play Console declarations, content-rating/privacy forms, and real-device tests.
 - [ ] Verify signup/email confirmation, password recovery, session expiry, logout, insufficient balance, provider rejection, success, failure/refund, app restart, and flaky-network recovery end to end.
 
