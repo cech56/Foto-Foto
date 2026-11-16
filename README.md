@@ -26,6 +26,7 @@ Use the SQL Editor in the separate FOTO FOTO Supabase project and run each migra
 4. `supabase/migrations/0004_gen45_aspect_ratios.sql`
 5. `supabase/migrations/0005_credit_reservations.sql`
 6. `supabase/migrations/0006_wallet_read_grants.sql`
+7. `supabase/migrations/0007_paytr_web_billing.sql`
 
 The mobile app uses only the public publishable key. Never put a Supabase secret/service-role key or the Runway API key in the Android app or Git repository. The service-role key belongs only in the private backend hosting environment.
 
@@ -58,3 +59,12 @@ Runway Gen-4.5 is the only enabled generation mode. Aleph 2 editing, Act-Two cha
 - [ ] Verify signup/email confirmation, password recovery, session expiry, logout, insufficient balance, provider rejection, success, failure/refund, app restart, and flaky-network recovery end to end.
 
 Payment gateway integration and wallet top-ups are intentionally tracked separately from the checklist above.
+
+## PayTR web checkout (foundation added)
+- Migration 0007 adds the server-managed product catalog, PayTR payment orders, and an atomic callback settlement RPC. No live products are seeded or activated.
+- Backend endpoints: `GET /api/catalog`, `POST /api/payments/paytr/create`, and public `POST /api/webhooks/paytr`.
+- Required private Render environment variables: `PAYTR_MERCHANT_ID`, `PAYTR_MERCHANT_KEY`, `PAYTR_MERCHANT_SALT`, `PAYTR_OK_URL`, `PAYTR_FAIL_URL`; optional `PAYTR_TEST_MODE=1` for approved testing.
+- Configure the PayTR notification URL as `https://YOUR-RENDER-SERVICE.onrender.com/api/webhooks/paytr` using the actual deployed API hostname.
+- PayTR merchant credentials must never be committed to GitHub, placed in Android, or sent in chat.
+- A PayTR merchant account and credentials are not available yet, so checkout cannot be activated or tested against PayTR. Product prices and credit quantities also remain intentionally unset.
+- This first PayTR phase is one-time credit packs only. Subscription billing still requires its own verified billing-provider flow; for Google Play distributed Android digital subscriptions, use Play Billing unless enrolled in an eligible regional alternative-billing program.
