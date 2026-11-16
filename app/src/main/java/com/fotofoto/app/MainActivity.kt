@@ -377,8 +377,10 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 }
             }
             Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().navigationBarsPadding()
-                .background(Brush.verticalGradient(listOf(Color(0xF21C2038), Color(0xFF111426)))).border(1.2.dp, Color(0xFF51318B), RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
-                .padding(horizontal = 12.dp, vertical = 5.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
+                .background(Brush.verticalGradient(listOf(Color(0xF51A1D32), Color(0xFF0D1020))))
+                .border(1.dp, Color(0x665E3A9B), RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp))
+                .padding(horizontal = 9.dp, vertical = 7.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
                 val navItems = listOf(
                     Triple("home", "⌂", if (appLanguage == "English") "Home" else if (appLanguage == "العربية") "الرئيسية" else "Ana Sayfa"),
                     Triple("projects", "▤", if (appLanguage == "English") "Projects" else if (appLanguage == "العربية") "مشاريعي" else "Projelerim"),
@@ -389,31 +391,37 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 navItems.forEach { item ->
                     val selected = selectedTab == item.first
                     if (item.first == "create") {
-                        Column(Modifier.weight(1f).padding(horizontal = 3.dp).offset(y = (-7).dp)
-                            .height(68.dp).clip(RoundedCornerShape(20.dp))
-                            .background(Brush.verticalGradient(listOf(Color(0xFFB34BFF), Color(0xFF6A22D0), Color(0xFF32106E))))
-                            .border(1.8.dp, Color(0xFFE5B4FF), RoundedCornerShape(20.dp))
-                            .graphicsLayer { shadowElevation = 22.dp.toPx(); ambientShadowColor = Color(0xFFB34CFF); spotShadowColor = Color(0xFFB34CFF) }
-                            .clickable { selectedTab = "create"; studioMode = "generate" }.padding(vertical = 7.dp),
+                        Column(Modifier.weight(1f).offset(y = (-8).dp).height(68.dp)
+                            .clip(RoundedCornerShape(19.dp))
+                            .background(Brush.verticalGradient(listOf(Color(0xFFC45BFF), Color(0xFF8129E8), Color(0xFF43158E))))
+                            .border(1.5.dp, Color(0xFFE8B9FF), RoundedCornerShape(19.dp))
+                            .graphicsLayer { shadowElevation = 24.dp.toPx(); ambientShadowColor = Color(0xFFB64CFF); spotShadowColor = Color(0xFFB64CFF) }
+                            .clickable { selectedTab = "create"; studioMode = "generate" }
+                            .padding(vertical = 5.dp),
                             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                            Text("＋", color = White, fontSize = 32.sp, fontWeight = FontWeight.Light,
-                                modifier = Modifier.graphicsLayer { shadowElevation = 12.dp.toPx(); ambientShadowColor = Color.White; spotShadowColor = Color.White })
-                            Text(item.third, color = White, fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
+                            Text("＋", color = White, fontSize = 34.sp, fontWeight = FontWeight.Light,
+                                modifier = Modifier.graphicsLayer { shadowElevation = 13.dp.toPx(); ambientShadowColor = Color.White; spotShadowColor = Color.White })
+                            Text(item.third, color = White, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
                         }
                     } else {
-                        Column(Modifier.weight(1f).height(65.dp).clip(RoundedCornerShape(16.dp))
-                            .background(if (selected) Brush.verticalGradient(listOf(Color(0xFF51247F), Color(0xFF211438))) else Brush.verticalGradient(listOf(Color(0x221A2440), Color(0x080F1427))))
-                            .border(if (selected) 1.2.dp else 0.7.dp, if (selected) Color(0xFFB86BFF) else Color(0x334D5D8A), RoundedCornerShape(16.dp))
-                            .graphicsLayer { shadowElevation = if (selected) 16.dp.toPx() else 3.dp.toPx(); ambientShadowColor = if (selected) Color(0xFFB34CFF) else Color(0xFF20CFFF); spotShadowColor = if (selected) Color(0xFFB34CFF) else Color(0xFF20CFFF) }
-                            .clickable { selectedTab = item.first }.padding(vertical = 5.dp),
+                        Column(Modifier.weight(1f).height(61.dp)
+                            .clip(RoundedCornerShape(17.dp))
+                            .then(if (selected) Modifier
+                                .background(Brush.verticalGradient(listOf(Color(0xFF54277F), Color(0xFF281744))))
+                                .border(1.dp, Color(0xFFBD72FF), RoundedCornerShape(17.dp))
+                                .graphicsLayer { shadowElevation = 15.dp.toPx(); ambientShadowColor = Color(0xFFB34CFF); spotShadowColor = Color(0xFFB34CFF) }
+                            else Modifier)
+                            .clickable { selectedTab = item.first }
+                            .padding(vertical = 5.dp),
                             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                             FotoBottomNavIcon(item.first, selected, Modifier.size(25.dp))
-                            Spacer(Modifier.height(3.dp))
-                            Text(item.third, color = if (selected) White else Color(0xFFD1D8EA), fontSize = 9.sp,
-                                fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium, maxLines = 1)
-                            if (selected) Box(Modifier.padding(top = 2.dp).width(23.dp).height(2.dp).clip(RoundedCornerShape(50))
-                                .background(Color(0xFFFF73E8))
-                                .graphicsLayer { shadowElevation = 7.dp.toPx(); ambientShadowColor = Color(0xFFFF73E8); spotShadowColor = Color(0xFFFF73E8) })
+                            Spacer(Modifier.height(4.dp))
+                            Text(item.third, color = if (selected) White else Color(0xFFB9C0D4),
+                                fontSize = 9.sp, fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium,
+                                maxLines = 1, softWrap = false)
+                            if (selected) Box(Modifier.padding(top = 2.dp).width(20.dp).height(2.dp)
+                                .clip(RoundedCornerShape(50)).background(Color(0xFFFF78E8))
+                                .graphicsLayer { shadowElevation = 8.dp.toPx(); ambientShadowColor = Color(0xFFFF78E8); spotShadowColor = Color(0xFFFF78E8) })
                         }
                     }
                 }
