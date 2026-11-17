@@ -75,7 +75,7 @@ async function iyzicoRequest(uriPath, payload) {
 function normalizeMoney(value) {
   const n = Number(value);
   if (!Number.isFinite(n)) return "";
-  return n.toFixed(2).replace(/\\.?0+$/, "");
+  return n.toFixed(2).replace(/\.?0+$/, "");
 }
 
 function verifyIyzicoRetrieveSignature(data) {
@@ -91,7 +91,7 @@ function safeHashEqual(a, b) {
 }
 
 function splitName(value) {
-  const parts = String(value || "").trim().split(/\\s+/).filter(Boolean);
+  const parts = String(value || "").trim().split(/\s+/).filter(Boolean);
   if (parts.length < 2) return { name: parts[0] || "", surname: "Kullanıcı" };
   return { name: parts.slice(0, -1).join(" "), surname: parts[parts.length - 1] };
 }
@@ -290,7 +290,7 @@ const server = http.createServer(async (req, res) => {
         id: user.id,
         name: String(buyerInput.name || nameParts.name).trim(),
         surname: String(buyerInput.surname || nameParts.surname).trim(),
-        identityNumber: String(buyerInput.identityNumber || "").replace(/\\D/g, ""),
+        identityNumber: String(buyerInput.identityNumber || "").replace(/\D/g, ""),
         email: String(user.email || "").trim(),
         gsmNumber: String(buyerInput.gsmNumber || "").trim(),
         registrationAddress: String(buyerInput.address || "").trim(),
@@ -299,7 +299,7 @@ const server = http.createServer(async (req, res) => {
         zipCode: String(buyerInput.zipCode || "").trim(),
         ip: String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "127.0.0.1").split(",")[0].trim()
       };
-      if (!buyer.name || !buyer.surname || !/^\\d{11}$/.test(buyer.identityNumber) || !buyer.email || !/^\\+?[0-9]{10,15}$/.test(buyer.gsmNumber.replace(/[\\s()-]/g, "")) || !buyer.registrationAddress || !buyer.city) {
+      if (!buyer.name || !buyer.surname || !/^\d{11}$/.test(buyer.identityNumber) || !buyer.email || !/^\+?[0-9]{10,15}$/.test(buyer.gsmNumber.replace(/[\s()-]/g, "")) || !buyer.registrationAddress || !buyer.city) {
         return send(res, 400, { message: "iyzico ödeme formu için ad, soyad, 11 haneli T.C. kimlik numarası, telefon, adres ve şehir bilgileri gerekli." });
       }
       const conversationId = "FF" + randomUUID().replaceAll("-", "");
