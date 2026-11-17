@@ -203,7 +203,7 @@ fun AccountWalletCard(onRefresh: Int = 0, language: String = "Türkçe", onAccou
                     }
                 }
             }
-            Row(Modifier.fillMaxWidth().background(Color(0xFF20283B), RoundedCornerShape(13.dp)).padding(12.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) { Text("ⓘ", color = Color(0xFF65C9D8), fontSize = 18.sp); Spacer(Modifier.width(9.dp)); Text(tr("Kredi yükleme ve ödeme henüz etkin değil. Bu alan etkinleştiğinde buradan bilgi alacaksın.", "Credit top-ups and payments are not active yet. You will find updates here when they launch.", "شحن الرصيد والدفع غير متاحين بعد. ستجد التحديثات هنا عند توفرهما."), color = Color(0xFFB6C0D1), fontSize = 9.sp, lineHeight = 14.sp) }
+            IyzicoTopUpCard(language = language)
             Spacer(Modifier.height(16.dp))
             HorizontalDivider(color = Color(0xFF30384A))
             Spacer(Modifier.height(10.dp))
