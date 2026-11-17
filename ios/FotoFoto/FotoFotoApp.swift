@@ -100,6 +100,54 @@ struct HistoryRow: Decodable, Identifiable {
         } catch { message = error.localizedDescription }
     }
 
+    func saveHistory(taskId: String, prompt: String, seconds: Int, ratio: String) async {
+        guard let userId = session?.user?.id else { return }
+        let url = URL(string: "/rest/v1/video_generations", relativeTo: Config.supabase)!
+        let payload: [String: Any] = ["user_id": userId, "provider_task_id": taskId, "prompt": prompt, "duration_seconds": seconds, "aspect_ratio": ratio, "status": "PENDING"]
+        do {
+            var req = URLRequest(url: url)
+            req.httpMethod = "POST"
+            req.setValue(Config.anonKey, forHTTPHeaderField: "apikey")
+            req.setValue("Bearer \(session?.access_token ?? "")", forHTTPHeaderField: "Authorization")
+            req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            req.setValue("return=minimal", forHTTPHeaderField: "Prefer")
+            req.httpBody = try JSONSerialization.data(withJSONObject: payload)
+            let (_, response) = try await URLSession.shared.data(for: req)
+            guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return }
+        } catch { message = "Video oluşturuldu ancak proje geçmişine kaydedilemedi: \(error.localizedDescription)" }
+    }
+
+    func refreshTask(_ taskId: String) async {
+        guard let token = session?.access_token else { return }
+        do {
+            var req = URLRequest(url: Config.api.appendingPathComponent("api/tasks/\(taskId)"))
+            req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            let (data, response) = try await URLSession.shared.data(for: req)
+            guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return }
+            let task = try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
+            let status = (task["status"] as? String ?? "PENDING").uppercased()
+            let output = task["output"] as? [String]
+            let videoURL = output?.first(where: { $0.hasPrefix("https://") })
+            var patch: [String: Any] = ["status": status, "updated_at": ISO8601DateFormatter().string(from: Date())]
+            if let videoURL { patch["video_url"] = videoURL }
+            let updateURL = URL(string: "/rest/v1/video_generations", relativeTo: Config.supabase)!.appending(queryItems: [URLQueryItem(name: "provider_task_id", value: "eq.\(taskId)")])
+            var update = URLRequest(url: updateURL!)
+            update.httpMethod = "PATCH"
+            update.setValue(Config.anonKey, forHTTPHeaderField: "apikey")
+            update.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            update.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            update.setValue("return=minimal", forHTTPHeaderField: "Prefer")
+            update.httpBody = try JSONSerialization.data(withJSONObject: patch)
+            _ = try await URLSession.shared.data(for: update)
+        } catch { message = "Görev durumu yenilenemedi: \(error.localizedDescription)" }
+    }
+
+    func refreshPendingTasks() async {
+        let pending = history.filter { !["SUCCEEDED", "FAILED", "CANCELED", "CANCELLED"].contains($0.status.uppercased()) }
+        for item in pending { await refreshTask(item.provider_task_id) }
+        if !pending.isEmpty { await refreshAll() }
+    }
+
     func generate(prompt: String, seconds: Int, ratio: String, imageData: Data? = nil) async {
         guard let token = session?.access_token else { message = "Önce giriş yap."; return }
         busy = true
@@ -119,6 +167,7 @@ struct HistoryRow: Decodable, Identifiable {
             }
             let result = try JSONDecoder().decode(GenerateResponse.self, from: data)
             message = "Video isteği Runway'e gönderildi. Görev: \(result.taskId)"
+            await saveHistory(taskId: result.taskId, prompt: prompt, seconds: seconds, ratio: ratio)
             await refreshAll()
         } catch { message = error.localizedDescription }
     }
@@ -288,8 +337,14 @@ struct HistoryView: View {
                     if let link = item.video_url, let url = URL(string: link) { Link("Videoyu aç", destination: url) }
                 }.padding(.vertical, 5)
             }.navigationTitle("Projelerim")
-                .toolbar { Button { Task { await store.refreshAll() } } label: { Image(systemName: "arrow.clockwise") } }
-                .refreshable { await store.refreshAll() }
+                .toolbar { Button { Task { await store.refreshAll(); await store.refreshPendingTasks() } } label: { Image(systemName: "arrow.clockwise") } }
+                .refreshable { await store.refreshAll(); await store.refreshPendingTasks() }
+                .task {
+                    while !Task.isCancelled {
+                        await store.refreshPendingTasks()
+                        try? await Task.sleep(for: .seconds(25))
+                    }
+                }
         }
     }
 }
