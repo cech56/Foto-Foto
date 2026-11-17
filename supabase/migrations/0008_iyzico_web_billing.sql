@@ -2,9 +2,10 @@
 -- Apply after migrations 0001-0007. 0007 is retained as a historical schema prerequisite.
 
 alter table public.billing_products drop constraint if exists billing_products_channel_check;
-alter table public.billing_products add constraint billing_products_channel_check check (channel in ('iyzico_checkout'));
+alter table public.billing_products add constraint billing_products_channel_check check (channel in ('paytr_web','iyzico_checkout'));
 alter table public.payment_orders drop constraint if exists payment_orders_channel_check;
 alter table public.payment_orders add constraint payment_orders_channel_check check (channel in ('iyzico_checkout'));
+alter table public.payment_orders alter column channel set default 'iyzico_checkout';
 alter table public.payment_orders add column if not exists basket_id text;
 alter table public.payment_orders add column if not exists iyzico_token text;
 alter table public.payment_orders add column if not exists iyzico_payment_id text;
