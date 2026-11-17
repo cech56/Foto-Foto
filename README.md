@@ -44,7 +44,7 @@ Runway Gen-4.5 is the only enabled generation mode. Aleph 2 editing, Act-Two cha
 - Android debug build: passing in GitHub Actions; latest run `43861973769` uploaded `foto-foto-debug-apk` (debug-only, not Play Store signed).
 - Account deletion: client confirmation UI and authenticated backend endpoint exist; verify against the live Supabase project before release.
 - Advanced modes: video editing, character animation, and upscaling are deliberately gated with HTTP 503 until secure upload and exact server-side pricing are implemented.
-- Wallet top-ups: iyzico Checkout Form backend foundation is implemented; merchant credentials, sandbox testing, buyer-details UI, and Android wallet purchase screen are still required. Do not sell or advertise credit packages until end-to-end verification is complete.
+- Wallet top-ups: iyzico Checkout Form backend foundation is implemented; merchant credentials, sandbox testing, and approved credit-pack setup are still required. The Android app does not expose iyzico in-app checkout while targeting Google Play; use Play Billing unless enrolled in an eligible alternative-billing programme.
 - Production runtime: Render is configured on the free plan; cold starts and production reliability must be evaluated before launch.
 
 ## Pre-payment / pre-release completion checklist
@@ -59,7 +59,7 @@ Runway Gen-4.5 is the only enabled generation mode. Aleph 2 editing, Act-Two cha
 - [ ] Complete signed release configuration, Play Console declarations, content-rating/privacy forms, and real-device tests.
 - [ ] Verify signup/email confirmation, password recovery, session expiry, logout, insufficient balance, provider rejection, success, failure/refund, app restart, and flaky-network recovery end to end.
 
-Payment gateway integration and wallet top-ups are intentionally tracked separately from the checklist above.
+Payment gateway integration and wallet top-ups are tracked in the iyzico section below.
 
 ## iyzico checkout (backend foundation)
 - Migration 0008 switches the billing catalog to iyzico Checkout Form and adds the iyzico token/payment references and an atomic wallet-settlement RPC. Migration 0007 is retained only as a historical schema prerequisite; the active backend no longer calls PayTR.
