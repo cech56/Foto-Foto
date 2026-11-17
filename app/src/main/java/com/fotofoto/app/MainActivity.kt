@@ -61,6 +61,7 @@ private val White = Color(0xFFF8F6F2)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        VideoReconcileScheduler.schedule(this)
         window.statusBarColor = android.graphics.Color.rgb(33, 24, 42)
         window.navigationBarColor = android.graphics.Color.rgb(11, 14, 24)
         window.decorView.systemUiVisibility = 0
