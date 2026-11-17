@@ -115,9 +115,6 @@ function safeHashEqual(a, b) {
   return left.length === right.length && timingSafeEqual(left, right);
 }
 
-function paytrCallbackHash(merchantOid, status, totalAmount) {
-  return createHmac("sha256", PAYTR_MERCHANT_KEY).update(merchantOid + PAYTR_MERCHANT_SALT + status + totalAmount).digest("base64");
-}
 
 async function requireUser(req) {
   const auth = req.headers.authorization || "";
