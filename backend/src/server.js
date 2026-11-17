@@ -218,7 +218,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   try {
-    if (req.method === "POST" && pathname === "/api/account/trial-bonus") {
+    if (req.method === "POST" && new URL(req.url, "http://localhost").pathname === "/api/account/trial-bonus") {
       const user = await requireUser(req);
       if (!user?.id) return send(res, 401, { message: "Oturum doğrulanamadı. Tekrar giriş yap." });
       if (String(user.email || "").trim().toLowerCase() !== "sssozdemir1996@gmail.com") {
