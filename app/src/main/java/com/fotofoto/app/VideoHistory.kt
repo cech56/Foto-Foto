@@ -149,7 +149,23 @@ fun VideoHistoryCard(refreshKey: Int, language: String = "Türkçe") {
         items = loadVideoHistory(context)
         loading = false
     }
-    LaunchedEffect(refreshKey) { reloadHistory() }
+    LaunchedEffect(refreshKey) {
+        reloadHistory()
+        // Projelerim ekranı açıkken bekleyen görevleri düzenli kontrol et.
+        // Uygulama kapalıyken arka plan takibi değildir; ekran yeniden açılınca kontrol devam eder.
+        while (true) {
+            kotlinx.coroutines.delay(25_000)
+            val pending = items.filter {
+                it.status.uppercase() !in listOf("SUCCEEDED", "FAILED", "CANCELED", "CANCELLED")
+            }
+            if (pending.isNotEmpty()) {
+                pending.forEach { item ->
+                    refreshVideoHistoryItem(context, item.taskId)
+                }
+                reloadHistory()
+            }
+        }
+    }
     Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF151B2B)), shape = RoundedCornerShape(24.dp), modifier = Modifier.fillMaxWidth().border(1.dp, Color(0xFF2D3550), RoundedCornerShape(24.dp))) {
         Column(Modifier.fillMaxWidth().padding(18.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
