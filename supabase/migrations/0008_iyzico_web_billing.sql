@@ -1,5 +1,5 @@
--- FOTO FOTO iyzico Checkout Form and wallet settlement.
--- Apply after migrations 0001-0007. Migration 0007 remains a historical schema prerequisite.
+-- FOTO FOTO iyzico Checkout Form billing migration.
+-- Apply after migrations 0001-0007. 0007 is retained as a historical schema prerequisite.
 
 alter table public.billing_products drop constraint if exists billing_products_channel_check;
 alter table public.billing_products add constraint billing_products_channel_check check (channel in ('iyzico_checkout'));
