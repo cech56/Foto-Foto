@@ -66,6 +66,6 @@ Payment gateway integration and wallet top-ups are intentionally tracked separat
 - Backend endpoints: `GET /api/catalog`, `POST /api/payments/iyzico/create`, `POST /api/webhooks/iyzico`, and authenticated `GET /api/payments/iyzico/status?conversationId=...`.
 - Required private Render environment variables: `IYZICO_API_KEY`, `IYZICO_SECRET_KEY`, and `IYZICO_CALLBACK_URL`. Set `IYZICO_BASE_URL=https://sandbox-api.iyzipay.com` for sandbox; use `https://api.iyzipay.com` only after iyzico approval and testing.
 - Checkout uses iyzico's hosted Checkout Form. The server retrieves the payment result by token, validates iyzico's response signature, checks payment status, fraud status, currency, basket, amount and order reference, then grants credits once.
-- The buyer-details UI must collect the required checkout identity/contact/address fields before starting payment. Do not log or commit these details or merchant secrets.
+- The Android wallet now has an iyzico credit-pack dialog that collects the required checkout identity/contact/address fields and opens the hosted payment page. End-to-end sandbox testing is still required. Do not log or commit these details or merchant secrets.
 - Product prices and credit quantities remain unset and products are inactive until commercially approved.
 - This integration covers one-time credit packs only. Subscription billing requires a separate iyzico subscription flow and product/plan configuration.
