@@ -186,11 +186,65 @@ struct MainTabs: View {
     @EnvironmentObject var store: Store
     var body: some View {
         TabView {
-            CreateView().tabItem { Label("Oluştur", systemImage: "plus.square.fill") }
+            HomeView().tabItem { Label("Ana Sayfa", systemImage: "house.fill") }
             HistoryView().tabItem { Label("Projelerim", systemImage: "film") }
+            CreateView().tabItem { Label("Oluştur", systemImage: "plus.square.fill") }
+            ToolsView().tabItem { Label("Araçlar", systemImage: "wand.and.stars") }
             WalletView().tabItem { Label("Hesabım", systemImage: "person.crop.circle") }
         }.tint(Color(red: 0.75, green: 0.40, blue: 1.0))
             .task { await store.refreshAll() }
+    }
+}
+
+struct HomeView: View {
+    @EnvironmentObject var store: Store
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    HStack(spacing: 12) {
+                        Text("▶").font(.title.bold()).frame(width: 52, height: 52).background(LinearGradient(colors: [.cyan, .purple, .pink], startPoint: .topLeading, endPoint: .bottomTrailing), in: RoundedRectangle(cornerRadius: 16))
+                        VStack(alignment: .leading) { Text("FOTO FOTO").font(.title2.bold()); Text("AI VIDEO STÜDYOSU").font(.caption.bold()).tracking(2).foregroundStyle(.cyan) }
+                    }
+                    Text("Hayallerini videoya dönüştür.").font(.title2.bold())
+                    Text("Yapay zekâ destekli video oluşturma stüdyon.").foregroundStyle(.secondary)
+                    NavigationLink(destination: CreateView()) { Label("Fotoğraftan veya metinden video oluştur", systemImage: "sparkles").frame(maxWidth: .infinity) }.buttonStyle(PrimaryButton())
+                    HStack {
+                        VStack(alignment: .leading) { Text("CÜZDANIN").font(.caption).foregroundStyle(.secondary); Text("\(store.balance) kredi").font(.title.bold()).foregroundStyle(.purple) }
+                        Spacer()
+                        VStack(alignment: .trailing) { Text("PROJELERİN").font(.caption).foregroundStyle(.secondary); Text("\(store.history.count)").font(.title.bold()) }
+                    }.padding().background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 18))
+                    Text("YAKINDA").font(.caption.bold()).tracking(2).foregroundStyle(.purple)
+                    FeatureTile(title: "Video düzenleme", detail: "Videolarında yapay zekâ ile değişiklik yap", icon: "wand.and.stars")
+                    FeatureTile(title: "Kalite yükseltme", detail: "Videolarını daha net hâle getir", icon: "4k.tv")
+                    FeatureTile(title: "Karakter animasyonu", detail: "Karakterlerine hareket kazandır", icon: "person.crop.square")
+                }.padding()
+            }.background(Color(red: 0.04, green: 0.05, blue: 0.10)).navigationTitle("FOTO FOTO")
+        }
+    }
+}
+struct ToolsView: View {
+    var body: some View {
+        NavigationStack {
+            List {
+                Section("YARATICI ARAÇLAR") {
+                    FeatureTile(title: "Video düzenleme", detail: "Hazırlanıyor — güvenli yükleme ve fiyatlandırma tamamlanınca açılacak.", icon: "wand.and.stars")
+                    FeatureTile(title: "Kalite yükseltme", detail: "Hazırlanıyor — servis ve kredi hesabı tamamlanınca açılacak.", icon: "4k.tv")
+                    FeatureTile(title: "Karakter animasyonu", detail: "Hazırlanıyor — karakter hareketi entegrasyonu tamamlanınca açılacak.", icon: "person.crop.square")
+                }
+            }.navigationTitle("Araçlar")
+        }
+    }
+}
+struct FeatureTile: View {
+    let title: String
+    let detail: String
+    let icon: String
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon).font(.title2).foregroundStyle(.purple).frame(width: 42, height: 42).background(Color.purple.opacity(0.14), in: RoundedRectangle(cornerRadius: 12))
+            VStack(alignment: .leading, spacing: 4) { Text(title).font(.headline); Text(detail).font(.caption).foregroundStyle(.secondary) }
+        }.padding(.vertical, 5)
     }
 }
 
