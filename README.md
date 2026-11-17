@@ -69,3 +69,8 @@ Payment gateway integration and wallet top-ups are tracked in the iyzico section
 - The Android wallet screen currently shows balance and ledger only; the iyzico purchase dialog and return/polling UI still need to be implemented and tested. Do not expose an external iyzico checkout link in a Google Play-distributed app unless the app is eligible for and enrolled in an applicable alternative-billing programme.
 - Product prices and credit quantities remain unset and products are inactive until commercially approved.
 - This integration covers one-time credit packs only. Subscription billing requires a separate iyzico subscription flow and product/plan configuration.
+
+## Release readiness and legal drafts
+- [Release readiness checklist](docs/RELEASE_READINESS.md)
+- [Privacy policy draft — must be reviewed and completed before publication](docs/PRIVACY_POLICY_DRAFT.md)
+- [Terms of service draft — must be reviewed and completed before publication](docs/TERMS_OF_SERVICE_DRAFT.md)
