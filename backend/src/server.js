@@ -218,6 +218,18 @@ const server = http.createServer(async (req, res) => {
   }
 
   try {
+    if (req.method === "POST" && pathname === "/api/account/trial-bonus") {
+      const user = await requireUser(req);
+      if (!user?.id) return send(res, 401, { message: "Oturum doğrulanamadı. Tekrar giriş yap." });
+      if (String(user.email || "").trim().toLowerCase() !== "sssozdemir1996@gmail.com") {
+        return send(res, 403, { message: "Bu deneme kredisi yalnızca belirlenen test hesabı içindir." });
+      }
+      const result = await adminRpc("grant_foto_trial_bonus", { p_user_id: user.id, p_amount: 59 });
+      if (result?.ok && result?.granted) return send(res, 200, { ok: true, granted: 59, balance: result.balance, message: "59 deneme kredisi hesabına eklendi." });
+      if (result?.ok && result?.already_claimed) return send(res, 409, { ok: false, message: "Bu hesap deneme kredisini daha önce kullanmış." });
+      throw new Error("Deneme kredisi tanımlanamadı.");
+    }
+
     if (req.method === "DELETE" && new URL(req.url, "http://localhost").pathname === "/api/account") {
       const user = await requireUser(req);
       if (!user?.id) return send(res, 401, { message: "Oturum doğrulanamadı. Tekrar giriş yap." });
