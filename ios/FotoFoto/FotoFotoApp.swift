@@ -3,6 +3,7 @@ import PhotosUI
 import UIKit
 import Combine
 import Security
+import UniformTypeIdentifiers
 
 private enum Config {
     static let api = URL(string: "https://foto-foto-api.onrender.com")!
@@ -189,6 +190,64 @@ struct HistoryRow: Decodable, Identifiable {
         } catch { message = "Görev durumu yenilenemedi: \(error.localizedDescription)" }
     }
 
+
+    private func submitTool(path: String, payload: [String: Any], prompt: String, ratio: String = "1280:720") async {
+        guard let token = session?.access_token else { message = "Önce giriş yap."; return }
+        busy = true
+        defer { busy = false }
+        do {
+            var req = URLRequest(url: Config.api.appendingPathComponent(path))
+            req.httpMethod = "POST"
+            req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            req.httpBody = try JSONSerialization.data(withJSONObject: payload)
+            let (data, response) = try await URLSession.shared.data(for: req)
+            guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+                let body = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+                throw NSError(domain: "FOTOFOTO", code: (response as? HTTPURLResponse)?.statusCode ?? -1, userInfo: [NSLocalizedDescriptionKey: body?["message"] as? String ?? String(data: data, encoding: .utf8) ?? "İşlem başlatılamadı."])
+            }
+            let result = try JSONDecoder().decode(GenerateResponse.self, from: data)
+            message = "İstek kabul edildi. Hazırlanıyor… Görev: \(result.taskId)"
+            await saveHistory(taskId: result.taskId, prompt: prompt, seconds: 5, ratio: ratio)
+            await refreshAll()
+        } catch { message = error.localizedDescription }
+    }
+
+    func editVideo(prompt: String, data: Data, mime: String) async {
+        guard data.count <= 3_500_000 else { message = "Video 3,5 MB sınırını aşıyor. Daha küçük bir video seç."; return }
+        guard mime.hasPrefix("video/") else { message = "Geçerli bir video dosyası seç."; return }
+        let encoded = "data:\(mime);base64," + data.base64EncodedString()
+        await submitTool(path: "api/edit-video", payload: ["prompt": prompt, "videoUri": encoded], prompt: "Video düzenleme: " + prompt)
+    }
+
+    func upscaleVideo(data: Data, mime: String, resolution: String) async {
+        guard data.count <= 3_500_000 else { message = "Video 3,5 MB sınırını aşıyor. Daha küçük bir video seç."; return }
+        guard mime.hasPrefix("video/") else { message = "Geçerli bir video dosyası seç."; return }
+        let encoded = "data:\(mime);base64," + data.base64EncodedString()
+        await submitTool(path: "api/upscale-video", payload: ["videoUri": encoded, "resolution": resolution], prompt: "Video kalite yükseltme: " + resolution)
+    }
+
+    func animateCharacter(imageData: Data, videoData: Data, videoMime: String, ratio: String) async {
+        guard videoData.count <= 3_500_000 else { message = "Hareket videosu 3,5 MB sınırını aşıyor."; return }
+        guard videoMime.hasPrefix("video/") else { message = "Geçerli bir hareket videosu seç."; return }
+        guard let image = UIImage(data: imageData) else { message = "Karakter fotoğrafı okunamadı."; return }
+        let maxSide: CGFloat = 1800
+        let scale = min(1, maxSide / max(image.size.width, image.size.height))
+        let size = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        let resized = renderer.image { _ in image.draw(in: CGRect(origin: .zero, size: size)) }
+        var quality: CGFloat = 0.88
+        var compressed = resized.jpegData(compressionQuality: quality) ?? Data()
+        while compressed.count > 3_500_000 && quality > 0.40 {
+            quality -= 0.08
+            compressed = resized.jpegData(compressionQuality: quality) ?? Data()
+        }
+        guard !compressed.isEmpty, compressed.count <= 3_500_000 else { message = "Karakter fotoğrafı çok büyük. Daha küçük bir fotoğraf seç."; return }
+        let character = "data:image/jpeg;base64," + compressed.base64EncodedString()
+        let reference = "data:\(videoMime);base64," + videoData.base64EncodedString()
+        await submitTool(path: "api/animate-character", payload: ["characterUri": character, "referenceUri": reference, "ratio": ratio], prompt: "Karakter animasyonu", ratio: ratio)
+    }
+
     func refreshPendingTasks() async {
         let pending = history.filter { !["SUCCEEDED", "FAILED", "CANCELED", "CANCELLED"].contains($0.status.uppercased()) }
         for item in pending { await refreshTask(item.provider_task_id) }
@@ -367,19 +426,122 @@ struct HomeView: View {
         }
     }
 }
+
 struct ToolsView: View {
+    @EnvironmentObject var store: Store
+    @State private var mode = "edit"
+    @State private var prompt = ""
+    @State private var resolution = "2k"
+    @State private var vertical = false
+    @State private var editPicker: PhotosPickerItem?
+    @State private var upscalePicker: PhotosPickerItem?
+    @State private var characterPicker: PhotosPickerItem?
+    @State private var motionPicker: PhotosPickerItem?
+    @State private var editData: Data?
+    @State private var upscaleData: Data?
+    @State private var characterData: Data?
+    @State private var motionData: Data?
+    @State private var editMime = "video/mp4"
+    @State private var upscaleMime = "video/mp4"
+    @State private var motionMime = "video/mp4"
+
+    private var modes: [String] { ["edit", "upscale", "character"] }
     var body: some View {
         NavigationStack {
-            List {
+            Form {
                 Section("YARATICI ARAÇLAR") {
-                    FeatureTile(title: "Video düzenleme", detail: "Hazırlanıyor — güvenli yükleme ve fiyatlandırma tamamlanınca açılacak.", icon: "wand.and.stars")
-                    FeatureTile(title: "Kalite yükseltme", detail: "Hazırlanıyor — servis ve kredi hesabı tamamlanınca açılacak.", icon: "4k.tv")
-                    FeatureTile(title: "Karakter animasyonu", detail: "Hazırlanıyor — karakter hareketi entegrasyonu tamamlanınca açılacak.", icon: "person.crop.square")
+                    Picker("Araç", selection: $mode) {
+                        Text("Video düzenleme").tag("edit")
+                        Text("Kalite yükseltme").tag("upscale")
+                        Text("Karakter animasyonu").tag("character")
+                    }.pickerStyle(.menu)
                 }
-            }.navigationTitle("Araçlar")
+                if mode == "edit" {
+                    Section("VİDEONU DÜZENLE") {
+                        Text("Videonda yapay zekâ ile neyin değişmesini istediğini anlat.")
+                        TextEditor(text: $prompt).frame(minHeight: 100)
+                        PhotosPicker(selection: $editPicker, matching: .videos) {
+                            Label(editData == nil ? "Düzenlenecek videoyu seç" : "Video seçildi · Değiştir", systemImage: "video")
+                        }
+                        if let editData { Text("Seçilen video: \(ByteCountFormatter.string(fromByteCount: Int64(editData.count), countStyle: .file))").font(.caption).foregroundStyle(.secondary) }
+                        Button {
+                            Task { await store.editVideo(prompt: prompt.trimmingCharacters(in: .whitespacesAndNewlines), data: editData ?? Data(), mime: editMime) }
+                        } label: {
+                            if store.busy { ProgressView() } else { Text("VİDEOYU DÜZENLE").fontWeight(.bold).frame(maxWidth: .infinity) }
+                        }.buttonStyle(PrimaryButton()).disabled(store.busy || editData == nil || prompt.trimmingCharacters(in: .whitespacesAndNewlines).count < 3)
+                    }
+                } else if mode == "upscale" {
+                    Section("VİDEO KALİTESİNİ YÜKSELT") {
+                        PhotosPicker(selection: $upscalePicker, matching: .videos) {
+                            Label(upscaleData == nil ? "Kalitesi yükseltilecek videoyu seç" : "Video seçildi · Değiştir", systemImage: "video")
+                        }
+                        Picker("Hedef çözünürlük", selection: $resolution) {
+                            Text("2K").tag("2k")
+                            Text("4K").tag("4k")
+                        }
+                        if let upscaleData { Text("Seçilen video: \(ByteCountFormatter.string(fromByteCount: Int64(upscaleData.count), countStyle: .file))").font(.caption).foregroundStyle(.secondary) }
+                        Button {
+                            Task { await store.upscaleVideo(data: upscaleData ?? Data(), mime: upscaleMime, resolution: resolution) }
+                        } label: {
+                            if store.busy { ProgressView() } else { Text("KALİTEYİ YÜKSELT").fontWeight(.bold).frame(maxWidth: .infinity) }
+                        }.buttonStyle(PrimaryButton()).disabled(store.busy || upscaleData == nil)
+                    }
+                } else {
+                    Section("KARAKTERİNE HAREKET VER") {
+                        PhotosPicker(selection: $characterPicker, matching: .images) {
+                            Label(characterData == nil ? "Karakter fotoğrafını seç" : "Karakter fotoğrafı seçildi · Değiştir", systemImage: "person.crop.square")
+                        }
+                        if let characterData, let image = UIImage(data: characterData) {
+                            Image(uiImage: image).resizable().scaledToFit().frame(maxHeight: 160)
+                        }
+                        PhotosPicker(selection: $motionPicker, matching: .videos) {
+                            Label(motionData == nil ? "Örnek hareket videosunu seç" : "Hareket videosu seçildi · Değiştir", systemImage: "video")
+                        }
+                        Picker("Video formatı", selection: $vertical) {
+                            Text("Yatay 16:9").tag(false)
+                            Text("Dikey 9:16").tag(true)
+                        }
+                        Button {
+                            Task { await store.animateCharacter(imageData: characterData ?? Data(), videoData: motionData ?? Data(), videoMime: motionMime, ratio: vertical ? "720:1280" : "1280:720") }
+                        } label: {
+                            if store.busy { ProgressView() } else { Text("KARAKTERİ ANİME ET").fontWeight(.bold).frame(maxWidth: .infinity) }
+                        }.buttonStyle(PrimaryButton()).disabled(store.busy || characterData == nil || motionData == nil)
+                    }
+                }
+                Section("DOSYA SINIRI") {
+                    Text("Video dosyaları en fazla 3,5 MB olmalıdır. İşlem tamamlandığında sonuç Projelerim bölümüne kaydedilir.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
+                if !store.message.isEmpty {
+                    Section("İŞLEM DURUMU") { Text(store.message).font(.footnote).textSelection(.enabled) }
+                }
+            }
+            .scrollContentBackground(.hidden)
+            .background(Color(red: 0.04, green: 0.05, blue: 0.10))
+            .navigationTitle("Araçlar")
+            .onChange(of: editPicker) { item in
+                Task {
+                    editData = try? await item?.loadTransferable(type: Data.self)
+                    editMime = item?.supportedContentTypes.first?.preferredMIMEType ?? "video/mp4"
+                }
+            }
+            .onChange(of: upscalePicker) { item in
+                Task {
+                    upscaleData = try? await item?.loadTransferable(type: Data.self)
+                    upscaleMime = item?.supportedContentTypes.first?.preferredMIMEType ?? "video/mp4"
+                }
+            }
+            .onChange(of: characterPicker) { item in Task { characterData = try? await item?.loadTransferable(type: Data.self) } }
+            .onChange(of: motionPicker) { item in
+                Task {
+                    motionData = try? await item?.loadTransferable(type: Data.self)
+                    motionMime = item?.supportedContentTypes.first?.preferredMIMEType ?? "video/mp4"
+                }
+            }
         }
     }
 }
+
 struct FeatureTile: View {
     let title: String
     let detail: String
