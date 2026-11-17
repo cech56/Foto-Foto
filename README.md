@@ -44,11 +44,11 @@ Runway Gen-4.5 is the only enabled generation mode. Aleph 2 editing, Act-Two cha
 - Android debug build: passing in GitHub Actions; latest run `43861973769` uploaded `foto-foto-debug-apk` (debug-only, not Play Store signed).
 - Account deletion: client confirmation UI and authenticated backend endpoint exist; verify against the live Supabase project before release.
 - Advanced modes: video editing, character animation, and upscaling are deliberately gated with HTTP 503 until secure upload and exact server-side pricing are implemented.
-- Wallet top-ups: iyzico Checkout Form backend foundation is implemented; merchant credentials, sandbox testing, and approved credit-pack setup are still required. The Android app does not expose iyzico in-app checkout while targeting Google Play; use Play Billing unless enrolled in an eligible alternative-billing programme.
+- Wallet top-ups: Google Play Billing is the selected Android payment method. The Android Billing Library 9.1.0 dependency is added; purchase UI, secure Google purchase verification, wallet settlement, subscription lifecycle, and Play Console product activation are still pending.
 - Production runtime: Render is configured on the free plan; cold starts and production reliability must be evaluated before launch.
 
 ## Pre-payment / pre-release completion checklist
-- [ ] Run all eight Supabase migrations in order in the FOTO FOTO project.
+- [ ] Run the Supabase migrations in numerical order in the FOTO FOTO project; add and apply the Google Play billing migration before enabling purchases.
 - [ ] Configure `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` as private backend environment variables.
 - [ ] Confirm the Render health endpoint reports the expected safe configuration checks.
 - [ ] Configure Runway API credentials only when provider access/credits are available.
@@ -59,18 +59,20 @@ Runway Gen-4.5 is the only enabled generation mode. Aleph 2 editing, Act-Two cha
 - [ ] Complete signed release configuration, Play Console declarations, content-rating/privacy forms, and real-device tests.
 - [ ] Verify signup/email confirmation, password recovery, session expiry, logout, insufficient balance, provider rejection, success, failure/refund, app restart, and flaky-network recovery end to end.
 
-Payment gateway integration and wallet top-ups are tracked in the iyzico section below.
+Google Play Billing setup and required product IDs are documented in [Google Play Billing setup](docs/GOOGLE_PLAY_BILLING_SETUP.md).
 
-## iyzico checkout (backend foundation)
-- Migration 0008 switches the billing catalog to iyzico Checkout Form and adds the iyzico token/payment references and an atomic wallet-settlement RPC. Migration 0007 is retained only as a historical schema prerequisite; the active backend no longer calls PayTR.
-- Backend endpoints: `GET /api/catalog`, `POST /api/payments/iyzico/create`, `POST /api/webhooks/iyzico`, and authenticated `GET /api/payments/iyzico/status?conversationId=...`.
-- Required private Render environment variables: `IYZICO_API_KEY`, `IYZICO_SECRET_KEY`, and `IYZICO_CALLBACK_URL`. Set `IYZICO_BASE_URL=https://sandbox-api.iyzipay.com` for sandbox; use `https://api.iyzipay.com` only after iyzico approval and testing.
-- Checkout uses iyzico's hosted Checkout Form. The server retrieves the payment result by token, validates iyzico's response signature, checks payment status, fraud status, currency, basket, amount and order reference, then grants credits once.
-- The Android wallet screen currently shows balance and ledger only; the iyzico purchase dialog and return/polling UI still need to be implemented and tested. Do not expose an external iyzico checkout link in a Google Play-distributed app unless the app is eligible for and enrolled in an applicable alternative-billing programme.
-- Product prices and credit quantities remain unset and products are inactive until commercially approved.
-- This integration covers one-time credit packs only. Subscription billing requires a separate iyzico subscription flow and product/plan configuration.
+## Legacy iyzico checkout (not used by Android)
+- The existing iyzico endpoints and database migration are legacy code retained temporarily for migration history. The Android app must not call these endpoints for digital credit packs or subscriptions. Google Play Billing is the selected Android payment path.
+- Do not configure or expose iyzico checkout in the Android app. Legacy backend routes will be removed after the Google Play purchase-verification flow is deployed and tested.
+- No iyzico credentials are required for the Android Google Play payment flow.
+- Google Play purchase tokens must be verified server-side before any credit or subscription entitlement is granted.
+- The Android wallet screen currently shows balance and ledger only; Google Play purchase UI and server verification are still being implemented.
+- Configure product prices and activate products in Play Console before testing purchases.
+- Subscription product setup and recurring entitlement reconciliation are documented in the Google Play Billing setup guide.
 
 ## Release readiness and legal drafts
 - [Release readiness checklist](docs/RELEASE_READINESS.md)
 - [Privacy policy draft — must be reviewed and completed before publication](docs/PRIVACY_POLICY_DRAFT.md)
 - [Terms of service draft — must be reviewed and completed before publication](docs/TERMS_OF_SERVICE_DRAFT.md)
+
+- [Google Play Billing setup guide](docs/GOOGLE_PLAY_BILLING_SETUP.md)
