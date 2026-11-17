@@ -250,7 +250,7 @@ const server = http.createServer(async (req, res) => {
       if (!verifyIyzicoRetrieveSignature(result)) return sendText(res, 400, "iyzico response signature validation failed");
       if (result.conversationId !== order.merchant_oid || result.token !== token || result.currency !== "TRY") return sendText(res, 400, "Payment reference mismatch");
       if (result.paymentStatus === "SUCCESS" && Number(result.fraudStatus) === 1 && result.status === "success") {
-        const settled = await adminRpc("settle_iyzico_order", { p_conversation_id: result.conversationId, p_token: token, p_payment_id: String(result.paymentId), p_paid_price: Number(result.paidPrice), p_currency: result.currency, p_basket_id: result.basketId });
+        const settled = await adminRpc("settle_iyzico_order", { p_conversation_id: result.conversationId, p_token: token, p_payment_id: String(result.paymentId), p_price: Number(result.price), p_paid_price: Number(result.paidPrice), p_currency: result.currency, p_basket_id: result.basketId });
         if (!settled || settled.ok !== true) return sendText(res, 500, "Payment settlement failed");
         return sendText(res, 200, "OK");
       }
@@ -334,7 +334,7 @@ const server = http.createServer(async (req, res) => {
         const payment = await iyzicoRequest("/payment/iyzipos/checkoutform/auth/ecom/detail", { locale: "tr", conversationId: order.merchant_oid, token: order.iyzico_token });
         if (verifyIyzicoRetrieveSignature(payment) && payment.conversationId === order.merchant_oid && payment.token === order.iyzico_token && payment.currency === "TRY") {
           if (payment.paymentStatus === "SUCCESS" && Number(payment.fraudStatus) === 1) {
-            await adminRpc("settle_iyzico_order", { p_conversation_id: payment.conversationId, p_token: order.iyzico_token, p_payment_id: String(payment.paymentId), p_paid_price: Number(payment.paidPrice), p_currency: payment.currency, p_basket_id: payment.basketId });
+            await adminRpc("settle_iyzico_order", { p_conversation_id: payment.conversationId, p_token: order.iyzico_token, p_payment_id: String(payment.paymentId), p_price: Number(payment.price), p_paid_price: Number(payment.paidPrice), p_currency: payment.currency, p_basket_id: payment.basketId });
           } else if (payment.paymentStatus === "FAILURE" || Number(payment.fraudStatus) === -1) {
             await adminRest("payment_orders?merchant_oid=eq." + encodeURIComponent(order.merchant_oid) + "&iyzico_token=eq." + encodeURIComponent(order.iyzico_token), { method: "PATCH", body: JSON.stringify({ status: "failed", iyzico_payment_id: payment.paymentId ? String(payment.paymentId) : null, failure_message: String(payment.errorMessage || "iyzico payment failed").slice(0, 500) }) });
           }
