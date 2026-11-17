@@ -174,6 +174,10 @@ fun VideoHistoryCard(refreshKey: Int, language: String = "Türkçe") {
                     Text(tr("YENİLE", "REFRESH", "تحديث"), color = Color(0xFFFFA47D), fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
             }
+            Text(
+                tr("Bu ekran açıkken bekleyen videolar 25 saniyede bir otomatik kontrol edilir.", "Pending videos are checked automatically every 25 seconds while this screen is open.", "يتم التحقق تلقائياً من مقاطع الفيديو المعلقة كل 25 ثانية أثناء فتح هذه الشاشة."),
+                color = Color(0xFF9AA3B6), fontSize = 10.sp, lineHeight = 14.sp
+            )
             if (feedback.isNotBlank()) Text(feedback, color = Color(0xFF9AA3B6), fontSize = 10.sp)
             Spacer(Modifier.height(8.dp))
             when {
