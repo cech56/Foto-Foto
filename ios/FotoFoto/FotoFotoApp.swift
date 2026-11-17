@@ -417,10 +417,10 @@ struct HomeView: View {
                         Spacer()
                         VStack(alignment: .trailing) { Text("PROJELERİN").font(.caption).foregroundStyle(.secondary); Text("\(store.history.count)").font(.title.bold()) }
                     }.padding().background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 18))
-                    Text("YAKINDA").font(.caption.bold()).tracking(2).foregroundStyle(.purple)
-                    FeatureTile(title: "Video düzenleme", detail: "Videolarında yapay zekâ ile değişiklik yap", icon: "wand.and.stars")
-                    FeatureTile(title: "Kalite yükseltme", detail: "Videolarını daha net hâle getir", icon: "4k.tv")
-                    FeatureTile(title: "Karakter animasyonu", detail: "Karakterlerine hareket kazandır", icon: "person.crop.square")
+                    Text("YARATICI ARAÇLAR").font(.caption.bold()).tracking(2).foregroundStyle(.purple)
+                    NavigationLink(destination: ToolsView(initialMode: "edit")) { FeatureTile(title: "Video düzenleme", detail: "Videolarında yapay zekâ ile değişiklik yap", icon: "wand.and.stars") }
+                    NavigationLink(destination: ToolsView(initialMode: "upscale")) { FeatureTile(title: "Kalite yükseltme", detail: "Videolarını daha net hâle getir", icon: "4k.tv") }
+                    NavigationLink(destination: ToolsView(initialMode: "character")) { FeatureTile(title: "Karakter animasyonu", detail: "Karakterlerine hareket kazandır", icon: "person.crop.square") }
                 }.padding()
             }.background(Color(red: 0.04, green: 0.05, blue: 0.10)).navigationTitle("FOTO FOTO")
         }
@@ -429,7 +429,8 @@ struct HomeView: View {
 
 struct ToolsView: View {
     @EnvironmentObject var store: Store
-    @State private var mode = "edit"
+    @State private var mode: String
+    init(initialMode: String = "edit") { _mode = State(initialValue: initialMode) }
     @State private var prompt = ""
     @State private var resolution = "2k"
     @State private var vertical = false
