@@ -35,5 +35,6 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.okhttp)
+    implementation(libs.play.billing)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
