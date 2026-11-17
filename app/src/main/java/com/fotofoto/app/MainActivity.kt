@@ -358,8 +358,6 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                     Spacer(Modifier.height(16.dp))
                     LegalSupportCard(language = appLanguage, onOpenLink = { url ->
                         runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
-                    }, onContact = {
-                        runCatching { context.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"))) }
                     })
                 }
                 if (selectedTab == "projects") {
@@ -985,8 +983,7 @@ private fun compressImageForRunway(context: android.content.Context, uri: Uri): 
 @Composable
 private fun LegalSupportCard(
     language: String,
-    onOpenLink: (String) -> Unit,
-    onContact: () -> Unit
+    onOpenLink: (String) -> Unit
 ) {
     val en = language == "English"
     val ar = language == "العربية"
@@ -1013,14 +1010,9 @@ private fun LegalSupportCard(
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = White)
             ) { Text(terms) }
-            Button(
-                onClick = onContact,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8129E8))
-            ) { Text(support, color = White, fontWeight = FontWeight.Bold) }
             Text(
-                if (en) "A support email address will be added before public release." else if (ar) "ستتم إضافة عنوان بريد الدعم قبل الإصدار العام." else "Destek e-posta adresi herkese açık yayından önce eklenecek.",
-                color = Muted, fontSize = 10.sp
+                support + ": " + (if (en) "The official support address will be published before release." else if (ar) "سيتم نشر عنوان الدعم الرسمي قبل الإصدار." else "Resmî destek adresi yayın öncesinde eklenecek."),
+                color = Muted, fontSize = 11.sp, lineHeight = 16.sp
             )
         }
     }
