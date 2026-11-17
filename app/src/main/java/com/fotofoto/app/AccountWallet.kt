@@ -99,6 +99,25 @@ suspend fun loadAccountSummary(context: Context): AccountLoadResult = withContex
     }
 }
 
+private suspend fun claimTrialBonus(context: Context): String = withContext(Dispatchers.IO) {
+    try {
+        val token = SessionStore.read(context)?.optString("access_token").orEmpty()
+        if (token.isBlank()) return@withContext "Oturum bulunamadı. Tekrar giriş yap."
+        val request = Request.Builder()
+            .url(BuildConfig.API_BASE_URL.trimEnd('/') + "/api/account/trial-bonus")
+            .addHeader("Authorization", "Bearer $token")
+            .post(ByteArray(0).toRequestBody())
+            .build()
+        walletHttp.newCall(request).execute().use { response ->
+            val data = JSONObject(response.body?.string().orEmpty())
+            if (response.isSuccessful && data.optBoolean("ok")) data.optString("message", "59 deneme kredisi eklendi.")
+            else data.optString("message").ifBlank { "Deneme kredisi alınamadı (HTTP ${response.code})." }
+        }
+    } catch (e: Exception) {
+        "Deneme kredisi isteği tamamlanamadı: " + (e.message ?: "Bağlantı hatası").take(120)
+    }
+}
+
 private suspend fun deleteFotoAccount(context: android.content.Context): String = withContext(Dispatchers.IO) {
     try {
         val token = SessionStore.read(context)?.optString("access_token").orEmpty()
@@ -130,6 +149,8 @@ fun AccountWalletCard(onRefresh: Int = 0, language: String = "Türkçe", onAccou
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var deleting by remember { mutableStateOf(false) }
     var deleteMessage by remember { mutableStateOf("") }
+    var trialLoading by remember { mutableStateOf(false) }
+    var trialMessage by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
     LaunchedEffect(onRefresh, refreshKey) {
         loading = true
@@ -178,6 +199,24 @@ fun AccountWalletCard(onRefresh: Int = 0, language: String = "Türkçe", onAccou
             Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                 Text(tr("Bakiye bilgisi hesabına özeldir.", "Your balance is private to your account.", "رصيدك خاص بحسابك."), color = Color(0xFF9AA3B6), fontSize = 9.sp)
                 TextButton(onClick = { refreshKey++ }, enabled = !loading, contentPadding = PaddingValues(4.dp)) { Text(if (loading) tr("YÜKLENİYOR", "LOADING", "جارٍ التحميل") else tr("↻ YENİLE", "↻ REFRESH", "↻ تحديث"), color = Color(0xFFFF795E), fontSize = 10.sp) }
+            }
+            if (summary?.email?.trim()?.equals("sssozdemir1996@gmail.com", ignoreCase = true) == true) {
+                Spacer(Modifier.height(10.dp))
+                OutlinedButton(
+                    onClick = {
+                        scope.launch {
+                            trialLoading = true
+                            trialMessage = claimTrialBonus(context)
+                            trialLoading = false
+                            refreshKey++
+                        }
+                    },
+                    enabled = !trialLoading && !loading,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(if (trialLoading) tr("TANIMLANIYOR…", "ADDING…", "جارٍ الإضافة…") else tr("59 ÜCRETSİZ DENEME KREDİSİ AL", "CLAIM 59 FREE TRIAL CREDITS", "احصل على 59 رصيداً تجريبياً مجانياً"))
+                }
+                if (trialMessage.isNotBlank()) Text(trialMessage, color = Color(0xFFB99AFF), fontSize = 10.sp)
             }
             Text(tr("ÜRETİM ÜCRETLERİ", "GENERATION PRICES", "أسعار الإنشاء"), color = Color(0xFFB99AFF), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
             Text(tr("Her video için gereken kredi miktarı", "Credits required for each video", "الرصيد المطلوب لكل فيديو"), color = Color(0xFF9AA3B6), fontSize = 9.sp)
