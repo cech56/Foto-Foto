@@ -75,7 +75,13 @@ async function iyzicoRequest(uriPath, payload) {
 function normalizeMoney(value) {
   const n = Number(value);
   if (!Number.isFinite(n)) return "";
-  return n.toFixed(2).replace(/\.?0+$/, "");
+  return String(n);
+}
+
+function verifyIyzicoInitializeSignature(data, conversationId) {
+  if (!data.signature || !data.token) return false;
+  const expected = createHmac("sha256", IYZICO_SECRET_KEY).update(conversationId + ":" + data.token).digest("hex");
+  return safeHashEqual(expected, data.signature);
 }
 
 function verifyIyzicoRetrieveSignature(data) {
@@ -315,6 +321,7 @@ const server = http.createServer(async (req, res) => {
           basketItems: [{ id: product.product_id, price: amount, name: String(product.title).slice(0, 100), category1: "Dijital Hizmet", itemType: "VIRTUAL" }]
         });
         if (!initialized.token || (!initialized.paymentPageUrl && !initialized.checkoutFormContent)) throw new Error("iyzico ödeme formu bağlantısı döndürmedi.");
+        if (!verifyIyzicoInitializeSignature(initialized, conversationId)) throw new Error("iyzico ödeme formu imzası doğrulanamadı.");
         await adminRest("payment_orders?merchant_oid=eq." + encodeURIComponent(conversationId), { method: "PATCH", body: JSON.stringify({ iyzico_token: initialized.token }) });
       } catch (error) {
         await adminRest("payment_orders?merchant_oid=eq." + encodeURIComponent(conversationId), { method: "PATCH", body: JSON.stringify({ status: "failed", failure_message: String(error.message || "iyzico initialize error").slice(0, 500) }) }).catch(() => {});
