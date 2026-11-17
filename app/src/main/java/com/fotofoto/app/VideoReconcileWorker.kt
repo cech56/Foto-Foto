@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
@@ -26,7 +27,7 @@ class VideoReconcileWorker(
             val request = Request.Builder()
                 .url(BuildConfig.API_BASE_URL.trimEnd('/') + "/api/tasks/reconcile")
                 .header("Authorization", "Bearer " + token)
-                .post(okhttp3.RequestBody.create(null, ByteArray(0)))
+                .post(ByteArray(0).toRequestBody(null))
                 .build()
             val response = client.newCall(request).execute()
             response.use {
