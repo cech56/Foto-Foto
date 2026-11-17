@@ -80,10 +80,43 @@ struct HistoryRow: Decodable, Identifiable {
         try await auth("token?grant_type=password", payload: ["email": email, "password": password])
         await refreshAll()
     }
+    func authRequest(_ endpoint: String, payload: [String: Any]) async throws -> Data {
+        let url = URL(string: "/auth/v1/\(endpoint)", relativeTo: Config.supabase)!
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue(Config.anonKey, forHTTPHeaderField: "apikey")
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try JSONSerialization.data(withJSONObject: payload)
+        let (data, response) = try await URLSession.shared.data(for: req)
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            let body = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+            let detail = body?["msg"] as? String ?? body?["message"] as? String ?? body?["error_description"] as? String ?? "İstek başarısız."
+            throw NSError(domain: "FOTOFOTO", code: (response as? HTTPURLResponse)?.statusCode ?? -1, userInfo: [NSLocalizedDescriptionKey: detail])
+        }
+        return data
+    }
+
     func signUp(email: String, password: String) async throws {
-        try await auth("signup", payload: ["email": email, "password": password])
-        message = "Doğrulama e-postası gönderildiyse gelen kutunu kontrol et. İlk sürümde e-posta kodu doğrulama ekranı henüz tamamlanmadı."
-        session = nil
+        _ = try await authRequest("signup", payload: ["email": email, "password": password])
+        message = "Doğrulama kodu e-posta adresine gönderildi."
+    }
+
+    func verifySignup(email: String, code: String) async throws {
+        let data = try await authRequest("verify", payload: ["email": email, "token": code, "type": "signup"])
+        let decoded = try JSONDecoder().decode(AuthSession.self, from: data)
+        session = decoded
+        KeychainSession.save(decoded)
+        await refreshAll()
+    }
+
+    func resendSignupCode(email: String) async throws {
+        _ = try await authRequest("resend", payload: ["email": email, "type": "signup"])
+        message = "Yeni doğrulama kodu gönderildi."
+    }
+
+    func sendPasswordReset(email: String) async throws {
+        _ = try await authRequest("recover", payload: ["email": email])
+        message = "Şifre yenileme bağlantısı e-posta adresine gönderildi."
     }
     func deleteAccount() async throws {
         guard let token = session?.access_token else { throw NSError(domain: "FOTOFOTO", code: 401, userInfo: [NSLocalizedDescriptionKey: "Oturum bulunamadı."]) }
@@ -221,26 +254,74 @@ struct LoginView: View {
     @EnvironmentObject var store: Store
     @State private var email = ""
     @State private var password = ""
+    @State private var code = ""
     @State private var register = false
+    @State private var reset = false
+    @State private var awaitingCode = false
+    @State private var busy = false
+
     var body: some View {
         ZStack {
-            Color(red: 0.04, green: 0.05, blue: 0.10).ignoresSafeArea()
-            VStack(spacing: 20) {
-                Spacer()
-                Text("▶").font(.system(size: 42, weight: .black)).frame(width: 76, height: 76).background(LinearGradient(colors: [.cyan, .purple, .pink], startPoint: .topLeading, endPoint: .bottomTrailing), in: RoundedRectangle(cornerRadius: 24))
-                Text("FOTO FOTO").font(.system(size: 30, weight: .black, design: .rounded))
-                Text("AI VIDEO STÜDYOSU").font(.caption.bold()).tracking(3).foregroundStyle(.cyan)
-                VStack(spacing: 14) {
-                    TextField("E-posta", text: $email).textInputAutocapitalization(.never).keyboardType(.emailAddress).autocorrectionDisabled().textFieldStyle(.roundedBorder)
-                    SecureField("Şifre", text: $password).textFieldStyle(.roundedBorder)
-                    Button(register ? "HESAP OLUŞTUR" : "GİRİŞ YAP") {
-                        Task { do { if register { try await store.signUp(email: email, password: password) } else { try await store.signIn(email: email, password: password) } } catch { store.message = error.localizedDescription } }
-                    }.buttonStyle(PrimaryButton()).disabled(email.isEmpty || password.count < 8)
-                    Button(register ? "Zaten hesabım var" : "Yeni hesap oluştur") { register.toggle() }.foregroundStyle(.purple.opacity(0.9))
-                }.padding(22).background(Color.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 24))
-                if !store.message.isEmpty { Text(store.message).font(.footnote).foregroundStyle(.orange).multilineTextAlignment(.center) }
-                Spacer()
-            }.padding(24)
+            LinearGradient(colors: [Color(red: 0.12, green: 0.09, blue: 0.20), Color(red: 0.04, green: 0.05, blue: 0.10)], startPoint: .top, endPoint: .bottom).ignoresSafeArea()
+            ScrollView {
+                VStack(spacing: 20) {
+                    Spacer(minLength: 50)
+                    Text("▶").font(.system(size: 42, weight: .black)).frame(width: 76, height: 76).background(LinearGradient(colors: [.cyan, .purple, .pink], startPoint: .topLeading, endPoint: .bottomTrailing), in: RoundedRectangle(cornerRadius: 24))
+                    Text("FOTO FOTO").font(.system(size: 30, weight: .black, design: .rounded))
+                    Text("AI VIDEO STÜDYOSU").font(.caption.bold()).tracking(3).foregroundStyle(.cyan)
+                    VStack(spacing: 14) {
+                        Text(awaitingCode ? "E-posta doğrulama" : (reset ? "Şifremi yenile" : (register ? "Ücretsiz hesap oluştur" : "Tekrar hoş geldin!")))
+                            .font(.title2.bold()).frame(maxWidth: .infinity, alignment: .leading)
+                        if !awaitingCode {
+                            TextField("E-posta", text: $email).textInputAutocapitalization(.never).keyboardType(.emailAddress).autocorrectionDisabled().textFieldStyle(.roundedBorder)
+                        }
+                        if awaitingCode {
+                            Text("E-posta adresine gelen doğrulama kodunu gir.").font(.footnote).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
+                            TextField("Doğrulama kodu", text: $code).keyboardType(.numberPad).textFieldStyle(.roundedBorder)
+                        } else if !reset {
+                            SecureField("Şifre (en az 8 karakter)", text: $password).textFieldStyle(.roundedBorder)
+                        }
+                        Button {
+                            Task {
+                                busy = true
+                                store.message = ""
+                                do {
+                                    if awaitingCode {
+                                        try await store.verifySignup(email: email, code: code)
+                                    } else if reset {
+                                        try await store.sendPasswordReset(email: email)
+                                    } else if register {
+                                        try await store.signUp(email: email, password: password)
+                                        awaitingCode = true
+                                    } else {
+                                        try await store.signIn(email: email, password: password)
+                                    }
+                                } catch { store.message = error.localizedDescription }
+                                busy = false
+                            }
+                        } label: {
+                            if busy { ProgressView().tint(.white) }
+                            else { Text(awaitingCode ? "KODU DOĞRULA" : (reset ? "YENİLEME E-POSTASI GÖNDER" : (register ? "HESAP OLUŞTUR" : "GİRİŞ YAP"))).fontWeight(.bold).frame(maxWidth: .infinity) }
+                        }.buttonStyle(PrimaryButton()).disabled(busy || (awaitingCode ? code.count < 6 : (!email.contains("@") || (!reset && password.count < 8))))
+                        if awaitingCode {
+                            Button("Kodu tekrar gönder") {
+                                Task { busy = true; do { try await store.resendSignupCode(email: email) } catch { store.message = error.localizedDescription }; busy = false }
+                            }.disabled(busy)
+                        } else if !register && !reset {
+                            Button("Şifremi unuttum") { reset = true; store.message = "" }.foregroundStyle(.purple)
+                        }
+                        Button(awaitingCode ? "Giriş ekranına dön" : (reset ? "Giriş ekranına dön" : (register ? "Zaten hesabım var" : "Yeni hesap oluştur"))) {
+                            awaitingCode = false
+                            reset = false
+                            register = !register && !reset
+                            code = ""
+                            store.message = ""
+                        }.foregroundStyle(.purple)
+                    }.padding(22).background(Color.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 24))
+                    if !store.message.isEmpty { Text(store.message).font(.footnote).foregroundStyle(.orange).multilineTextAlignment(.center).textSelection(.enabled) }
+                    Spacer(minLength: 50)
+                }.padding(24)
+            }
         }
     }
 }
