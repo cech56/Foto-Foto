@@ -110,11 +110,6 @@ async function adminRest(path, options = {}) {
   return data;
 }
 
-function safeHashEqual(a, b) {
-  const left = Buffer.from(String(a || "")); const right = Buffer.from(String(b || ""));
-  return left.length === right.length && timingSafeEqual(left, right);
-}
-
 
 async function requireUser(req) {
   const auth = req.headers.authorization || "";
