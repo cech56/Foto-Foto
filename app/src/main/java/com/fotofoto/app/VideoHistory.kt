@@ -175,7 +175,7 @@ fun VideoHistoryCard(refreshKey: Int, language: String = "Türkçe") {
                 }
             }
             Text(
-                tr("Bu ekran açıkken bekleyen videolar 25 saniyede bir otomatik kontrol edilir.", "Pending videos are checked automatically every 25 seconds while this screen is open.", "يتم التحقق تلقائياً من مقاطع الفيديو المعلقة كل 25 ثانية أثناء فتح هذه الشاشة."),
+                tr("Bu ekran açıkken videolar 25 saniyede bir, uygulama arka plandayken ise internet varsa yaklaşık 15 dakikada bir kontrol edilir.", "Videos are checked every 25 seconds on this screen and approximately every 15 minutes in the background when internet is available.", "يتم التحقق من الفيديو كل 25 ثانية أثناء فتح الشاشة، وحوالي كل 15 دقيقة في الخلفية عند توفر الإنترنت."),
                 color = Color(0xFF9AA3B6), fontSize = 10.sp, lineHeight = 14.sp
             )
             if (feedback.isNotBlank()) Text(feedback, color = Color(0xFF9AA3B6), fontSize = 10.sp)
