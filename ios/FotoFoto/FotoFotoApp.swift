@@ -61,7 +61,7 @@ struct HistoryRow: Decodable, Identifiable {
     }
 
     func auth(_ endpoint: String, payload: [String: Any]) async throws {
-        let url = Config.supabase.appendingPathComponent("auth/v1/\(endpoint)")
+        let url = URL(string: "/auth/v1/\(endpoint)", relativeTo: Config.supabase)!
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
         req.setValue(Config.anonKey, forHTTPHeaderField: "apikey")
