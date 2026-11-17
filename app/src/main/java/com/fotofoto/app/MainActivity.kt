@@ -355,6 +355,12 @@ private fun FotoFotoApp(onSignOut: () -> Unit) {
                 if (selectedTab == "account") {
                     Spacer(Modifier.height(18.dp))
                     AccountWalletCard(historyRefresh, appLanguage, onAccountDeleted = onSignOut)
+                    Spacer(Modifier.height(16.dp))
+                    LegalSupportCard(language = appLanguage, onOpenLink = { url ->
+                        runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+                    }, onContact = {
+                        runCatching { context.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"))) }
+                    })
                 }
                 if (selectedTab == "projects") {
                     Spacer(Modifier.height(18.dp))
@@ -974,4 +980,48 @@ private fun compressImageForRunway(context: android.content.Context, uri: Uri): 
         bitmap.recycle()
         if (bytes.size > 3500000) null else "data:image/jpeg;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP)
     } catch (_: Exception) { null }
+}
+
+@Composable
+private fun LegalSupportCard(
+    language: String,
+    onOpenLink: (String) -> Unit,
+    onContact: () -> Unit
+) {
+    val en = language == "English"
+    val ar = language == "العربية"
+    val title = if (en) "LEGAL & SUPPORT" else if (ar) "القانون والدعم" else "YASAL BİLGİLER VE DESTEK"
+    val privacy = if (en) "Privacy policy draft" else if (ar) "مسودة سياسة الخصوصية" else "Gizlilik politikası (taslak)"
+    val terms = if (en) "Terms of service draft" else if (ar) "مسودة شروط الاستخدام" else "Kullanım koşulları (taslak)"
+    val support = if (en) "Contact support" else if (ar) "اتصل بالدعم" else "Destek ile iletişime geç"
+    val note = if (en) "These legal texts are drafts and are not final publication documents. Operator and contact details must be completed before release." else if (ar) "هذه النصوص القانونية مسودات وليست نهائية للنشر. يجب استكمال بيانات المشغّل والاتصال قبل الإصدار." else "Bu hukuki metinler taslaktır, henüz yayın için hazır değildir. Yayından önce işletmeci ve iletişim bilgileri tamamlanmalıdır."
+    Card(
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF17172D)),
+        shape = RoundedCornerShape(22.dp),
+        modifier = Modifier.fillMaxWidth().border(1.dp, Color(0xFF34304D), RoundedCornerShape(22.dp))
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(title, color = Color(0xFFB99AFF), fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.4.sp)
+            Text(note, color = Muted, fontSize = 11.sp, lineHeight = 16.sp)
+            OutlinedButton(
+                onClick = { onOpenLink("https://github.com/cech56/Foto-Foto/blob/main/docs/PRIVACY_POLICY_DRAFT.md") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = White)
+            ) { Text(privacy) }
+            OutlinedButton(
+                onClick = { onOpenLink("https://github.com/cech56/Foto-Foto/blob/main/docs/TERMS_OF_SERVICE_DRAFT.md") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = White)
+            ) { Text(terms) }
+            Button(
+                onClick = onContact,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8129E8))
+            ) { Text(support, color = White, fontWeight = FontWeight.Bold) }
+            Text(
+                if (en) "A support email address will be added before public release." else if (ar) "ستتم إضافة عنوان بريد الدعم قبل الإصدار العام." else "Destek e-posta adresi herkese açık yayından önce eklenecek.",
+                color = Muted, fontSize = 10.sp
+            )
+        }
+    }
 }
