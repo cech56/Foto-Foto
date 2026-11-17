@@ -203,7 +203,7 @@ fun AccountWalletCard(onRefresh: Int = 0, language: String = "Türkçe", onAccou
                     }
                 }
             }
-            IyzicoTopUpCard(language = language)
+            Row(Modifier.fillMaxWidth().background(Color(0xFF20283B), RoundedCornerShape(13.dp)).padding(12.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) { Text("ⓘ", color = Color(0xFF65C9D8), fontSize = 18.sp); Spacer(Modifier.width(9.dp)); Text(tr("Kredi satın alma, Google Play ödeme kurallarına uygun yöntemle etkinleştirilecek.", "Credit purchases will be enabled using a payment method compliant with Google Play policies.", "سيتم تفعيل شراء الرصيد بطريقة متوافقة مع سياسات Google Play."), color = Color(0xFFB6C0D1), fontSize = 9.sp, lineHeight = 14.sp) }
             Spacer(Modifier.height(16.dp))
             HorizontalDivider(color = Color(0xFF30384A))
             Spacer(Modifier.height(10.dp))
