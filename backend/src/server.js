@@ -310,6 +310,7 @@ const server = http.createServer(async (req, res) => {
           locale: "tr", conversationId: conversationId, price: amount, paidPrice: amount, currency: "TRY", basketId: basketId, paymentGroup: "PRODUCT", callbackUrl: IYZICO_CALLBACK_URL, enabledInstallments: [1],
           buyer: buyer,
           billingAddress: { address: buyer.registrationAddress, contactName: buyer.name + " " + buyer.surname, city: buyer.city, country: buyer.country, zipCode: buyer.zipCode },
+          shippingAddress: { address: buyer.registrationAddress, contactName: buyer.name + " " + buyer.surname, city: buyer.city, country: buyer.country, zipCode: buyer.zipCode },
           basketItems: [{ id: product.product_id, price: amount, name: String(product.title).slice(0, 100), category1: "Dijital Hizmet", itemType: "VIRTUAL" }]
         });
         if (!initialized.token || (!initialized.paymentPageUrl && !initialized.checkoutFormContent)) throw new Error("iyzico ödeme formu bağlantısı döndürmedi.");
