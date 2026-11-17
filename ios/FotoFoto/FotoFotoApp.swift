@@ -87,12 +87,12 @@ struct HistoryRow: Decodable, Identifiable {
     func refreshAll() async {
         guard session != nil else { return }
         do {
-            let walletURL = Config.supabase.appendingPathComponent("rest/v1/wallets").appending(queryItems: [URLQueryItem(name: "select", value: "balance_credits"), URLQueryItem(name: "limit", value: "1")])
+            let walletURL = URL(string: "/rest/v1/wallets", relativeTo: Config.supabase)!.appending(queryItems: [URLQueryItem(name: "select", value: "balance_credits"), URLQueryItem(name: "limit", value: "1")])
             let wallets: [WalletRow] = try await request(walletURL)
             balance = wallets.first?.balance_credits ?? 0
-            let ledgerURL = Config.supabase.appendingPathComponent("rest/v1/credit_ledger").appending(queryItems: [URLQueryItem(name: "select", value: "amount_credits,description,entry_type,reference_id"), URLQueryItem(name: "order", value: "created_at.desc"), URLQueryItem(name: "limit", value: "10")])
+            let ledgerURL = URL(string: "/rest/v1/credit_ledger", relativeTo: Config.supabase)!.appending(queryItems: [URLQueryItem(name: "select", value: "amount_credits,description,entry_type,reference_id"), URLQueryItem(name: "order", value: "created_at.desc"), URLQueryItem(name: "limit", value: "10")])
             ledger = (try? await request(ledgerURL)) ?? []
-            let historyURL = Config.supabase.appendingPathComponent("rest/v1/video_generations").appending(queryItems: [URLQueryItem(name: "select", value: "provider_task_id,prompt,status,video_url"), URLQueryItem(name: "order", value: "created_at.desc"), URLQueryItem(name: "limit", value: "20")])
+            let historyURL = URL(string: "/rest/v1/video_generations", relativeTo: Config.supabase)!.appending(queryItems: [URLQueryItem(name: "select", value: "provider_task_id,prompt,status,video_url"), URLQueryItem(name: "order", value: "created_at.desc"), URLQueryItem(name: "limit", value: "20")])
             history = (try? await request(historyURL)) ?? []
         } catch { message = error.localizedDescription }
     }
