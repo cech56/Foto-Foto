@@ -1,4 +1,7 @@
 import SwiftUI
+import PhotosUI
+import UIKit
+import Combine
 import Security
 
 private enum Config {
@@ -97,7 +100,7 @@ struct HistoryRow: Decodable, Identifiable {
         } catch { message = error.localizedDescription }
     }
 
-    func generate(prompt: String, seconds: Int, ratio: String) async {
+    func generate(prompt: String, seconds: Int, ratio: String, imageData: Data? = nil) async {
         guard let token = session?.access_token else { message = "Önce giriş yap."; return }
         busy = true
         defer { busy = false }
@@ -107,7 +110,9 @@ struct HistoryRow: Decodable, Identifiable {
             req.httpMethod = "POST"
             req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
             req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            req.httpBody = try JSONSerialization.data(withJSONObject: ["prompt": prompt, "duration": seconds, "ratio": ratio])
+            var payload: [String: Any] = ["prompt": prompt, "duration": seconds, "ratio": ratio]
+            if let imageData { payload["imageUri"] = "data:image/jpeg;base64," + imageData.base64EncodedString() }
+            req.httpBody = try JSONSerialization.data(withJSONObject: payload)
             let (data, response) = try await URLSession.shared.data(for: req)
             guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
                 throw NSError(domain: "FOTOFOTO", code: (response as? HTTPURLResponse)?.statusCode ?? -1, userInfo: [NSLocalizedDescriptionKey: String(data: data, encoding: .utf8) ?? "Video isteği başarısız."])
@@ -194,6 +199,8 @@ struct CreateView: View {
     @State private var prompt = ""
     @State private var seconds = 5
     @State private var vertical = false
+    @State private var selectedPhoto: PhotosPickerItem?
+    @State private var photoData: Data?
     var body: some View {
         NavigationStack {
             Form {
@@ -201,14 +208,17 @@ struct CreateView: View {
                     TextEditor(text: $prompt).frame(minHeight: 130).overlay(alignment: .topLeading) { if prompt.isEmpty { Text("Nasıl bir video hayal ediyorsun?").foregroundStyle(.secondary).padding(.top, 8).padding(.leading, 5).allowsHitTesting(false) } }
                     Picker("Video süresi", selection: $seconds) { Text("5 saniye · 59 kredi").tag(5); Text("10 saniye · 119 kredi").tag(10) }
                     Picker("Format", selection: $vertical) { Text("16:9").tag(false); Text("9:16").tag(true) }
+                    PhotosPicker(selection: $selectedPhoto, matching: .images) { Label(photoData == nil ? "Fotoğraf ekle" : "Fotoğraf seçildi", systemImage: "photo") }
+                    if let photoData, let image = UIImage(data: photoData) { Image(uiImage: image).resizable().scaledToFit().frame(maxHeight: 190) }
                     Text("Runway Gen-4.5 · \(seconds == 5 ? 59 : 119) kredi").foregroundStyle(.orange).font(.headline)
-                    Button { Task { await store.generate(prompt: prompt, seconds: seconds, ratio: vertical ? "720:1280" : "1280:720") } } label: {
+                    Button { Task { await store.generate(prompt: prompt, seconds: seconds, ratio: vertical ? "720:1280" : "1280:720", imageData: photoData) } } label: {
                         if store.busy { ProgressView() } else { Text("✦ VİDEOMU OLUŞTUR").fontWeight(.bold).frame(maxWidth: .infinity) }
                     }.buttonStyle(PrimaryButton()).disabled(store.busy || prompt.trimmingCharacters(in: .whitespacesAndNewlines).count < 10)
                 }
                 if !store.message.isEmpty { Section("Durum") { Text(store.message).font(.footnote).textSelection(.enabled) } }
             }.scrollContentBackground(.hidden).background(Color(red: 0.04, green: 0.05, blue: 0.10))
                 .navigationTitle("FOTO FOTO")
+                .onChange(of: selectedPhoto) { item in Task { photoData = try? await item?.loadTransferable(type: Data.self) } }
         }
     }
 }
