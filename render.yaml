@@ -23,3 +23,11 @@ services:
         sync: false
       - key: ALLOWED_ORIGIN
         value: "*"
+      - key: IYZICO_API_KEY
+        sync: false
+      - key: IYZICO_SECRET_KEY
+        sync: false
+      - key: IYZICO_BASE_URL
+        value: https://sandbox-api.iyzipay.com
+      - key: IYZICO_CALLBACK_URL
+        sync: false
