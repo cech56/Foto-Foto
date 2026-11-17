@@ -85,6 +85,20 @@ struct HistoryRow: Decodable, Identifiable {
         message = "Doğrulama e-postası gönderildiyse gelen kutunu kontrol et. İlk sürümde e-posta kodu doğrulama ekranı henüz tamamlanmadı."
         session = nil
     }
+    func deleteAccount() async throws {
+        guard let token = session?.access_token else { throw NSError(domain: "FOTOFOTO", code: 401, userInfo: [NSLocalizedDescriptionKey: "Oturum bulunamadı."]) }
+        var req = URLRequest(url: Config.api.appendingPathComponent("api/account"))
+        req.httpMethod = "DELETE"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let (data, response) = try await URLSession.shared.data(for: req)
+        let http = response as? HTTPURLResponse
+        let result = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
+        guard let http, (200..<300).contains(http.statusCode), result["ok"] as? Bool == true else {
+            throw NSError(domain: "FOTOFOTO", code: http?.statusCode ?? -1, userInfo: [NSLocalizedDescriptionKey: result["message"] as? String ?? "Hesap silinemedi."])
+        }
+        signOut()
+    }
+
     func signOut() { session = nil; balance = 0; history = []; ledger = []; KeychainSession.clear() }
 
     func refreshAll() async {
@@ -351,22 +365,76 @@ struct HistoryView: View {
 
 struct WalletView: View {
     @EnvironmentObject var store: Store
+    @State private var showDeleteConfirm = false
+    @State private var deleting = false
+    @State private var accountMessage = ""
+
     var body: some View {
         NavigationStack {
             List {
+                Section("HESABIM") {
+                    HStack(spacing: 12) {
+                        Image(systemName: "person.crop.circle.fill").font(.system(size: 42)).foregroundStyle(.purple)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(store.session?.user?.email ?? "FOTO FOTO kullanıcısı").font(.headline)
+                            Text("Kişisel hesabın").font(.caption).foregroundStyle(.secondary)
+                        }
+                    }.padding(.vertical, 6)
+                    Button("Yenile") { Task { await store.refreshAll() } }
+                }
                 Section("KREDİ CÜZDANIN") {
                     Text("\(store.balance) kredi").font(.largeTitle.bold()).foregroundStyle(.purple)
                     Text("1 kredi = 1 TL").foregroundStyle(.secondary)
-                    Text("Ödeme ve kredi satın alma özellikleri henüz etkin değil.").font(.footnote).foregroundStyle(.secondary)
-                    Button("Bakiyeyi yenile") { Task { await store.refreshAll() } }
+                    HStack {
+                        VStack(alignment: .leading) { Text("5 SANİYE").font(.caption).foregroundStyle(.secondary); Text("59 kredi").font(.headline) }
+                        Spacer()
+                        VStack(alignment: .leading) { Text("10 SANİYE").font(.caption).foregroundStyle(.secondary); Text("119 kredi").font(.headline) }
+                    }.padding(.vertical, 4)
+                    Text("Kredi satın alma henüz etkin değil. Ödeme sistemi hazır olduğunda bu bölümden açılacak.").font(.footnote).foregroundStyle(.secondary)
                 }
                 Section("SON KREDİ HAREKETLERİ") {
-                    ForEach(store.ledger) { row in
-                        HStack { Text(row.description ?? row.entry_type ?? "Kredi hareketi"); Spacer(); Text("\(row.amount_credits)") }
+                    if store.ledger.isEmpty {
+                        Text("Henüz kredi hareketi yok.").foregroundStyle(.secondary)
+                    } else {
+                        ForEach(store.ledger) { row in
+                            HStack {
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(row.description ?? row.entry_type ?? "Kredi hareketi")
+                                    if let type = row.entry_type { Text(type.uppercased()).font(.caption2).foregroundStyle(.secondary) }
+                                }
+                                Spacer()
+                                Text("\(row.amount_credits > 0 ? "+" : "")\(row.amount_credits)")
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(row.amount_credits >= 0 ? .green : .orange)
+                            }
+                        }
                     }
                 }
-                Section { Button("Çıkış yap", role: .destructive) { store.signOut() } }
-            }.navigationTitle("Hesabım")
+                Section("GÜVENLİK") {
+                    Button("Çıkış yap", role: .destructive) { store.signOut() }
+                    Button("Hesabımı kalıcı olarak sil", role: .destructive) { showDeleteConfirm = true }
+                    if !accountMessage.isEmpty { Text(accountMessage).font(.footnote).foregroundStyle(.orange) }
+                }
+            }
+            .navigationTitle("Hesabım")
+            .confirmationDialog("Hesabın kalıcı olarak silinsin mi?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
+                Button("Evet, hesabımı kalıcı olarak sil", role: .destructive) {
+                    Task {
+                        deleting = true
+                        do {
+                            try await store.deleteAccount()
+                            accountMessage = "Hesabın silindi."
+                        } catch { accountMessage = error.localizedDescription }
+                        deleting = false
+                    }
+                }
+                Button("Vazgeç", role: .cancel) {}
+            } message: {
+                Text("Hesabın ve hesaba bağlı profil, cüzdan ve video geçmişi verileri silinir. Bu işlem geri alınamaz.")
+            }
+            .overlay {
+                if deleting { ProgressView("Hesap siliniyor…").padding().background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14)) }
+            }
         }
     }
 }
