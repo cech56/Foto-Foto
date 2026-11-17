@@ -79,13 +79,13 @@ function normalizeMoney(value) {
 }
 
 function verifyIyzicoInitializeSignature(data, conversationId) {
-  if (!data.signature || !data.token) return false;
+  if (!data.signature || !data.token || data.conversationId !== conversationId) return false;
   const expected = createHmac("sha256", IYZICO_SECRET_KEY).update(conversationId + ":" + data.token).digest("hex");
   return safeHashEqual(expected, data.signature);
 }
 
 function verifyIyzicoRetrieveSignature(data) {
-  if (!data.signature || !data.paymentId || !data.currency || !data.basketId || !data.conversationId || !data.token) return false;
+  if (!data.signature || !data.paymentStatus || !data.paymentId || !data.currency || !data.basketId || !data.conversationId || !data.token || data.price == null || data.paidPrice == null) return false;
   const fields = [data.paymentStatus, data.paymentId, data.currency, data.basketId, data.conversationId, normalizeMoney(data.paidPrice), normalizeMoney(data.price), data.token];
   const expected = createHmac("sha256", IYZICO_SECRET_KEY).update(fields.join(":")).digest("hex");
   return safeHashEqual(expected, data.signature);
