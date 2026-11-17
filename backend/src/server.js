@@ -474,6 +474,49 @@ const server = http.createServer(async (req, res) => {
       return send(res, 202, { taskId: task.id || task.taskId, status: task.status || "PENDING" });
     }
 
+    if (req.method === "POST" && pathname === "/api/tasks/reconcile") {
+      const user = await requireUser(req);
+      if (!user?.id) return send(res, 401, { message: "Oturum doğrulanamadı." });
+      const auth = req.headers.authorization || "";
+      const pendingUrl = SUPABASE_URL + "/rest/v1/credit_reservations?select=provider_task_id&status=eq.reserved&provider_task_id=not.is.null&user_id=eq." + encodeURIComponent(user.id) + "&limit=20";
+      const pendingResponse = await fetch(pendingUrl, {
+        headers: { apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: auth }
+      });
+      if (!pendingResponse.ok) return send(res, 502, { message: "Bekleyen video listesi alınamadı." });
+      const pendingRows = await pendingResponse.json();
+      let checked = 0;
+      let completed = 0;
+      let failed = 0;
+      for (const row of pendingRows) {
+        const taskId = String(row.provider_task_id || "");
+        if (!taskId) continue;
+        try {
+          const task = await runway("/v1/tasks/" + encodeURIComponent(taskId), { method: "GET" });
+          const state = String(task.status || "PENDING").toUpperCase();
+          const output = Array.isArray(task.output) ? task.output : [];
+          const videoUrl = typeof output[0] === "string" && output[0].startsWith("https://") ? output[0] : null;
+          if (state === "SUCCEEDED") {
+            await settleTask(taskId, true);
+            completed++;
+          } else if (["FAILED", "CANCELED", "CANCELLED"].includes(state)) {
+            await settleTask(taskId, false);
+            failed++;
+          }
+          if (["SUCCEEDED", "FAILED", "CANCELED", "CANCELLED"].includes(state)) {
+            const patch = { status: state, updated_at: new Date().toISOString() };
+            if (videoUrl) patch.video_url = videoUrl;
+            await adminRest("video_generations?provider_task_id=eq." + encodeURIComponent(taskId) + "&user_id=eq." + encodeURIComponent(user.id), {
+              method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify(patch)
+            });
+          }
+          checked++;
+        } catch (error) {
+          console.error("Task reconciliation failed:", taskId, error.message);
+        }
+      }
+      return send(res, 200, { ok: true, checked, completed, failed });
+    }
+
     const match = req.method === "GET" && req.url?.match(/^\/api\/tasks\/([a-zA-Z0-9_-]+)$/);
     if (match) {
       const user = await requireUser(req);
