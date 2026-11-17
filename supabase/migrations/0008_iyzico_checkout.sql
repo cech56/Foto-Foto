@@ -33,6 +33,7 @@ create or replace function public.settle_iyzico_order(
   p_conversation_id text,
   p_token text,
   p_payment_id text,
+  p_price numeric,
   p_paid_price numeric,
   p_currency text,
   p_basket_id text
@@ -66,6 +67,7 @@ begin
      or v_order.iyzico_token is distinct from p_token
      or v_order.currency <> p_currency
      or v_order.basket_id is distinct from p_basket_id
+     or round(p_price * 100) <> v_order.amount_minor
      or round(p_paid_price * 100) <> v_order.amount_minor then
     raise exception 'iyzico payment details do not match order %', p_conversation_id;
   end if;
@@ -96,7 +98,7 @@ begin
 end;
 $$;
 
-revoke all on function public.settle_iyzico_order(text,text,text,numeric,text,text)
+revoke all on function public.settle_iyzico_order(text,text,text,numeric,numeric,text,text)
   from public, anon, authenticated;
 grant execute on function public.settle_iyzico_order(text,text,text,numeric,text,text)
   to service_role;
