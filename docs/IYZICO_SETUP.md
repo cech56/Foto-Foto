@@ -41,4 +41,4 @@ The backend defaults to the sandbox host unless `IYZICO_BASE_URL` is exactly the
 - Never grant credits from client-side state or the hosted-page return URL.
 - Keep API and secret keys only in private backend environment variables.
 - The current implementation is for one-time credit packs. Recurring subscriptions need the iyzico subscription API and separate plan setup.
-- The Android wallet purchase dialog is connected to the checkout endpoint and opens the hosted iyzico payment page. Users must refresh their wallet after returning; pending payments are re-checked by the authenticated status endpoint.
+- The iyzico backend is prepared for a website or distribution channel where iyzico is permitted. The Android app is currently targeted at Google Play, so the iyzico redirect button is intentionally not exposed in-app pending confirmation of an eligible Google Play alternative-billing programme. For Play distribution, use Google Play Billing unless the app is formally enrolled in an applicable alternative-billing programme.
