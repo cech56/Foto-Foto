@@ -131,7 +131,7 @@ struct HistoryRow: Decodable, Identifiable {
             var patch: [String: Any] = ["status": status, "updated_at": ISO8601DateFormatter().string(from: Date())]
             if let videoURL { patch["video_url"] = videoURL }
             let updateURL = URL(string: "/rest/v1/video_generations", relativeTo: Config.supabase)!.appending(queryItems: [URLQueryItem(name: "provider_task_id", value: "eq.\(taskId)")])
-            var update = URLRequest(url: updateURL!)
+            var update = URLRequest(url: updateURL)
             update.httpMethod = "PATCH"
             update.setValue(Config.anonKey, forHTTPHeaderField: "apikey")
             update.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -342,7 +342,7 @@ struct HistoryView: View {
                 .task {
                     while !Task.isCancelled {
                         await store.refreshPendingTasks()
-                        try? await Task.sleep(for: .seconds(25))
+                        try? await Task.sleep(nanoseconds: 25_000_000_000)
                     }
                 }
         }
