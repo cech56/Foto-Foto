@@ -100,5 +100,5 @@ $$;
 
 revoke all on function public.settle_iyzico_order(text,text,text,numeric,numeric,text,text)
   from public, anon, authenticated;
-grant execute on function public.settle_iyzico_order(text,text,text,numeric,text,text)
+grant execute on function public.settle_iyzico_order(text,text,text,numeric,numeric,text,text)
   to service_role;
