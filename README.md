@@ -26,7 +26,8 @@ Use the SQL Editor in the separate FOTO FOTO Supabase project and run each migra
 4. `supabase/migrations/0004_gen45_aspect_ratios.sql`
 5. `supabase/migrations/0005_credit_reservations.sql`
 6. `supabase/migrations/0006_wallet_read_grants.sql`
-7. `supabase/migrations/0007_paytr_web_billing.sql`
+7. `supabase/migrations/0007_paytr_web_billing.sql` (legacy schema foundation; retained for migration history)
+8. `supabase/migrations/0008_iyzico_checkout.sql`
 
 The mobile app uses only the public publishable key. Never put a Supabase secret/service-role key or the Runway API key in the Android app or Git repository. The service-role key belongs only in the private backend hosting environment.
 
@@ -43,11 +44,11 @@ Runway Gen-4.5 is the only enabled generation mode. Aleph 2 editing, Act-Two cha
 - Android debug build: passing in GitHub Actions; latest run `43861973769` uploaded `foto-foto-debug-apk` (debug-only, not Play Store signed).
 - Account deletion: client confirmation UI and authenticated backend endpoint exist; verify against the live Supabase project before release.
 - Advanced modes: video editing, character animation, and upscaling are deliberately gated with HTTP 503 until secure upload and exact server-side pricing are implemented.
-- Wallet top-ups/payment checkout: not implemented. Do not sell or advertise credit packages until a verified payment and webhook flow is deployed.
+- Wallet top-ups: iyzico Checkout Form backend foundation is implemented; merchant credentials, sandbox testing, buyer-details UI, and Android wallet purchase screen are still required. Do not sell or advertise credit packages until end-to-end verification is complete.
 - Production runtime: Render is configured on the free plan; cold starts and production reliability must be evaluated before launch.
 
 ## Pre-payment / pre-release completion checklist
-- [ ] Run all six Supabase migrations in order in the FOTO FOTO project.
+- [ ] Run all eight Supabase migrations in order in the FOTO FOTO project.
 - [ ] Configure `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` as private backend environment variables.
 - [ ] Confirm the Render health endpoint reports the expected safe configuration checks.
 - [ ] Configure Runway API credentials only when provider access/credits are available.
@@ -60,11 +61,11 @@ Runway Gen-4.5 is the only enabled generation mode. Aleph 2 editing, Act-Two cha
 
 Payment gateway integration and wallet top-ups are intentionally tracked separately from the checklist above.
 
-## PayTR web checkout (foundation added)
-- Migration 0007 adds the server-managed product catalog, PayTR payment orders, and an atomic callback settlement RPC. No live products are seeded or activated.
-- Backend endpoints: `GET /api/catalog`, `POST /api/payments/paytr/create`, and public `POST /api/webhooks/paytr`.
-- Required private Render environment variables: `PAYTR_MERCHANT_ID`, `PAYTR_MERCHANT_KEY`, `PAYTR_MERCHANT_SALT`, `PAYTR_OK_URL`, `PAYTR_FAIL_URL`; optional `PAYTR_TEST_MODE=1` for approved testing.
-- Configure the PayTR notification URL as `https://YOUR-RENDER-SERVICE.onrender.com/api/webhooks/paytr` using the actual deployed API hostname.
-- PayTR merchant credentials must never be committed to GitHub, placed in Android, or sent in chat.
-- A PayTR merchant account and credentials are not available yet, so checkout cannot be activated or tested against PayTR. Product prices and credit quantities also remain intentionally unset.
-- This first PayTR phase is one-time credit packs only. Subscription billing still requires its own verified billing-provider flow; for Google Play distributed Android digital subscriptions, use Play Billing unless enrolled in an eligible regional alternative-billing program.
+## iyzico checkout (backend foundation)
+- Migration 0008 switches the billing catalog to iyzico Checkout Form and adds the iyzico token/payment references and an atomic wallet-settlement RPC. Migration 0007 is retained only as a historical schema prerequisite; the active backend no longer calls PayTR.
+- Backend endpoints: `GET /api/catalog`, `POST /api/payments/iyzico/create`, `POST /api/webhooks/iyzico`, and authenticated `GET /api/payments/iyzico/status?conversationId=...`.
+- Required private Render environment variables: `IYZICO_API_KEY`, `IYZICO_SECRET_KEY`, and `IYZICO_CALLBACK_URL`. Set `IYZICO_BASE_URL=https://sandbox-api.iyzipay.com` for sandbox; use `https://api.iyzipay.com` only after iyzico approval and testing.
+- Checkout uses iyzico's hosted Checkout Form. The server retrieves the payment result by token, validates iyzico's response signature, checks payment status, fraud status, currency, basket, amount and order reference, then grants credits once.
+- The buyer-details UI must collect the required checkout identity/contact/address fields before starting payment. Do not log or commit these details or merchant secrets.
+- Product prices and credit quantities remain unset and products are inactive until commercially approved.
+- This integration covers one-time credit packs only. Subscription billing requires a separate iyzico subscription flow and product/plan configuration.
