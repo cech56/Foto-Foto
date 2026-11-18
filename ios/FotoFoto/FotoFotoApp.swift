@@ -260,6 +260,22 @@ struct HistoryRow: Decodable, Identifiable {
         if !pending.isEmpty { await refreshAll() }
     }
 
+    private func optimizedJPEG(_ source: Data, maxBytes: Int = 3_500_000) -> Data? {
+        guard let image = UIImage(data: source) else { return nil }
+        let maxSide: CGFloat = 1800
+        let scale = min(1, maxSide / max(image.size.width, image.size.height))
+        let size = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        let resized = renderer.image { _ in image.draw(in: CGRect(origin: .zero, size: size)) }
+        var quality: CGFloat = 0.88
+        var data = resized.jpegData(compressionQuality: quality) ?? Data()
+        while data.count > maxBytes && quality > 0.32 {
+            quality -= 0.08
+            data = resized.jpegData(compressionQuality: quality) ?? Data()
+        }
+        return (!data.isEmpty && data.count <= maxBytes) ? data : nil
+    }
+
     func generate(prompt: String, seconds: Int, ratio: String, imageData: Data? = nil) async {
         guard let token = session?.access_token else { message = "Önce giriş yap."; return }
         busy = true
@@ -271,7 +287,12 @@ struct HistoryRow: Decodable, Identifiable {
             req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
             req.setValue("application/json", forHTTPHeaderField: "Content-Type")
             var payload: [String: Any] = ["prompt": prompt, "duration": seconds, "ratio": ratio]
-            if let imageData { payload["imageUri"] = "data:image/jpeg;base64," + imageData.base64EncodedString() }
+            if let imageData {
+                guard let compressed = optimizedJPEG(imageData) else {
+                    throw NSError(domain: "FOTOFOTO", code: 413, userInfo: [NSLocalizedDescriptionKey: "Fotoğraf 3,5 MB sınırına küçültülemedi. Lütfen başka bir fotoğraf seç."])
+                }
+                payload["imageUri"] = "data:image/jpeg;base64," + compressed.base64EncodedString()
+            }
             req.httpBody = try JSONSerialization.data(withJSONObject: payload)
             let (data, response) = try await URLSession.shared.data(for: req)
             guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
