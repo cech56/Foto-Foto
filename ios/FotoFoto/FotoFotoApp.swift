@@ -16,7 +16,7 @@ struct AuthSession: Codable {
     let refresh_token: String
     let user: AuthUser?
 }
-struct AuthUser: Codable { let id: String; let email: String? }
+struct AuthUser: Codable { let id: String; let email: String?; let user_metadata: [String: String]? }
 struct WalletRow: Decodable { let balance_credits: Int }
 struct LedgerRow: Decodable, Identifiable {
     var id: String { reference_id ?? UUID().uuidString }
@@ -97,8 +97,8 @@ struct HistoryRow: Decodable, Identifiable {
         return data
     }
 
-    func signUp(email: String, password: String) async throws {
-        _ = try await authRequest("signup", payload: ["email": email, "password": password])
+    func signUp(email: String, password: String, displayName: String) async throws {
+        _ = try await authRequest("signup", payload: ["email": email, "password": password, "data": ["display_name": displayName]])
         message = "Doğrulama kodu e-posta adresine gönderildi."
     }
 
@@ -313,6 +313,7 @@ struct LoginView: View {
     @EnvironmentObject var store: Store
     @State private var email = ""
     @State private var password = ""
+    @State private var displayName = ""
     @State private var code = ""
     @State private var register = false
     @State private var reset = false
@@ -332,6 +333,9 @@ struct LoginView: View {
                         Text(awaitingCode ? "E-posta doğrulama" : (reset ? "Şifremi yenile" : (register ? "Ücretsiz hesap oluştur" : "Tekrar hoş geldin!")))
                             .font(.title2.bold()).frame(maxWidth: .infinity, alignment: .leading)
                         if !awaitingCode {
+                            if register && !reset {
+                                TextField("Adın", text: $displayName).textInputAutocapitalization(.words).textFieldStyle(.roundedBorder)
+                            }
                             TextField("E-posta", text: $email).textInputAutocapitalization(.never).keyboardType(.emailAddress).autocorrectionDisabled().textFieldStyle(.roundedBorder)
                         }
                         if awaitingCode {
@@ -350,7 +354,7 @@ struct LoginView: View {
                                     } else if reset {
                                         try await store.sendPasswordReset(email: email)
                                     } else if register {
-                                        try await store.signUp(email: email, password: password)
+                                        try await store.signUp(email: email, password: password, displayName: displayName.trimmingCharacters(in: .whitespacesAndNewlines))
                                         awaitingCode = true
                                     } else {
                                         try await store.signIn(email: email, password: password)
@@ -361,7 +365,7 @@ struct LoginView: View {
                         } label: {
                             if busy { ProgressView().tint(.white) }
                             else { Text(awaitingCode ? "KODU DOĞRULA" : (reset ? "YENİLEME E-POSTASI GÖNDER" : (register ? "HESAP OLUŞTUR" : "GİRİŞ YAP"))).fontWeight(.bold).frame(maxWidth: .infinity) }
-                        }.buttonStyle(PrimaryButton()).disabled(busy || (awaitingCode ? code.count < 6 : (!email.contains("@") || (!reset && password.count < 8))))
+                        }.buttonStyle(PrimaryButton()).disabled(busy || (awaitingCode ? code.count < 6 : (!email.contains("@") || (!reset && (password.count < 8 || (register && displayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty))))))
                         if awaitingCode {
                             Button("Kodu tekrar gönder") {
                                 Task { busy = true; do { try await store.resendSignupCode(email: email) } catch { store.message = error.localizedDescription }; busy = false }
@@ -620,8 +624,8 @@ struct WalletView: View {
                     HStack(spacing: 12) {
                         Image(systemName: "person.crop.circle.fill").font(.system(size: 42)).foregroundStyle(.purple)
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(store.session?.user?.email ?? "FOTO FOTO kullanıcısı").font(.headline)
-                            Text("Kişisel hesabın").font(.caption).foregroundStyle(.secondary)
+                            Text(store.session?.user?.user_metadata?["display_name"] ?? "FOTO FOTO kullanıcısı").font(.headline)
+                            Text(store.session?.user?.email ?? "Kişisel hesabın").font(.caption).foregroundStyle(.secondary)
                         }
                     }.padding(.vertical, 6)
                     Button("Yenile") { Task { await store.refreshAll() } }
