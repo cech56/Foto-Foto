@@ -41,7 +41,13 @@ struct HistoryRow: Decodable, Identifiable {
     @Published var history: [HistoryRow] = []
     @Published var busy = false
     @Published var message = ""
-    @Published var language = "Türkçe"
+    @Published var language = UserDefaults.standard.string(forKey: "foto_language") ?? "Türkçe" {
+        didSet { UserDefaults.standard.set(language, forKey: "foto_language") }
+    }
+
+    func tr(_ turkish: String, _ english: String, _ arabic: String) -> String {
+        language == "English" ? english : (language == "العربية" ? arabic : turkish)
+    }
 
     init() { session = KeychainSession.load() }
 
@@ -325,24 +331,32 @@ struct LoginView: View {
             LinearGradient(colors: [Color(red: 0.12, green: 0.09, blue: 0.20), Color(red: 0.04, green: 0.05, blue: 0.10)], startPoint: .top, endPoint: .bottom).ignoresSafeArea()
             ScrollView {
                 VStack(spacing: 20) {
-                    Spacer(minLength: 50)
+                    HStack {
+                        Spacer()
+                        Picker("Dil / Language", selection: $store.language) {
+                            Text("Türkçe").tag("Türkçe")
+                            Text("English").tag("English")
+                            Text("العربية").tag("العربية")
+                        }.pickerStyle(.menu).tint(.white)
+                    }
+                    Spacer(minLength: 30)
                     Text("▶").font(.system(size: 42, weight: .black)).frame(width: 76, height: 76).background(LinearGradient(colors: [.cyan, .purple, .pink], startPoint: .topLeading, endPoint: .bottomTrailing), in: RoundedRectangle(cornerRadius: 24))
                     Text("FOTO FOTO").font(.system(size: 30, weight: .black, design: .rounded))
-                    Text("AI VIDEO STÜDYOSU").font(.caption.bold()).tracking(3).foregroundStyle(.cyan)
+                    Text(store.tr("YAPAY ZEKÂ VİDEO STÜDYOSU", "AI VIDEO STUDIO", "استوديو فيديو بالذكاء الاصطناعي")).font(.caption.bold()).tracking(3).foregroundStyle(.cyan)
                     VStack(spacing: 14) {
-                        Text(awaitingCode ? "E-posta doğrulama" : (reset ? "Şifremi yenile" : (register ? "Ücretsiz hesap oluştur" : "Tekrar hoş geldin!")))
+                        Text(awaitingCode ? store.tr("E-posta doğrulama", "Email verification", "تأكيد البريد الإلكتروني") : (reset ? store.tr("Şifremi yenile", "Reset password", "إعادة تعيين كلمة المرور") : (register ? store.tr("Ücretsiz hesap oluştur", "Create a free account", "إنشاء حساب مجاني") : store.tr("Tekrar hoş geldin!", "Welcome back!", "مرحباً بعودتك!"))))
                             .font(.title2.bold()).frame(maxWidth: .infinity, alignment: .leading)
                         if !awaitingCode {
                             if register && !reset {
-                                TextField("Adın", text: $displayName).textInputAutocapitalization(.words).textFieldStyle(.roundedBorder)
+                                TextField(store.tr("Adın", "Your name", "اسمك"), text: $displayName).textInputAutocapitalization(.words).textFieldStyle(.roundedBorder)
                             }
-                            TextField("E-posta", text: $email).textInputAutocapitalization(.never).keyboardType(.emailAddress).autocorrectionDisabled().textFieldStyle(.roundedBorder)
+                            TextField(store.tr("E-posta", "Email", "البريد الإلكتروني"), text: $email).textInputAutocapitalization(.never).keyboardType(.emailAddress).autocorrectionDisabled().textFieldStyle(.roundedBorder)
                         }
                         if awaitingCode {
-                            Text("E-posta adresine gelen doğrulama kodunu gir.").font(.footnote).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
-                            TextField("Doğrulama kodu", text: $code).keyboardType(.numberPad).textFieldStyle(.roundedBorder)
+                            Text(store.tr("E-posta adresine gelen doğrulama kodunu gir.", "Enter the verification code sent to your email.", "أدخل رمز التحقق المرسل إلى بريدك الإلكتروني.")).font(.footnote).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
+                            TextField(store.tr("Doğrulama kodu", "Verification code", "رمز التحقق"), text: $code).keyboardType(.numberPad).textFieldStyle(.roundedBorder)
                         } else if !reset {
-                            SecureField("Şifre (en az 8 karakter)", text: $password).textFieldStyle(.roundedBorder)
+                            SecureField(store.tr("Şifre (en az 8 karakter)", "Password (at least 8 characters)", "كلمة المرور (8 أحرف على الأقل)"), text: $password).textFieldStyle(.roundedBorder)
                         }
                         Button {
                             Task {
@@ -364,16 +378,16 @@ struct LoginView: View {
                             }
                         } label: {
                             if busy { ProgressView().tint(.white) }
-                            else { Text(awaitingCode ? "KODU DOĞRULA" : (reset ? "YENİLEME E-POSTASI GÖNDER" : (register ? "HESAP OLUŞTUR" : "GİRİŞ YAP"))).fontWeight(.bold).frame(maxWidth: .infinity) }
+                            else { Text(awaitingCode ? store.tr("KODU DOĞRULA", "VERIFY CODE", "تحقق من الرمز") : (reset ? store.tr("YENİLEME E-POSTASI GÖNDER", "SEND RESET EMAIL", "إرسال بريد إعادة التعيين") : (register ? store.tr("HESAP OLUŞTUR", "CREATE ACCOUNT", "إنشاء حساب") : store.tr("GİRİŞ YAP", "SIGN IN", "تسجيل الدخول")))).fontWeight(.bold).frame(maxWidth: .infinity) }
                         }.buttonStyle(PrimaryButton()).disabled(busy || (awaitingCode ? code.count < 6 : (!email.contains("@") || (!reset && (password.count < 8 || (register && displayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty))))))
                         if awaitingCode {
-                            Button("Kodu tekrar gönder") {
+                            Button(store.tr("Kodu tekrar gönder", "Resend code", "إعادة إرسال الرمز")) {
                                 Task { busy = true; do { try await store.resendSignupCode(email: email) } catch { store.message = error.localizedDescription }; busy = false }
                             }.disabled(busy)
                         } else if !register && !reset {
-                            Button("Şifremi unuttum") { reset = true; store.message = "" }.foregroundStyle(.purple)
+                            Button(store.tr("Şifremi unuttum", "Forgot password?", "نسيت كلمة المرور؟")) { reset = true; store.message = "" }.foregroundStyle(.purple)
                         }
-                        Button(awaitingCode ? "Giriş ekranına dön" : (reset ? "Giriş ekranına dön" : (register ? "Zaten hesabım var" : "Yeni hesap oluştur"))) {
+                        Button(awaitingCode ? store.tr("Giriş ekranına dön", "Back to sign in", "العودة لتسجيل الدخول") : (reset ? store.tr("Giriş ekranına dön", "Back to sign in", "العودة لتسجيل الدخول") : (register ? store.tr("Zaten hesabım var", "I already have an account", "لدي حساب بالفعل") : store.tr("Yeni hesap oluştur", "Create a new account", "إنشاء حساب جديد")))) {
                             awaitingCode = false
                             reset = false
                             register = !register && !reset
@@ -393,11 +407,11 @@ struct MainTabs: View {
     @EnvironmentObject var store: Store
     var body: some View {
         TabView {
-            HomeView().tabItem { Label("Ana Sayfa", systemImage: "house.fill") }
-            HistoryView().tabItem { Label("Projelerim", systemImage: "film") }
-            CreateView().tabItem { Label("Oluştur", systemImage: "plus.square.fill") }
-            ToolsView().tabItem { Label("Araçlar", systemImage: "wand.and.stars") }
-            WalletView().tabItem { Label("Hesabım", systemImage: "person.crop.circle") }
+            HomeView().tabItem { Label(store.tr("Ana Sayfa", "Home", "الرئيسية"), systemImage: "house.fill") }
+            HistoryView().tabItem { Label(store.tr("Projelerim", "My Projects", "مشاريعي"), systemImage: "film") }
+            CreateView().tabItem { Label(store.tr("Oluştur", "Create", "إنشاء"), systemImage: "plus.square.fill") }
+            ToolsView().tabItem { Label(store.tr("Araçlar", "Tools", "الأدوات"), systemImage: "wand.and.stars") }
+            WalletView().tabItem { Label(store.tr("Hesabım", "Account", "حسابي"), systemImage: "person.crop.circle") }
         }.tint(Color(red: 0.75, green: 0.40, blue: 1.0))
             .task { await store.refreshAll() }
     }
