@@ -21,7 +21,7 @@ workflows:
         script: |
           xcodebuild \
             -project "ios/FOTO FOTO.xcodeproj" \
-            -target "FOTO FOTO" \
+            -scheme "FOTO FOTO" \
             -sdk iphonesimulator \
             -configuration Debug \
             -derivedDataPath "$CM_BUILD_DIR/build" \
